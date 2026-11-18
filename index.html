@@ -78,7 +78,7 @@ h3{font:600 13px/1.2 var(--body);color:var(--muted);text-transform:uppercase;let
 
 /* Week planner */
 .tray{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.chip{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 12px;border-radius:14px;background:var(--c);color:var(--w-ink);font-weight:700;font-size:14px;text-align:left;touch-action:none;user-select:none;-webkit-user-select:none;line-height:1.15}
+.chip{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 12px;border-radius:14px;background:var(--c);color:var(--w-ink);font-weight:700;font-size:14px;text-align:left;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;line-height:1.15}
 .chip:last-child:nth-child(odd){grid-column:1/-1}
 .chip svg{width:16px;height:16px;flex:none;opacity:.85}
 .prog{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden;flex:1}
@@ -90,17 +90,21 @@ h3{font:600 13px/1.2 var(--body);color:var(--muted);text-transform:uppercase;let
 .day .dn{font:700 15px/1.1 var(--display)} .day .dd{font-size:12px;color:var(--muted)}
 .day .slot{display:flex;flex-direction:column;gap:6px;min-width:0}
 .day .empty{font-size:13px;color:var(--muted)}
-.pill{display:flex;align-items:center;gap:8px;width:100%;border-radius:12px;background:var(--c);color:var(--w-ink);min-height:42px;padding:6px 10px;font-weight:700;font-size:14px;text-align:left;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.pill{display:flex;align-items:center;gap:8px;width:100%;border-radius:12px;background:var(--c);color:var(--w-ink);min-height:42px;padding:6px 10px;font-weight:700;font-size:14px;text-align:left;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .pill svg{width:14px;height:14px;flex:none;opacity:.8}
 .pill .nm{flex:1;min-width:0}
 .pill.done{opacity:.72}
-.pill.lift{opacity:.3}
+.pill.lift{display:none}
+.pill,.chip{transition:transform .15s,box-shadow .15s}
+.pill.press,.chip.press{transform:scale(.96)}
+.chip.held{opacity:.45}
+#ins{height:42px;border-radius:12px;border:2px dashed var(--accent);background:var(--accent-soft)}
 .pill .tick{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.3);display:grid;place-items:center;flex:none;font-size:12px}
 .day .slot.gap-top{padding-top:0}
 .set.cw{grid-template-columns:64px 1fr}
 .set.cw .lab{text-align:left;color:var(--ink)}
 .add{width:40px;height:40px;border-radius:50%;background:var(--surface2);font-size:22px;line-height:1;color:var(--muted)}
-#ghost{position:fixed;z-index:60;pointer-events:none;padding:10px 14px;border-radius:14px;color:var(--w-ink);font-weight:700;font-size:14px;box-shadow:0 12px 30px rgba(0,0,0,.25);transform:translate(-50%,-120%) rotate(-3deg);display:none}
+#ghost{position:fixed;z-index:60;pointer-events:none;padding:10px 14px;border-radius:14px;color:var(--w-ink);font-weight:700;font-size:14px;box-shadow:0 12px 30px rgba(0,0,0,.25);transform:translate(-50%,-135%) rotate(-3deg);display:none;white-space:nowrap}
 
 /* Library */
 .wk{border-left:6px solid var(--c)}
@@ -678,8 +682,8 @@ function vWeek(){
       <div style="text-align:center"><h2>${label}</h2><div class="small muted num">${nice(key)} to ${nice(iso(addDays(mon,6)))}</div></div>
       <button class="mini" data-act="week" data-d="1" aria-label="Next week">›</button></div>
     <div class="row"><div class="prog"><i style="width:${planned?Math.round(done/planned*100):0}%"></i></div><span class="small muted num"><b>${done}</b> of ${planned} done</span></div>
-    <div><h3 style="margin-bottom:8px">Drag a workout or your steps onto a day</h3><div class="tray">${tray}<button class="chip" style="--c:var(--ws)" data-drag="steps" data-label="Steps" data-c="s" data-act="tray-steps">${ICON.drag}<span>Steps</span></button></div></div>
-    <div class="small muted">${isStarter?'This is a starter week to show how it works. ':''}Tap a workout in your week to see its exercises. Drag it to move or reorder.</div>
+    <div><h3 style="margin-bottom:8px">Hold a bubble, then drag it onto a day</h3><div class="tray">${tray}<button class="chip" style="--c:var(--ws)" data-drag="steps" data-label="Steps" data-c="s" data-act="tray-steps">${ICON.drag}<span>Steps</span></button></div></div>
+    <div class="small muted">${isStarter?'This is a starter week to show how it works. ':''}Tap a workout in your week to see its exercises. Hold and drag it to move or reorder.</div>
     <div class="days">${rows}</div>
     <button class="btn ghost wide" data-act="act-new">+ Log cardio or steps</button>
     <div class="row" style="justify-content:center;flex-wrap:wrap">
@@ -1051,30 +1055,69 @@ function addEntry(day,w,idx){
   a.splice(idx==null?a.length:idx,0,e);saveMain();render();
 }
 function moveEntry(from,id,to,idx){const p=planFor(curKey()),a=p[from]||[],i=a.findIndex(e=>e.id===id);if(i<0)return;const [e]=a.splice(i,1),b=(p[to]=p[to]||[]);b.splice(idx==null?b.length:Math.min(idx,b.length),0,e);saveMain();render()}
-function dropIndex(day,y,skip){let n=0;day.querySelectorAll('.pill').forEach(el=>{if(skip&&el.dataset.id===skip)return;const r=el.getBoundingClientRect();if(y>r.top+r.height/2)n++});return n}
+function dropIndex(day,y){let n=0;day.querySelectorAll('.pill:not(.lift)').forEach(el=>{const r=el.getBoundingClientRect();if(y>r.top+r.height/2)n++});return n}
 
-/* ---------- drag and drop (pointer based, works with touch) ---------- */
+/* ---------- drag and drop: press and hold to pick a bubble up (so a normal swipe just scrolls), then drag ---------- */
 let drag=null,justDragged=false;
-document.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-drag]');if(!el)return;drag={el,x:e.clientX,y:e.clientY,on:false,d:{...el.dataset}}});
-document.addEventListener('pointermove',e=>{
-  if(!drag)return;
-  if(!drag.on){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8)return;drag.on=true;const g=$('#ghost');g.textContent=drag.d.label;g.style.background=drag.d.c==='s'?'var(--ws)':`var(--w${drag.d.c})`;g.style.display='block';if(drag.d.drag==='entry')drag.el.classList.add('lift')}
-  e.preventDefault();const g=$('#ghost');g.style.left=e.clientX+'px';g.style.top=e.clientY+'px';
-  document.querySelectorAll('.day.over').forEach(x=>x.classList.remove('over'));
-  const t=document.elementFromPoint(e.clientX,e.clientY),day=t&&t.closest('[data-drop]');if(day)day.classList.add('over');
-  const m=$('#main'),r=m.getBoundingClientRect();if(e.clientY>r.bottom-50)m.scrollTop+=10;else if(e.clientY<r.top+50)m.scrollTop-=10;
-},{passive:false});
-function endDrag(e,cancel){
-  if(!drag)return;const d=drag;drag=null;$('#ghost').style.display='none';d.el.classList.remove('lift');
-  document.querySelectorAll('.day.over').forEach(x=>x.classList.remove('over'));
-  if(!d.on||cancel)return;justDragged=true;setTimeout(()=>justDragged=false,60);
-  const t=document.elementFromPoint(e.clientX,e.clientY),day=t&&t.closest('[data-drop]');if(!day)return;
-  if(d.d.drag==='steps'){openSteps(iso(addDays(addDays(mondayOf(new Date()),ui.weekOff*7),+day.dataset.drop)));return}
-  if(d.d.drag==='w')addEntry(day.dataset.drop,d.d.w,dropIndex(day,e.clientY));else moveEntry(d.d.day,d.d.id,day.dataset.drop,dropIndex(day,e.clientY,d.d.id));
+const HOLD=260;
+function dragStart(el,x,y,touch){
+  dragCancel();
+  drag={el,x,y,cx:x,cy:y,on:false,touch,d:{...el.dataset},t:null};
+  if(touch){drag.t=setTimeout(()=>{if(drag&&!drag.on)dragLift()},HOLD);el.classList.add('press')}
 }
-document.addEventListener('touchmove',e=>{if(drag&&drag.on)e.preventDefault()},{passive:false});
-document.addEventListener('pointerup',e=>endDrag(e,false));
-document.addEventListener('pointercancel',e=>endDrag(e,true));
+function dragLift(){
+  const d=drag;d.on=true;clearTimeout(d.t);d.el.classList.remove('press');
+  const g=$('#ghost');g.textContent=d.d.label;g.style.background=d.d.c==='s'?'var(--ws)':`var(--w${d.d.c})`;g.style.display='block';
+  if(d.d.drag==='entry')d.el.classList.add('lift');else d.el.classList.add('held');
+  try{if(navigator.vibrate)navigator.vibrate(8)}catch(e){}
+  dragAt(d.cx,d.cy);
+}
+function dragMark(day,idx){
+  let m=$('#ins');if(!day){if(m)m.remove();return}
+  if(!m){m=document.createElement('div');m.id='ins'}
+  const slot=day.querySelector('.slot'),pills=[...slot.querySelectorAll('.pill:not(.lift)')];
+  const before=pills[idx]||slot.querySelector('.actl,.empty');
+  if(m.parentNode!==slot||m.nextSibling!==(before||null))slot.insertBefore(m,before||null);
+}
+function dayAt(x,y){const t=document.elementFromPoint(x,y);let day=t&&t.closest('[data-drop]');
+  if(!day){const m=$('#main').getBoundingClientRect();if(y>m.top&&y<m.bottom)document.querySelectorAll('[data-drop]').forEach(el=>{const r=el.getBoundingClientRect();if(y>=r.top-5&&y<=r.bottom+5)day=el})}
+  return day}
+function dragAt(x,y){
+  const d=drag;d.cx=x;d.cy=y;const g=$('#ghost');g.style.left=x+'px';g.style.top=y+'px';
+  document.querySelectorAll('.day.over').forEach(el=>el.classList.remove('over'));
+  const day=dayAt(x,y);
+  if(day){day.classList.add('over');if(d.d.drag==='steps')dragMark(null);else dragMark(day,dropIndex(day,y))}else dragMark(null);
+  const m=$('#main'),r=m.getBoundingClientRect();if(y>r.bottom-60)m.scrollTop+=12;else if(y<r.top+60)m.scrollTop-=12;
+}
+function dragCancel(){if(!drag)return;clearTimeout(drag.t);drag.el.classList.remove('press','lift','held');drag=null;$('#ghost').style.display='none';dragMark(null);document.querySelectorAll('.day.over').forEach(el=>el.classList.remove('over'))}
+function dragDrop(){
+  const d=drag;if(!d)return;const on=d.on,x=d.cx,y=d.cy;
+  const day=on?dayAt(x,y):null,idx=day&&d.d.drag!=='steps'?dropIndex(day,y):0;
+  dragCancel();if(!on)return;
+  justDragged=true;setTimeout(()=>justDragged=false,350);
+  if(!day)return;
+  if(d.d.drag==='steps'){openSteps(iso(addDays(addDays(mondayOf(new Date()),ui.weekOff*7),+day.dataset.drop)));return}
+  if(d.d.drag==='w')addEntry(day.dataset.drop,d.d.w,idx);else moveEntry(d.d.day,d.d.id,day.dataset.drop,idx);
+}
+/* fingers */
+document.addEventListener('touchstart',e=>{if(e.touches.length!==1){dragCancel();return}const el=e.target.closest('[data-drag]');if(!el)return;const t=e.touches[0];dragStart(el,t.clientX,t.clientY,true)},{passive:true});
+document.addEventListener('touchmove',e=>{
+  if(!drag||!drag.touch)return;const t=e.touches[0];
+  if(!drag.on){if(Math.hypot(t.clientX-drag.x,t.clientY-drag.y)>9)dragCancel();else{drag.cx=t.clientX;drag.cy=t.clientY}return}
+  if(e.cancelable)e.preventDefault();dragAt(t.clientX,t.clientY);
+},{passive:false});
+document.addEventListener('touchend',e=>{if(drag&&drag.touch){if(drag.on&&e.cancelable)e.preventDefault();dragDrop()}},{passive:false});
+document.addEventListener('touchcancel',()=>{if(drag&&drag.touch)dragCancel()});
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('[data-drag]'))e.preventDefault()});
+/* mouse and pen: no hold needed, a small movement picks it up */
+document.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button)return;const el=e.target.closest('[data-drag]');if(el)dragStart(el,e.clientX,e.clientY,false)});
+document.addEventListener('pointermove',e=>{
+  if(!drag||drag.touch||e.pointerType==='touch')return;
+  if(!drag.on){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6)return;drag.cx=e.clientX;drag.cy=e.clientY;dragLift()}
+  e.preventDefault();dragAt(e.clientX,e.clientY);
+});
+document.addEventListener('pointerup',e=>{if(drag&&!drag.touch&&e.pointerType!=='touch'){drag.cx=e.clientX;drag.cy=e.clientY;dragDrop()}});
+document.addEventListener('pointercancel',e=>{if(drag&&!drag.touch&&e.pointerType!=='touch')dragCancel()});
 document.addEventListener('click',e=>{if(justDragged){e.stopPropagation();e.preventDefault()}},true);
 
 /* ---------- actions ---------- */
