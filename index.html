@@ -266,6 +266,13 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 #lock .btn:disabled{opacity:.6}
 #app{padding-top:env(safe-area-inset-top)}
 #nav{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+.ochips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ochip{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:8px 12px;border-radius:12px;background:var(--surface2);min-width:92px;text-align:left}
+.ochip b{font-size:14px} .ochip span{font-size:12px;color:var(--muted)}
+.seg.scroll{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.seg.scroll::-webkit-scrollbar{display:none}
+.seg.scroll button{flex:none;padding:0 16px;white-space:nowrap}
+.seg .addopt{color:var(--accent)}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -285,7 +292,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795044822;
+const BUILD=1795044979;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -705,7 +712,8 @@ function vWorkouts(){
   const seg=`<div class="seg"><button class="${ui.wtab==='workouts'?'on':''}" data-act="wtab" data-t="workouts">My workouts</button><button class="${ui.wtab==='library'?'on':''}" data-act="wtab" data-t="library">Exercise library</button></div>`;
   if(ui.wtab==='library')return seg+vLibrary();
   return seg+S.main.order.filter(W).map(id=>{const w=W(id);
-    const body=w.vars.some(v=>v.items.length)?w.vars.map((v,i)=>`<div class="optl">${w.vars.length>1?`<b>Option ${i+1}</b>`:''}<span>${esc(shortList(v.items))||'No exercises yet'}</span></div>`).join(''):'';
+    const cnt=n=>n+' exercise'+(n===1?'':'s');
+    const body=w.cls&&!w.vars.some(v=>v.items.length)?'':w.vars.length>1?`<div class="ochips">${w.vars.map((v,i)=>`<button class="ochip" data-act="open" data-w="${id}" data-v="${i}"><b>Option ${i+1}</b><span>${cnt(v.items.length)}</span></button>`).join('')}</div>`:`<div class="small muted" style="margin-top:8px">${cnt(w.vars[0].items.length)}</div>`;
     return `<div class="card wk" style="--c:var(--w${w.c})"><button class="wk-h" data-act="open" data-w="${id}"><div><div class="ex-n">${esc(w.name)}</div><div class="small muted">${esc(w.sub||'')}${w.cls?' · '+esc(w.cls.name)+(w.cls.wts?' with upper, lower and core weights':''):''}</div></div><span class="chev">›</span></button>
       ${body}<div class="row" style="margin-top:12px"><button class="btn sm" data-act="open" data-w="${id}">View</button><button class="btn ghost sm" data-act="open" data-w="${id}" data-edit="1">Edit</button></div></div>`}).join('')+
     `<button class="btn ghost wide" data-act="w-new">+ Create a new workout</button>`;
@@ -722,7 +730,7 @@ function vWorkout(){
   const sc=ui.screen,id=sc.wk,w=W(id);if(sc.v>=w.vars.length)sc.v=0;
   const en=planEntry(sc.from),custom=!!(en&&en.items),day=!!sc.from;
   const items=custom?en.items:w.vars[sc.v].items,multi=w.vars.length>1;
-  const tabs=(day&&sc.edit)?'':(multi||sc.edit)?`<div class="seg">${w.vars.map((v,i)=>`<button class="${i===sc.v?'on':''}" data-act="var" data-v="${i}">${multi?'Option '+(i+1):'Exercises'}</button>`).join('')}${sc.edit&&w.vars.length<4?'<button data-act="var-add" style="flex:.6">+ Option</button>':''}</div>`:'';
+  const tabs=(day&&sc.edit)?'':(multi||sc.edit)?`<div class="seg ${w.vars.length+(sc.edit?1:0)>3?'scroll':''}">${w.vars.map((v,i)=>`<button class="${i===sc.v?'on':''}" data-act="var" data-v="${i}">${multi?'Option '+(i+1):'Exercises'}</button>`).join('')}${sc.edit?'<button data-act="var-add" class="addopt">+ Option</button>':''}</div>`:'';
   if(sc.edit){
     const list=items.map((it,i)=>{const ex=X(it.ex)||{n:'Exercise',t:'w',p:'generic'};
       return `<div class="card"><div class="row">${fig(ex.p)}<div style="flex:1;min-width:0"><div class="ex-n">${esc(ex.n)}</div><button class="tlink" data-act="ed-change" data-i="${i}">Change exercise</button></div>
@@ -1148,7 +1156,7 @@ document.addEventListener('click',e=>{
       if(!prev||!Object.values(prev).some(a=>a&&a.length)){toast('Nothing planned the week before');break}
       const p={};Object.keys(prev).forEach(k=>p[k]=(prev[k]||[]).map(x=>({id:uid('p'),w:x.w,v:x.v})));S.main.plans[curKey()]=p;saveMain();render();toast('Copied');break}
     case 'clear-week':S.main.plans[curKey()]={};if(S.main.starter===curKey())S.main.starter=null;saveMain();render();break;
-    case 'open':ui.screen={wk:d.w,v:nextVar(d.w),edit:!!d.edit,from:null};render();$('#main').scrollTop=0;break;
+    case 'open':ui.screen={wk:d.w,v:d.v!=null?+d.v:nextVar(d.w),edit:!!d.edit,from:null};render();$('#main').scrollTop=0;break;
     case 'start':startWorkout(d.w,+d.v);break;
     case 'start-force':startWorkout(d.w,+d.v,true);break;
     case 'resume':closeSheet();ui.screen='session';render();break;
@@ -1241,12 +1249,12 @@ document.addEventListener('click',e=>{
     /* settings + history */
     case 'settings':sheet(`<h2>Settings</h2>
       <div class="row between"><div><b>Rest timer sound</b><div class="small muted">A short chime when rest is over.</div></div><button class="btn ${S.main.settings.sound?'':'ghost'} sm" data-act="sound">${S.main.settings.sound?'On':'Off'}</button></div>
-      <div><b>Look</b><div class="small muted">Match your phone, or always light or dark.</div><div class="seg" role="group" aria-label="Look">${[['auto','Match phone'],['light','Light'],['dark','Dark']].map(([k,n])=>`<button data-act="theme" data-t="${k}" aria-pressed="${theme===k}">${n}</button>`).join('')}</div></div>
+      <div><b>Look</b><div class="small muted">Match your phone, or always light or dark.</div><div class="seg" role="group" aria-label="Look" style="margin-top:8px">${[['auto','Match phone'],['light','Light'],['dark','Dark']].map(([k,n])=>`<button class="${theme===k?'on':''}" data-act="theme" data-t="${k}" aria-pressed="${theme===k}">${n}</button>`).join('')}</div></div>
       <div><b>Where your data lives</b><div class="small muted">${API?(cloud==='cloud'?'Saved privately and backed up, so it survives a new phone.':cloud==='checking'?'Connecting…':cloud==='locked'?'Locked.':'Saved on this phone for now. It will back up when Sage can connect.'):cloud==='cloud'?'Saved to your Claude account, so it follows you across devices.':cloud==='checking'?'Checking…':'Saved in this browser on this device.'}</div></div>
       <div><b>Automatic steps</b><div class="small muted" id="drv">${driveLine()}</div><button class="btn ghost sm" style="margin-top:8px" data-act="drive-check">${API||S.main.settings.drive?'Check now':'Turn on and check'}</button></div>
       ${API?'<div><b>This phone</b><div class="small muted">Signing out removes Sage’s data from this phone only. Your backup stays, and the password brings it back.</div><button class="btn ghost sm" style="margin-top:8px" data-act="signout">Sign out on this phone</button></div>':''}
       <button class="btn danger" data-act="reset">Reset everything</button><button class="btn wide" data-act="close">Done</button>`);break;
-    case 'theme':theme=d.t;try{localStorage.setItem(THEMELS,theme)}catch(e){}applyTheme();document.querySelectorAll('.seg [data-act="theme"]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.t===theme)));break;
+    case 'theme':theme=d.t;try{localStorage.setItem(THEMELS,theme)}catch(e){}applyTheme();document.querySelectorAll('.seg [data-act="theme"]').forEach(x=>{x.classList.toggle('on',x.dataset.t===theme);x.setAttribute('aria-pressed',String(x.dataset.t===theme))});break;
     case 'drive-check':{const el=$('#drv');if(el)el.textContent=API?'Checking…':'Checking Google Drive…';driveSync(true);break}
     case 'signout':sheet(`<h2>Sign out on this phone?</h2><p class="muted">Sage’s data is removed from this phone. Your backup is kept, and typing the password again brings everything back.</p><button class="btn wide" data-act="signout-yes">Sign out</button><button class="btn ghost wide" data-act="close">Cancel</button>`);break;
     case 'signout-yes':{clearTimeout(mainTimer);const done=()=>{forgetKey();try{localStorage.removeItem(LS)}catch(e){}location.reload()};if(mainTimer!==null&&col){mainTimer=null;pushMain()}chain.then(done,done);break}
