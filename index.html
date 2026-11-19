@@ -273,6 +273,11 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 .seg.scroll::-webkit-scrollbar{display:none}
 .seg.scroll button{flex:none;padding:0 16px;white-space:nowrap}
 .seg .addopt{color:var(--accent)}
+.olist{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto}
+.orow{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:12px 14px;border-radius:14px;background:var(--surface2);width:100%}
+.orow span{display:flex;align-items:center;gap:8px;font-size:16px}
+.orow em{font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent);padding:3px 8px;border-radius:99px}
+.orow small{font-size:13px;color:var(--muted);line-height:1.35}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -292,7 +297,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795044979;
+const BUILD=1795046812;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1064,10 +1069,14 @@ function confetti(power){
 /* ---------- planner helpers ---------- */
 function curKey(){return iso(addDays(mondayOf(new Date()),ui.weekOff*7))}
 function planFor(key){return S.main.plans[key]||(S.main.plans[key]={})}
-function addEntry(day,w,idx){
-  const p=planFor(curKey()),a=(p[day]=p[day]||[]),e={id:uid('p'),w},n=W(w)?W(w).vars.length:1;
-  if(n>1){let cnt=0;Object.values(p).forEach(l=>(l||[]).forEach(x=>{if(x.w===w)cnt++}));e.v=(nextVar(w)+cnt)%n}
-  a.splice(idx==null?a.length:idx,0,e);saveMain();render();
+/* a workout with more than one option asks which one, with the next one in the rotation marked */
+function addEntry(day,w,idx,v){
+  const p=planFor(curKey()),n=W(w)?W(w).vars.length:1;
+  if(n>1&&v==null){let cnt=0;Object.values(p).forEach(l=>(l||[]).forEach(x=>{if(x.w===w)cnt++}));const sug=(nextVar(w)+cnt)%n;
+    ui.addOpt={day,w,idx};
+    sheet(`<h2>${esc(W(w).name)} on ${DAYS[day]}</h2><p class="muted">Which option?</p><div class="olist">${W(w).vars.map((x,i)=>`<button class="orow" data-act="opt-pick" data-v="${i}"><span><b>Option ${i+1}</b>${i===sug?'<em>Next up</em>':''}</span><small>${esc(shortList(x.items))||'No exercises yet'}</small></button>`).join('')}</div><button class="btn quiet wide" data-act="close">Cancel</button>`);return}
+  const a=(p[day]=p[day]||[]),e={id:uid('p'),w};if(n>1)e.v=Math.min(+v||0,n-1);
+  a.splice(idx==null?a.length:Math.min(idx,a.length),0,e);saveMain();render();
 }
 function moveEntry(from,id,to,idx){const p=planFor(curKey()),a=p[from]||[],i=a.findIndex(e=>e.id===id);if(i<0)return;const [e]=a.splice(i,1),b=(p[to]=p[to]||[]);b.splice(idx==null?b.length:Math.min(idx,b.length),0,e);saveMain();render()}
 function dropIndex(day,y){let n=0;day.querySelectorAll('.pill:not(.lift)').forEach(el=>{const r=el.getBoundingClientRect();if(y>r.top+r.height/2)n++});return n}
@@ -1149,6 +1158,7 @@ document.addEventListener('click',e=>{
     case 'tray':sheet(`<h2>Add ${esc(W(d.w).name)} to</h2><div class="opts">${DAYS.map((n,i)=>`<button class="opt" data-act="add-pick" data-day="${i}" data-w="${d.w}">${n}</button>`).join('')}</div><p class="small muted">Tip: you can also drag it straight onto a day.</p><button class="btn quiet" data-act="close">Cancel</button>`);break;
     case 'day-add':sheet(`<h2>${DAYS[d.day]}</h2><div class="opts" style="grid-template-columns:1fr">${S.main.order.filter(W).map(id=>`<button class="opt w" style="--c:var(--w${W(id).c})" data-act="add-pick" data-day="${d.day}" data-w="${id}">${esc(W(id).name)}</button>`).join('')}</div><button class="btn ghost wide" data-act="act-new" data-day="${d.day}">Log cardio or steps</button><button class="btn quiet" data-act="close">Cancel</button>`);break;
     case 'add-pick':closeSheet();addEntry(d.day,d.w);break;
+    case 'opt-pick':{const o=ui.addOpt;ui.addOpt=null;closeSheet();if(o)addEntry(o.day,o.w,o.idx,+d.v);break}
     case 'entry':{const en=(planFor(curKey())[d.day]||[]).find(x=>x.id===d.id);if(!en||!W(en.w))break;
       ui.screen={wk:en.w,v:en.v!=null?en.v:nextVar(en.w),edit:false,from:{day:+d.day,id:d.id,key:curKey()}};render();$('#main').scrollTop=0;break}
     case 'entry-del':{const p=planFor(sc&&sc.from?sc.from.key:curKey());p[d.day]=(p[d.day]||[]).filter(x=>x.id!==d.id);closeSheet();ui.screen=null;ui.tab='week';saveMain();render();break}
