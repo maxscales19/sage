@@ -286,17 +286,17 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 .pbl small{color:var(--gold);letter-spacing:.14em;text-transform:uppercase;font:700 11px/1 var(--body)}
 .pbl div{display:flex;justify-content:space-between;gap:12px;font-size:15px} .pbl div span{font-weight:700;white-space:nowrap}
 /* extra:start */
-:root[data-palette="harbour"]{--bg:#ECF1F6;--surface:#FBFCFE;--surface2:#DDE6F0;--ink:#1A2533;--muted:#5D6B7C;--line:#CCD7E3;--accent:#2E5E8E;--accent-soft:#D3E1F0}
-:root[data-palette="clay"]{--bg:#F5EFE9;--surface:#FDFBF9;--surface2:#ECE1D6;--ink:#2B211B;--muted:#75655A;--line:#DFD1C4;--accent:#A9573A;--accent-soft:#F0DCD0}
-:root[data-palette="slate"]{--bg:#EFF0F2;--surface:#FCFCFD;--surface2:#E2E4E8;--ink:#1E2126;--muted:#626871;--line:#D3D6DB;--accent:#3D4652;--accent-soft:#DCDFE4}
+:root[data-palette="harbour"]{--bg:#ECF1F6;--surface:#FBFCFE;--surface2:#DDE6F0;--ink:#1A2533;--muted:#5D6B7C;--line:#CCD7E3;--accent:#2E5E8E;--accent-soft:#D3E1F0;--w1:#2F6690;--w2:#3A7D8C;--w3:#5A6FA6;--w4:#7B6FA8;--w5:#B8754E}
+:root[data-palette="clay"]{--bg:#F5EFE9;--surface:#FDFBF9;--surface2:#ECE1D6;--ink:#2B211B;--muted:#75655A;--line:#DFD1C4;--accent:#A9573A;--accent-soft:#F0DCD0;--w1:#A9573A;--w2:#B8862F;--w3:#7C8446;--w4:#8A5E7E;--w5:#6F5A4B}
+:root[data-palette="slate"]{--bg:#EFF0F2;--surface:#FCFCFD;--surface2:#E2E4E8;--ink:#1E2126;--muted:#626871;--line:#D3D6DB;--accent:#3D4652;--accent-soft:#DCDFE4;--w1:#3D4652;--w2:#4F6F8C;--w3:#6B7B58;--w4:#7A6A86;--w5:#9A6A52}
 @media (prefers-color-scheme: dark){
-  :root[data-palette="harbour"]:not([data-theme="light"]){--bg:#111820;--surface:#19232E;--surface2:#22303E;--ink:#E4ECF4;--muted:#93A3B5;--line:#2B3A4A;--accent:#8AB6E0;--accent-ink:#0E1B28;--accent-soft:#253749}
-  :root[data-palette="clay"]:not([data-theme="light"]){--bg:#1B1512;--surface:#261E19;--surface2:#322721;--ink:#F1E7DF;--muted:#AE9C90;--line:#3E3129;--accent:#E3A083;--accent-ink:#2A130A;--accent-soft:#3E2A20}
-  :root[data-palette="slate"]:not([data-theme="light"]){--bg:#141517;--surface:#1D1F22;--surface2:#282B2F;--ink:#E9EAEC;--muted:#9BA0A8;--line:#33373C;--accent:#C3CAD4;--accent-ink:#15181C;--accent-soft:#2E3238}
+  :root[data-palette="harbour"]:not([data-theme="light"]){--bg:#111820;--surface:#19232E;--surface2:#22303E;--ink:#E4ECF4;--muted:#93A3B5;--line:#2B3A4A;--accent:#8AB6E0;--accent-ink:#0E1B28;--accent-soft:#253749;--w1:#7FB2DC;--w2:#74BCC8;--w3:#9FAEE0;--w4:#B5A9DE;--w5:#E3A583}
+  :root[data-palette="clay"]:not([data-theme="light"]){--bg:#1B1512;--surface:#261E19;--surface2:#322721;--ink:#F1E7DF;--muted:#AE9C90;--line:#3E3129;--accent:#E3A083;--accent-ink:#2A130A;--accent-soft:#3E2A20;--w1:#E3A083;--w2:#E0B865;--w3:#B5BE7E;--w4:#C79DBB;--w5:#BBA696}
+  :root[data-palette="slate"]:not([data-theme="light"]){--bg:#141517;--surface:#1D1F22;--surface2:#282B2F;--ink:#E9EAEC;--muted:#9BA0A8;--line:#33373C;--accent:#C3CAD4;--accent-ink:#15181C;--accent-soft:#2E3238;--w1:#C3CAD4;--w2:#93B4D0;--w3:#B0C09A;--w4:#BEAECB;--w5:#DDAE96}
 }
-:root[data-palette="harbour"][data-theme="dark"]{--bg:#111820;--surface:#19232E;--surface2:#22303E;--ink:#E4ECF4;--muted:#93A3B5;--line:#2B3A4A;--accent:#8AB6E0;--accent-ink:#0E1B28;--accent-soft:#253749}
-:root[data-palette="clay"][data-theme="dark"]{--bg:#1B1512;--surface:#261E19;--surface2:#322721;--ink:#F1E7DF;--muted:#AE9C90;--line:#3E3129;--accent:#E3A083;--accent-ink:#2A130A;--accent-soft:#3E2A20}
-:root[data-palette="slate"][data-theme="dark"]{--bg:#141517;--surface:#1D1F22;--surface2:#282B2F;--ink:#E9EAEC;--muted:#9BA0A8;--line:#33373C;--accent:#C3CAD4;--accent-ink:#15181C;--accent-soft:#2E3238}
+:root[data-palette="harbour"][data-theme="dark"]{--bg:#111820;--surface:#19232E;--surface2:#22303E;--ink:#E4ECF4;--muted:#93A3B5;--line:#2B3A4A;--accent:#8AB6E0;--accent-ink:#0E1B28;--accent-soft:#253749;--w1:#7FB2DC;--w2:#74BCC8;--w3:#9FAEE0;--w4:#B5A9DE;--w5:#E3A583}
+:root[data-palette="clay"][data-theme="dark"]{--bg:#1B1512;--surface:#261E19;--surface2:#322721;--ink:#F1E7DF;--muted:#AE9C90;--line:#3E3129;--accent:#E3A083;--accent-ink:#2A130A;--accent-soft:#3E2A20;--w1:#E3A083;--w2:#E0B865;--w3:#B5BE7E;--w4:#C79DBB;--w5:#BBA696}
+:root[data-palette="slate"][data-theme="dark"]{--bg:#141517;--surface:#1D1F22;--surface2:#282B2F;--ink:#E9EAEC;--muted:#9BA0A8;--line:#33373C;--accent:#C3CAD4;--accent-ink:#15181C;--accent-soft:#2E3238;--w1:#C3CAD4;--w2:#93B4D0;--w3:#B0C09A;--w4:#BEAECB;--w5:#DDAE96}
 .seg .sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:#46775C}
 .seg .sw[data-p="harbour"]{background:#2E5E8E}.seg .sw[data-p="clay"]{background:#A9573A}.seg .sw[data-p="slate"]{background:#3D4652}
 #lockwho{min-height:28px}
@@ -375,6 +375,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 .actl.st.cool{background:var(--surface2);color:var(--ink);font-weight:600;position:relative;overflow:hidden;padding:8px 10px 10px}
 .actl.st.cool span{display:flex;align-items:center;gap:6px}.actl.st.cool svg{width:14px;height:14px;color:var(--accent);flex:none}
 .actl.st.cool i{position:absolute;left:0;bottom:0;height:3px;background:var(--accent);border-radius:0 3px 3px 0}
+.tds .k{letter-spacing:.05em;font-size:12px;line-height:1.25;text-wrap:balance}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -395,7 +396,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795055210;
+const BUILD=1795055460;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -609,7 +610,7 @@ const API=((document.querySelector('meta[name="sage-api"]')||{}).content||'').tr
 const KEYLS='sage-key-v1';
 const USERLS='sage-user-v1';
 /* what a brand-new account starts with, by the name typed on the way in */
-const PROFILES={dad:{v:2,palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:1,palette:'slate'}};
+const PROFILES={dad:{v:3,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:1,palette:'slate'}};
 let apiKey=null,apiUser='',webSteps=null,webStepsAt=0,retries=0;
 if(API){try{apiKey=localStorage.getItem(KEYLS);apiUser=localStorage.getItem(USERLS)||''}catch(e){}}
 function applyProfile(p){
@@ -622,7 +623,7 @@ function applyProfile(p){
   profileFlags(p);
 }
 /* settings a profile switches on; also catches an account up when its profile gains something later */
-function profileFlags(p){if(!p||S.main.settings.pv===p.v)return false;const st=S.main.settings;if(p.home&&st.home===undefined)st.home=true;if(p.levels===false&&st.levels===undefined)st.levels=false;st.pv=p.v;return true}
+function profileFlags(p){if(!p||S.main.settings.pv===p.v)return false;const st=S.main.settings;if(p.home&&st.home===undefined)st.home=true;if(p.levels===false&&st.levels===undefined)st.levels=false;if(p.name&&!st.name)st.name=p.name;st.pv=p.v;return true}
 async function api(q,open){
   const r=await fetch(API,{method:'POST',body:JSON.stringify(open?q:Object.assign({k:apiKey,u:apiUser},q))});
   const j=await r.json();if(!j||!j.ok){const e=new Error((j&&j.err)||'error');e.code=(j&&j.err)||'error';throw e}return j;
@@ -1011,7 +1012,7 @@ function vToday(){
   const hr=now.getHours(),hello=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
   const side=[km!=null?['<b class="num">'+fmt(Math.round(km*10)/10)+'</b> km','walked']:null,t.act!=null?['<b class="num">'+t.act.toLocaleString()+'</b> kcal','active']:null,(t.im!=null||t.iv!=null)?['<b class="num">'+((t.im||0)+2*(t.iv||0))+'</b> min','intensity']:null].filter(Boolean);
   const hero=`<div class="hero td"><div class="tdr">${ringSvg(steps!=null?steps/goal:0)}<div><b class="num">${steps!=null?steps.toLocaleString():'–'}</b><span>of ${goal.toLocaleString()} steps</span></div></div>
-    <div class="tds"><div class="k">${hello}</div>${side.map(x=>`<div class="tdl">${x[0]}<span>${x[1]}</span></div>`).join('')||'<div class="small" style="opacity:.85;margin-top:8px">Steps arrive by themselves through the day.</div>'}</div></div>`;
+    <div class="tds"><div class="k">${hello}${S.main.settings.name?', '+esc(S.main.settings.name):''}</div>${side.map(x=>`<div class="tdl">${x[0]}<span>${x[1]}</span></div>`).join('')||'<div class="small" style="opacity:.85;margin-top:8px">Steps arrive by themselves through the day.</div>'}</div></div>`;
   let tiles='';
   if(g){const sl=gwLatest('sl'),rh=gwLatest('rhr'),bb=gwLatest('bbnow');
     const tl=(v,l,sub,sp)=>`<button class="tile tq" data-act="tab" data-tab="progress"><span>${l}</span><b>${v}</b><i>${sub}</i>${sp}</button>`;
