@@ -297,7 +297,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795046812;
+const BUILD=1795046923;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1375,14 +1375,14 @@ function hashSync(){
 }
 window.addEventListener('hashchange',hashSync);
 /* website version: when Sage comes back to the front, quietly move to a newer copy if one has been published */
-let lastUpd=Date.now();
+let lastUpd=0;
 async function checkUpdate(){
-  if(!API||!BUILD||Date.now()-lastUpd<120000)return;lastUpd=Date.now();
+  if(!API||!BUILD||Date.now()-lastUpd<20000)return;lastUpd=Date.now();
   try{const t=await (await fetch(location.pathname+'?u='+Date.now(),{cache:'no-store'})).text(),m=/const BUILD=(\d{6,});/.exec(t);
     if(!m||+m[1]<=BUILD)return;
     if(S.main.active||$('#sheet').classList.contains('on')||$('#lock')||drag)return;
     if(mainTimer!==null&&col){clearTimeout(mainTimer);mainTimer=null;pushMain()}
-    const go=()=>location.reload();chain.then(go,go);
+    const go=()=>location.replace(location.pathname+'?v='+m[1]);chain.then(go,go);
   }catch(e){}
 }
 /* pick up changes made elsewhere (for example a shortcut sync) when the app comes back to the front */
