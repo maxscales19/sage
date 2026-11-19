@@ -278,6 +278,13 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 .orow span{display:flex;align-items:center;gap:8px;font-size:16px}
 .orow em{font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent);padding:3px 8px;border-radius:99px}
 .orow small{font-size:13px;color:var(--muted);line-height:1.35}
+.wbm{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;max-height:44vh;overflow-y:auto}
+.wbm>div{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:var(--accent-soft);border-radius:16px;padding:12px 8px}
+.wbm .medal{width:76px;height:76px}
+.wbm b{font:700 16px/1.2 var(--display)} .wbm span{font-size:12px;color:var(--muted);line-height:1.3}
+.pbl{background:var(--surface2);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.pbl small{color:var(--gold);letter-spacing:.14em;text-transform:uppercase;font:700 11px/1 var(--body)}
+.pbl div{display:flex;justify-content:space-between;gap:12px;font-size:15px} .pbl div span{font-weight:700;white-space:nowrap}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -297,7 +304,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795047115;
+const BUILD=1795047923;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -656,6 +663,20 @@ function levelOf(c,bs){const xp=c.n*100+c.sets*5+c.pbs*50+c.acts*25+bs.filter(b=
   return {xp,i,name:LEVELS[i][0],next,pct:next?Math.round((xp-LEVELS[i][1])/(next[1]-LEVELS[i][1])*100):100}}
 function snap(){const c=calc(),b=badges(c);return {done:new Set(b.filter(x=>x.done).map(x=>x.id)),lvl:levelOf(c,b)}}
 function gained(before){const c=calc(),b=badges(c),l=levelOf(c,b);return {newB:b.filter(x=>x.done&&!before.done.has(x.id)),lvl:l.i>before.lvl.i?l:null}}
+/* what she has already been shown, so anything earned since (steps arriving while the app was shut, say) gets its moment on the way back in */
+function markSeen(){const sn=snap(),b=[...sn.done].sort(),o=S.main.seen;if(o&&o.l===sn.lvl.i&&o.b.join()===b.join())return false;S.main.seen={b,l:sn.lvl.i};return true}
+function welcomeBack(){
+  if(!S.main.seen){if(markSeen())saveMain();return}
+  if(S.main.active||ui.screen||$('#sheet').classList.contains('on')||$('#lock')||drag||(document.activeElement&&document.activeElement.matches('input')))return;
+  const g=gained({done:new Set(S.main.seen.b),lvl:{i:S.main.seen.l}});
+  if(!g.newB.length&&!g.lvl){if(markSeen())saveMain();return}
+  markSeen();saveMain();render();
+  sheet(`<div style="text-align:center"><span class="tag">Welcome back</span><h2 style="font-size:26px">${g.newB.length?(g.newB.length>1?g.newB.length+' new achievements':'New achievement'):'Level up'}</h2><p class="muted">Earned since you were last here.</p></div>
+    ${g.newB.length?`<div class="wbm">${g.newB.map(b=>`<div>${medal(b)}<b>${esc(b.name)}</b><span>${esc(b.desc)}</span></div>`).join('')}</div>`:''}
+    ${g.lvl?`<div class="unl"><small>Level up</small>Level ${g.lvl.i+1} · ${g.lvl.name}</div>`:''}
+    <button class="btn wide" data-act="close">Lovely</button>`);
+  confetti(1);
+}
 const unlockHTML=g=>g.newB.map(b=>`<div class="unl"><small>Achievement unlocked</small>${esc(b.name)}</div>`).join('')+(g.lvl?`<div class="unl"><small>Level up</small>Level ${g.lvl.i+1} · ${g.lvl.name}</div>`:'');
 function medal(b){const C=2*Math.PI*27,p=Math.min(1,b.cur/b.goal);
   return `<svg viewBox="0 0 64 64" class="medal ${b.done?'on':''}" aria-hidden="true"><circle cx="32" cy="32" r="27" class="mt"/><circle cx="32" cy="32" r="27" class="mp" stroke-dasharray="${(C*p).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 32 32)"/>${b.done?'<circle cx="32" cy="32" r="21" class="mf"/><path class="ml" d="M32 20c-6 5-9 10-9 14a9 9 0 0 0 18 0c0-4-3-9-9-14zM32 43V30"/>':`<text x="32" y="36.5" text-anchor="middle">${Math.floor(p*100)}%</text>`}</svg>`}
@@ -998,11 +1019,14 @@ function finish(){
   const gain=gained(before);
   const sets=entries.reduce((n,e)=>n+(e.type==='k'?0:e.sets.length),0),vol=entries.reduce((n,e)=>n+(e.type==='w'?e.sets.reduce((m,s)=>m+s.w*s.r,0):0),0),pbs=entries.reduce((n,e)=>n+e.sets.filter(s=>s.pb).length,0);
   const mins=Math.max(1,Math.round((sess.finishedAt-sess.startedAt)/60000));
+  const pbList=entries.map(e=>{const p=e.sets.filter(x=>x.pb);if(!p.length)return '';const b=p.reduce((m,x)=>x.w>m.w||(x.w===m.w&&x.r>m.r)?x:m,p[0]);return `<div><b>${esc(e.name)}</b><span class="num">${e.type==='t'?fmt(b.r)+' sec':e.type==='k'?fmt(b.w)+' kg':b.w?fmt(b.w)+' kg × '+b.r:b.r+' reps'}</span></div>`}).join('');
+  markSeen();saveMain();
   ui.screen=null;ui.tab='week';ui.weekOff=0;render();
   sheet(`<div style="text-align:center"><span class="tag">${sets?'Done':'Class done'}</span><h2 style="font-size:26px">${esc(sess.name)}</h2></div>
     ${sets?`<div class="tiles"><div class="tile"><b>${mins}</b><span>minutes</span></div><div class="tile"><b>${sets}</b><span>sets</span></div><div class="tile"><b style="color:var(--gold)">${pbs}</b><span>new PBs</span></div></div>`:''}
     ${entries.some(e=>e.type==='k')?`<p class="num" style="text-align:center;font-weight:700">${entries.filter(e=>e.type==='k').map(e=>CWL[e.ex.split('-').pop()]+' '+fmt(e.sets[0].w)+' kg').join(' · ')}</p>`:''}
     ${vol?`<p class="muted" style="text-align:center">You moved <b class="num" style="color:var(--ink)">${Math.round(vol).toLocaleString()} kg</b> in total${sess.cls?', plus your class':''}.</p>`:`<p class="muted" style="text-align:center">Ticked off${pbs?' with '+pbs+' new PB'+(pbs>1?'s':''):''}. Nice work.</p>`}
+    ${pbList?`<div class="pbl"><small>Personal bests</small>${pbList}</div>`:''}
     ${unlockHTML(gain)}
     <p class="small muted num" style="text-align:center">+${(100+sets*5+pbs*50+gain.newB.length*100).toLocaleString()} points</p>
     <button class="btn wide" data-act="close">Lovely</button>`);
@@ -1231,7 +1255,7 @@ document.addEventListener('click',e=>{
     case 'steps-save':{const v=stepsPrev();if(!v.hs&&!v.hkm&&!v.tkm){toast('Add your steps or kilometres');break}
       const before=snap(),a={id:ui.steps.id||uid('a'),type:'Steps',date:ui.steps.date,hs:v.hs,hkm:v.hkm,tkm:v.tkm};
       S.main.acts=(S.main.acts||[]).filter(x=>x.id!==a.id);S.main.acts.push(a);S.main.acts.sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0);closeSheet();saveMain();render();
-      {const g=gained(before);if(g.newB.length||g.lvl){sheet(`<div style="text-align:center"><span class="tag">Logged</span></div>${unlockHTML(g)}<button class="btn wide" data-act="close">Lovely</button>`);confetti(1)}else toast('Steps logged')}break}
+      {const g=gained(before);if(markSeen())saveMain();if(g.newB.length||g.lvl){sheet(`<div style="text-align:center"><span class="tag">Logged</span></div>${unlockHTML(g)}<button class="btn wide" data-act="close">Lovely</button>`);confetti(1)}else toast('Steps logged')}break}
     case 'steps-del':S.main.acts=(S.main.acts||[]).filter(x=>x.id!==ui.steps.id);closeSheet();saveMain();render();break;
     /* cardio and steps */
     case 'act-new':case 'act-edit':{
@@ -1251,7 +1275,7 @@ document.addEventListener('click',e=>{
     case 'act-type':ui.act.type=d.t;document.querySelectorAll('#actt button').forEach(x=>x.classList.toggle('on',x.dataset.t===d.t));break;
     case 'act-save':{const a={id:ui.act.id||uid('a'),type:ui.act.type,date:$('#ac-date').value,mins:Math.round(num($('#ac-mins').value)),km:num($('#ac-km').value),steps:Math.round(num(String($('#ac-steps').value).replace(/[ ,]/g,'')))};
       if(!a.mins&&!a.km&&!a.steps){toast('Add minutes, distance or steps');break}
-      const before=snap();S.main.acts=(S.main.acts||[]).filter(x=>x.id!==a.id);S.main.acts.push(a);S.main.acts.sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0);closeSheet();saveMain();render();{const g=gained(before);if(g.newB.length||g.lvl){sheet(`<div style="text-align:center"><span class="tag">Logged</span></div>${unlockHTML(g)}<button class="btn wide" data-act="close">Lovely</button>`);confetti(1)}else toast('Logged')}break}
+      const before=snap();S.main.acts=(S.main.acts||[]).filter(x=>x.id!==a.id);S.main.acts.push(a);S.main.acts.sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0);closeSheet();saveMain();render();{const g=gained(before);if(markSeen())saveMain();if(g.newB.length||g.lvl){sheet(`<div style="text-align:center"><span class="tag">Logged</span></div>${unlockHTML(g)}<button class="btn wide" data-act="close">Lovely</button>`);confetti(1)}else toast('Logged')}break}
     case 'act-del':S.main.acts=(S.main.acts||[]).filter(x=>x.id!==ui.act.id);closeSheet();saveMain();render();break;
     case 'badge':{const cc=calc(),bb=badges(cc).find(x=>x.id===d.id);if(!bb)break;
       sheet(`<div style="text-align:center"><div class="bigm">${medal(bb)}</div><span class="tag" style="margin-top:10px">${bb.done?'Earned':'In progress'}</span><h2 style="font-size:26px">${esc(bb.name)}</h2><p class="muted">${esc(bb.desc)}.</p>
@@ -1300,13 +1324,13 @@ function findSheet(o){
 }
 const driveMsg=e=>{const c=e&&e.code;return c==='needs_reauth'?'Google Drive needs reconnecting in Claude’s settings (Connectors).':c==='server_not_connected'?'Google Drive is not connected to this Claude account. Add it in Claude’s settings (Connectors).':c==='not_in_manifest'||c==='approval_required'||c==='consent_required'||c==='not_granted'?'Sage was not given permission to read Google Drive. Tap Check now and choose Allow.':c==='blocked_by_policy'?'Your organisation blocks this.':'Could not reach Google Drive just now ('+(c||'unknown')+'). Try again shortly.'};
 function applySteps(best,whole){
-  const before=snap();let ch=false;S.main.acts=S.main.acts||[];
+  let ch=false;S.main.acts=S.main.acts||[];
   Object.keys(best).forEach(ds=>{const b=best[ds];if(!b.s&&!b.k)return;const ex=S.main.acts.find(a=>a.type==='Steps'&&a.date===ds);
     if(ex){if(ex.hs!==b.s||(b.k&&ex.hkm!==b.k)){ex.hs=b.s;if(b.k)ex.hkm=b.k;ch=true}}else{S.main.acts.push({id:uid('a'),type:'Steps',date:ds,hs:b.s,hkm:b.k,tkm:0});ch=true}});
   if(!S.main.settings.drive){S.main.settings.drive=true;ch=true}
   drive={state:'ok',msg:'',at:Date.now(),days:Object.keys(best).length,whole};
-  if(ch){S.main.acts.sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0);saveMain();
-    if(!$('#sheet').classList.contains('on')&&!(document.activeElement&&document.activeElement.matches('input'))){render();const g=gained(before);if(g.newB.length||g.lvl){sheet(`<div style="text-align:center"><span class="tag">Steps updated</span></div>${unlockHTML(g)}<button class="btn wide" data-act="close">Lovely</button>`);confetti(1)}}}
+  if(ch){S.main.acts.sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0);saveMain();if(!$('#sheet').classList.contains('on')&&!(document.activeElement&&document.activeElement.matches('input')))render()}
+  welcomeBack();
 }
 async function driveSync(manual){
   if(API){
@@ -1369,7 +1393,7 @@ function hashSync(){
   const before=snap(),ex=(S.main.acts||[]).find(a=>a.type==='Steps'&&a.date===ds);
   if(ex){ex.hs=hs;if(hkm)ex.hkm=hkm}else{S.main.acts=S.main.acts||[];S.main.acts.push({id:uid('a'),type:'Steps',date:ds,hs,hkm,tkm:0});S.main.acts.sort((x,y)=>x.date<y.date?-1:x.date>y.date?1:0)}
   saveMain();ui.screen=S.main.active?ui.screen:null;ui.tab='week';ui.weekOff=0;render();
-  const a=acts().find(x=>x.type==='Steps'&&x.date===ds),g=gained(before);
+  const a=acts().find(x=>x.type==='Steps'&&x.date===ds),g=gained(before);if(markSeen())saveMain();
   if(g.newB.length||g.lvl){sheet(`<div style="text-align:center"><span class="tag">Steps synced</span><h2 style="font-size:26px">${esc(actLine(a))}</h2></div>${unlockHTML(g)}<button class="btn wide" data-act="close">Lovely</button>`);confetti(1)}
   else toast('Steps synced: '+actLine(a));
 }
@@ -1389,11 +1413,11 @@ async function checkUpdate(){
 let lastPull=Date.now();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){if(mainTimer!==null&&col){clearTimeout(mainTimer);mainTimer=null;pushMain()}return}
   checkUpdate();
-  if(API&&!apiKey)return;if(document.visibilityState!=='visible'||Date.now()-lastPull<4000)return;lastPull=Date.now();clearTimeout(mainTimer);chain.then(()=>initCloud()).then(()=>driveSync(false))});
+  if(API&&!apiKey)return;if(document.visibilityState!=='visible'||Date.now()-lastPull<4000)return;lastPull=Date.now();clearTimeout(mainTimer);chain.then(()=>initCloud()).then(()=>driveSync(false)).then(()=>{if(cloud!=='locked')welcomeBack()})});
 
 if(S.main.active)ui.screen='session';
 render();
-initCloud().then(()=>{if(cloud!=='cloud')persistLocal();hashSync();driveSync(false)});
+initCloud().then(()=>{if(cloud!=='cloud')persistLocal();hashSync();return driveSync(false)}).then(()=>{if(cloud!=='checking'&&cloud!=='locked')welcomeBack()});
 </script>
 </body>
 </html>
