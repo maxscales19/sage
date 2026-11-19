@@ -396,7 +396,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795055460;
+const BUILD=1795056677;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1539,7 +1539,7 @@ document.addEventListener('click',e=>{
       <div class="row between"><div><b>Today screen</b><div class="small muted">A home screen with today’s numbers, plan and physio at a glance.</div></div><button class="btn ${HOME()?'':'ghost'} sm" data-act="flag" data-k="home">${HOME()?'On':'Off'}</button></div>
       <div class="row between"><div><b>Levels and points</b><div class="small muted">The level name and points. Achievements stay either way.</div></div><button class="btn ${LV()?'':'ghost'} sm" data-act="flag" data-k="levels">${LV()?'On':'Off'}</button></div>
       <div class="row between"><div><b>Physio section</b><div class="small muted">A daily tick-off list for exercises from your physio.</div></div><button class="btn ${S.main.settings.physio?'':'ghost'} sm" data-act="physio-toggle">${S.main.settings.physio?'On':'Off'}</button></div>
-      ${GW()?`<div><b>Watch link</b><div class="small muted">Garmin is connected. Sage refreshes it about every half hour.${gwExpiry()?' The link runs out on '+nice(gwExpiry().date)+' '+gwExpiry().date.slice(0,4)+(gwExpiry().left<=30?' ('+Math.max(0,gwExpiry().left)+' days left). Ask Max to renew it.':'.'):''}</div></div>`:''}
+      ${GW()?`<div><b>Watch link</b><div class="small muted">Garmin is connected. Sage fetches the latest each time you open it, so it is as fresh as the watch’s last sync with the Garmin Connect app.${gwExpiry()?' The link runs out on '+nice(gwExpiry().date)+' '+gwExpiry().date.slice(0,4)+(gwExpiry().left<=30?' ('+Math.max(0,gwExpiry().left)+' days left). Ask Max to renew it.':'.'):''}</div></div>`:''}
       <div><b>Where your data lives</b><div class="small muted">${API?(cloud==='cloud'?'Saved privately and backed up, so it survives a new phone.':cloud==='checking'?'Connecting…':cloud==='locked'?'Locked.':'Saved on this phone for now. It will back up when Sage can connect.'):cloud==='cloud'?'Saved to your Claude account, so it follows you across devices.':cloud==='checking'?'Checking…':'Saved in this browser on this device.'}</div></div>
       <div><b>Automatic steps</b><div class="small muted" id="drv">${driveLine()}</div><button class="btn ghost sm" style="margin-top:8px" data-act="drive-check">${API||S.main.settings.drive?'Check now':'Turn on and check'}</button></div>
       ${API?'<div><b>This phone</b><div class="small muted">Signing out removes Sage’s data from this phone only. Your backup stays, and the password brings it back.</div><button class="btn ghost sm" style="margin-top:8px" data-act="signout">Sign out on this phone</button></div>':''}
@@ -1595,7 +1595,7 @@ async function driveSync(manual){
   if(API){
     if(driveBusy||!apiKey||!col)return;driveBusy=true;drive.state='checking';
     try{
-      if(!webSteps||manual||Date.now()-webStepsAt>8000){const j=await api({op:'steps'});webSteps=j.steps||{};webStepsAt=Date.now()}
+      if(!webSteps||manual||Date.now()-webStepsAt>8000){const j=await api({op:'steps',force:manual?1:0});webSteps=j.steps||{};webStepsAt=Date.now();if(manual&&GW()){lastPull=Date.now();await initCloud()}}
       const best={};Object.keys(webSteps).forEach(ds=>{const x=webSteps[ds];if(/^\d{4}-\d{2}-\d{2}$/.test(ds)&&x)best[ds]={s:+x.s||0,k:Math.round((+x.m||0)/10)/100}});
       applySteps(best,true);
     }catch(e){if(e&&e.code==='bad'){cloudErr(e)}drive={state:'error',msg:'Sage could not check for new steps just now. Try again shortly.',at:Date.now(),days:0}}
