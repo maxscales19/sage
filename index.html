@@ -297,7 +297,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795046923;
+const BUILD=1795047115;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1069,12 +1069,12 @@ function confetti(power){
 /* ---------- planner helpers ---------- */
 function curKey(){return iso(addDays(mondayOf(new Date()),ui.weekOff*7))}
 function planFor(key){return S.main.plans[key]||(S.main.plans[key]={})}
-/* a workout with more than one option asks which one, with the next one in the rotation marked */
+/* a workout with more than one option asks which one */
 function addEntry(day,w,idx,v){
   const p=planFor(curKey()),n=W(w)?W(w).vars.length:1;
-  if(n>1&&v==null){let cnt=0;Object.values(p).forEach(l=>(l||[]).forEach(x=>{if(x.w===w)cnt++}));const sug=(nextVar(w)+cnt)%n;
+  if(n>1&&v==null){
     ui.addOpt={day,w,idx};
-    sheet(`<h2>${esc(W(w).name)} on ${DAYS[day]}</h2><p class="muted">Which option?</p><div class="olist">${W(w).vars.map((x,i)=>`<button class="orow" data-act="opt-pick" data-v="${i}"><span><b>Option ${i+1}</b>${i===sug?'<em>Next up</em>':''}</span><small>${esc(shortList(x.items))||'No exercises yet'}</small></button>`).join('')}</div><button class="btn quiet wide" data-act="close">Cancel</button>`);return}
+    sheet(`<h2>${esc(W(w).name)} on ${DAYS[day]}</h2><p class="muted">Which option?</p><div class="olist">${W(w).vars.map((x,i)=>`<button class="orow" data-act="opt-pick" data-v="${i}"><span><b>Option ${i+1}</b></span><small>${esc(shortList(x.items))||'No exercises yet'}</small></button>`).join('')}</div><button class="btn quiet wide" data-act="close">Cancel</button>`);return}
   const a=(p[day]=p[day]||[]),e={id:uid('p'),w};if(n>1)e.v=Math.min(+v||0,n-1);
   a.splice(idx==null?a.length:Math.min(idx,a.length),0,e);saveMain();render();
 }
