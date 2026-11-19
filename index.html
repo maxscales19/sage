@@ -376,6 +376,11 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 .actl.st.cool span{display:flex;align-items:center;gap:6px}.actl.st.cool svg{width:14px;height:14px;color:var(--accent);flex:none}
 .actl.st.cool i{position:absolute;left:0;bottom:0;height:3px;background:var(--accent);border-radius:0 3px 3px 0}
 .tds .k{letter-spacing:.05em;font-size:12px;line-height:1.25;text-wrap:balance}
+.btn svg{width:16px;height:16px;flex:none}
+.btn.big{min-height:54px;font-size:17px}.btn.big svg{width:18px;height:18px}
+.startbar{position:sticky;bottom:0;margin:6px -16px -24px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 72%,transparent)}
+.tdstart{margin:2px 0 10px}
+.card.upn{display:flex;align-items:center;justify-content:space-between;gap:12px;border-left:5px solid var(--c)}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -396,7 +401,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795056677;
+const BUILD=1795057229;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -815,6 +820,7 @@ const ICON={
   gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   physio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2"/><path d="M5 9.5l7-1 7 1M12 8.5v6M12 14.5l-4 6M12 14.5l4 6"/></svg>',
   today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.500 4.640A1 1 0 0 0 8 5.5z"/></svg>',
   watch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="4"/><path d="M9 6l.8-3.5h4.4L15 6M9 18l.8 3.5h4.4L15 18M12 10v2.5l1.5 1"/></svg>',
   drag:'<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/></svg>',
   swap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M4 8h14l-3-3M20 16H6l3 3"/></svg>'
@@ -860,6 +866,12 @@ function phForm(x){
     <label class="lbl" for="ph-o">Notes from your physio</label><input class="txt" id="ph-o" value="${esc(e.note||'')}" maxlength="120" autocomplete="off" placeholder="Optional">
     <button class="btn wide" data-act="ph-save">Save</button>${x?'<button class="btn danger wide" data-act="ph-del">Delete this exercise</button>':''}<button class="btn quiet wide" data-act="close">Cancel</button>`);
 }
+/* on this week's planner: today's next workout, with a start button you cannot miss */
+function upNext(){
+  if(ui.weekOff!==0||S.main.active)return '';const now=new Date(),today=iso(now),di=(now.getDay()+6)%7,es=((S.main.plans[iso(mondayOf(now))]||{})[di]||[]).filter(e=>W(e.w)),e=es.find(x=>!sessDone(today,x.w));
+  if(!e)return '';const w=W(e.w);
+  return `<div class="card upn" style="--c:var(--w${w.c})"><div><div class="small muted">Today</div><div class="ex-n">${esc(vName(e.w,e.v))}</div></div><button class="btn" data-act="start-entry" data-day="${di}" data-id="${e.id}">${ICON.play}Start</button></div>`;
+}
 function vWeek(){
   const mon=addDays(mondayOf(new Date()),ui.weekOff*7),key=iso(mon),plan=S.main.plans[key]||{},today=iso(new Date());
   let planned=0,done=0;
@@ -875,7 +887,7 @@ function vWeek(){
   return `<div class="row between"><button class="mini" data-act="week" data-d="-1" aria-label="Previous week">‹</button>
       <div style="text-align:center"><h2>${label}</h2><div class="small muted num">${nice(key)} to ${nice(iso(addDays(mon,6)))}</div></div>
       <button class="mini" data-act="week" data-d="1" aria-label="Next week">›</button></div>
-    ${gwWarn()}${HOME()?'':gwStrip()}
+    ${gwWarn()}${HOME()?'':gwStrip()}${upNext()}
     <div class="row"><div class="prog"><i style="width:${planned?Math.round(done/planned*100):0}%"></i></div><span class="small muted num"><b>${done}</b> of ${planned} done</span></div>
     <div><h3 style="margin-bottom:8px">${GW()?'Hold a workout, then drag it onto a day':'Hold a bubble, then drag it onto a day'}</h3><div class="tray">${tray}${GW()?'':`<button class="chip" style="--c:var(--ws)" data-drag="steps" data-label="Steps" data-c="s" data-act="tray-steps">${ICON.drag}<span>Steps</span></button>`}</div></div>
     <div class="small muted">${isStarter?'This is a starter week to show how it works. ':''}Tap a workout in your week to see its exercises. Hold and drag it to move or reorder.</div>
@@ -896,7 +908,7 @@ function vWorkouts(){
     const cnt=n=>n+' exercise'+(n===1?'':'s');
     const body=w.cls&&!w.vars.some(v=>v.items.length)?'':w.vars.length>1?`<div class="ochips">${w.vars.map((v,i)=>`<button class="ochip" data-act="open" data-w="${id}" data-v="${i}"><b>Option ${i+1}</b><span>${cnt(v.items.length)}</span></button>`).join('')}</div>`:`<div class="small muted" style="margin-top:8px">${cnt(w.vars[0].items.length)}</div>`;
     return `<div class="card wk" style="--c:var(--w${w.c})"><button class="wk-h" data-act="open" data-w="${id}"><div><div class="ex-n">${esc(w.name)}</div><div class="small muted">${esc(w.sub||'')}${w.cls?' · '+esc(w.cls.name)+(w.cls.wts?' with upper, lower and core weights':''):''}</div></div><span class="chev">›</span></button>
-      ${body}<div class="row" style="margin-top:12px"><button class="btn sm" data-act="open" data-w="${id}">View</button><button class="btn ghost sm" data-act="open" data-w="${id}" data-edit="1">Edit</button></div></div>`}).join('')+
+      ${body}<div class="row" style="margin-top:12px"><button class="btn sm" data-act="start-pick" data-w="${id}">${ICON.play}Start</button><button class="btn ghost sm" data-act="open" data-w="${id}">View</button><button class="btn ghost sm" data-act="open" data-w="${id}" data-edit="1">Edit</button></div></div>`}).join('')+
     `<button class="btn ghost wide" data-act="w-new">+ Create a new workout</button>`;
 }
 function exRow(id,act,extra){const x=X(id);if(!x)return '';return `<button class="xrow" data-act="${act}" data-ex="${id}" ${extra||''}>${fig(x.p)}<span class="xt"><b>${esc(x.n)}</b><span class="small muted">${esc(x.q||'Custom')}${x.g?' · '+esc(x.g):''}</span></span><span class="chev">›</span></button>`}
@@ -941,8 +953,8 @@ function vWorkout(){
     ${tabs}${custom?`<p class="small muted" style="margin-top:-6px">Changed for this ${DAYS[from.day]} only. <button class="tlink" data-act="entry-reset">Put it back to the usual</button></p>`:multi?'<p class="small muted" style="margin-top:-6px">Different versions of the same session. Pick the one you feel like today.</p>':''}
     ${items.length?`<div class="card"><h3>${items.length} exercise${items.length>1?'s':''}</h3><div class="xlist">${list}</div></div>`:(w.cls?'':'<div class="card"><p class="muted">No exercises in here yet. Tap Edit to add some.</p></div>')}
     ${w.cls?`<div class="card"><div class="ex-n">${esc(w.cls.name)}</div><p class="small muted" style="margin-top:4px">A 45-minute class with your trainer.${w.cls.wts?' Tick it off and note your upper, lower and core weights.':''}</p></div>`:''}
-    <button class="btn wide" data-act="start" data-w="${id}" data-v="${sc.v}">${!items.length&&w.cls?'Log this class':'Start '+esc(vName(id,multi?sc.v:null))}</button>
-    ${from?`<button class="btn danger wide" data-act="entry-del" data-day="${from.day}" data-id="${from.id}">Remove from ${DAYS[from.day]}</button>`:''}`;
+    ${from?`<button class="btn danger wide" data-act="entry-del" data-day="${from.day}" data-id="${from.id}">Remove from ${DAYS[from.day]}</button>`:''}
+    <div class="startbar"><button class="btn wide big" data-act="start" data-w="${id}" data-v="${sc.v}">${ICON.play}${!items.length&&w.cls?'Log this class':'Start '+esc(vName(id,multi?sc.v:null))}</button></div>`;
 }
 
 function fld(ei,si,f,val,step,ph){return `<div class="fld"><button data-act="step" data-e="${ei}" data-s="${si}" data-f="${f}" data-d="${-step}" aria-label="Less">−</button><input id="f-${ei}-${si}-${f}" inputmode="decimal" autocomplete="off" data-e="${ei}" data-s="${si}" data-f="${f}" value="${esc(val)}" placeholder="${ph}" aria-label="${ph}"><button data-act="step" data-e="${ei}" data-s="${si}" data-f="${f}" data-d="${step}" aria-label="More">+</button></div>`}
@@ -1017,10 +1029,10 @@ function vToday(){
   if(g){const sl=gwLatest('sl'),rh=gwLatest('rhr'),bb=gwLatest('bbnow');
     const tl=(v,l,sub,sp)=>`<button class="tile tq" data-act="tab" data-tab="progress"><span>${l}</span><b>${v}</b><i>${sub}</i>${sp}</button>`;
     tiles=`<div class="tiles tqs">${sl?tl(hm(sl.v),sl.d===today?'Sleep last night':'Sleep '+nice(sl.d),sl.o.ss!=null?'Score '+sl.o.ss:'&nbsp;',spark(col('sl'),96,30)):''}${rh?tl(rh.v+'<small> bpm</small>','Resting heart rate',rh.d===today?'today':nice(rh.d),spark(col('rhr'),96,30)):''}${bb?tl(bb.v,'Body Battery',bb.o.bbmin!=null?'low '+bb.o.bbmin+' · high '+bb.o.bbmax:'&nbsp;',spark(col('bbmax'),96,30)):''}</div>`}
-  const rows=plan.map(e=>{const w=W(e.w),dn=sessDone(today,e.w);return `<button class="tdp" data-act="entry" data-day="${di}" data-id="${e.id}"><span class="dot" style="--c:var(--w${w.c})"></span><span class="nm"><b>${esc(vName(e.w,e.v))}</b><small>${dn?'Done today':itemsOf(e.w,e.v||0).length+' exercises'}</small></span>${dn?'<span class="tick on">✓</span>':'<span class="go">Open ›</span>'}</button>`}).join('');
+  const rows=plan.map(e=>{const w=W(e.w),dn=sessDone(today,e.w);return `<button class="tdp" data-act="entry" data-day="${di}" data-id="${e.id}"><span class="dot" style="--c:var(--w${w.c})"></span><span class="nm"><b>${esc(vName(e.w,e.v))}</b><small>${dn?'Done today':itemsOf(e.w,e.v||0).length+' exercises'}</small></span>${dn?'<span class="tick on">✓</span>':'<span class="go">View ›</span>'}</button>${dn?'':`<button class="btn wide big tdstart" data-act="start-entry" data-day="${di}" data-id="${e.id}">${ICON.play}Start ${esc(vName(e.w,e.v))}</button>`}`}).join('');
   const ph=S.main.settings.physio&&phItems().length?phDay(today):null;
   const planCard=`<div class="card"><div class="row between" style="margin-bottom:8px"><h3>Today’s plan</h3><button class="tlink" data-act="tab" data-tab="week" data-now="1">Whole week</button></div>
-    ${rows||'<p class="muted" style="padding:4px 0 6px">Nothing planned. A rest day, or add something from the Week tab.</p>'}
+    ${rows||'<p class="muted" style="padding:4px 0 10px">Nothing planned today.</p><button class="btn ghost wide" data-act="start-any">'+ICON.play+'Start a workout anyway</button>'}
     ${ph?`<button class="tdp" data-act="tab" data-tab="physio"><span class="dot" style="--c:var(--accent)"></span><span class="nm"><b>Physio</b><small>${ph.full?'All ticked off':ph.done+' of '+ph.need+' ticked off'}</small><span class="prog" style="margin-top:6px"><i style="width:${Math.round(ph.done/ph.need*100)}%"></i></span></span>${ph.full?'<span class="tick on">✓</span>':'<span class="go">Open ›</span>'}</button>`:S.main.settings.physio?`<button class="tdp" data-act="tab" data-tab="physio"><span class="dot" style="--c:var(--accent)"></span><span class="nm"><b>Physio</b><small>Add the exercises from your physio</small></span><span class="go">Open ›</span></button>`:''}</div>`;
   const wk=[...Array(7)].map((_,i)=>{const d=addDays(mon,i),ds=iso(d),a=acts().find(x=>x.type==='Steps'&&x.date===ds),st=g&&g.days[ds]&&g.days[ds].st!=null?g.days[ds].st:(a?a.steps:0),es=((S.main.plans[key]||{})[i]||[]).filter(e=>W(e.w)),dn=es.filter(e=>sessDone(ds,e.w)).length;
     return `<div class="twd ${ds===today?'on':''} ${ds>today?'fut':''}"><div class="twb"><i class="${st>=goal?'hit':''}" style="height:${st?Math.max(6,Math.min(100,Math.round(st/goal*100))):0}%"></i></div><span>${DAYS[i].slice(0,1)}</span><em class="${es.length?(dn>=es.length?'done':'plan'):''}">${es.length&&dn>=es.length?'✓':''}</em></div>`}).join('');
@@ -1432,6 +1444,11 @@ document.addEventListener('click',e=>{
     case 'clear-week':S.main.plans[curKey()]={};if(S.main.starter===curKey())S.main.starter=null;saveMain();render();break;
     case 'open':ui.screen={wk:d.w,v:d.v!=null?+d.v:nextVar(d.w),edit:!!d.edit,from:null};render();$('#main').scrollTop=0;break;
     case 'start':startWorkout(d.w,+d.v);break;
+    case 'start-any':sheet(`<h2>Start a workout</h2><div class="opts" style="grid-template-columns:1fr">${S.main.order.filter(W).map(id=>`<button class="opt w" style="--c:var(--w${W(id).c})" data-act="start-pick" data-w="${id}">${esc(W(id).name)}</button>`).join('')}</div><button class="btn quiet wide" data-act="close">Cancel</button>`);break;
+    case 'start-pick':{const w=W(d.w);if(!w)break;if(w.vars.length<2){ui.screen=null;startWorkout(d.w,0);break}
+      sheet(`<h2>Start ${esc(w.name)}</h2><p class="muted">Which option today?</p><div class="olist">${w.vars.map((x,i)=>`<button class="orow" data-act="start" data-w="${d.w}" data-v="${i}"><span><b>Option ${i+1}</b></span><small>${esc(shortList(x.items))||'No exercises yet'}</small></button>`).join('')}</div><button class="btn quiet wide" data-act="close">Cancel</button>`);break}
+    case 'start-entry':{const key=iso(mondayOf(new Date())),en=((S.main.plans[key]||{})[d.day]||[]).find(x=>x.id===d.id);if(!en||!W(en.w))break;
+      const v=en.v!=null?en.v:nextVar(en.w);ui.weekOff=0;ui.screen={wk:en.w,v,edit:false,from:{day:+d.day,id:d.id,key}};startWorkout(en.w,v);break}
     case 'start-force':startWorkout(d.w,+d.v,true);break;
     case 'resume':closeSheet();ui.screen='session';render();break;
     case 'back':if(sc&&sc.from)ui.tab='week';else if(sc&&sc.wk)ui.tab='workouts';ui.screen=null;render();break;
