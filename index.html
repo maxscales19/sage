@@ -427,7 +427,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795213279;
+const BUILD=1795216565;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1368,7 +1368,10 @@ function startWorkout(wid,v,force){
   const entries=((pen&&pen.w===wid&&pen.items)||w.vars[v].items).filter(it=>X(it.ex)).map(it=>{const ex=X(it.ex),ls=lastSets(it.ex);
     const sets=[];for(let i=0;i<it.sets;i++){const p=ls?(ls[i]||ls[ls.length-1]):null;sets.push({w:ex.t==='w'?(p?fmt(num(p.w)):''):'',r:p?String(p.r):String(it.reps),done:false})}
     return {ex:it.ex,name:ex.n,type:ex.t,rest:it.rest,link:it.link,sets}});
-  S.main.active={id:uid('s'),workoutId:wid,v,name:vName(wid,v),c:w.c,date:iso(new Date()),startedAt:Date.now(),entries,
+  /* started from an earlier day in the week: log it against that day, so that day gets its tick */
+  let on=iso(new Date());const fr=ui.screen&&ui.screen.from;
+  if(fr&&fr.key&&fr.day>=0){const d=iso(addDays(new Date(fr.key+'T00:00:00'),+fr.day));if(d<on){on=d;setTimeout(()=>toast('Logging this for '+DAYS[+fr.day]),300)}}
+  S.main.active={id:uid('s'),workoutId:wid,v,name:vName(wid,v),c:w.c,date:on,startedAt:Date.now(),entries,
     cls:w.cls?{name:w.cls.name,mins:w.cls.mins,done:false,wts:w.cls.wts?Object.fromEntries(CW.map(k=>{const ls=lastSets(cwId(wid,k));return [k,ls?fmt(num(ls[0].w)):'']})):null}:null};
   stopRest();closeSheet();ui.screen='session';saveMain();render();$('#main').scrollTop=0;
 }
