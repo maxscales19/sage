@@ -412,6 +412,8 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 #nav .cpill{display:flex;align-items:center;justify-content:center;width:40px;height:26px;margin:-2px 0;border-radius:99px;background:var(--accent-soft);color:var(--accent-text)}
 #nav .cpill svg{width:18px;height:18px}
 #nav button[aria-current="page"] .cpill{background:var(--accent);color:var(--accent-ink)}
+.segn{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent-text);font-size:12px;font-weight:700}
+.segn.ok{background:var(--accent);color:var(--accent-ink)}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -432,7 +434,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795217318;
+const BUILD=1795217466;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -904,11 +906,11 @@ function render(){
   let h;
   if(inSess)h=vSession();
   else if(ui.screen&&ui.screen.wk&&W(ui.screen.wk))h=vWorkout();
-  else{ui.screen=null;h=(S.main.active?`<div class="banner"><span>${esc(S.main.active.name)} in progress</span><button class="btn sm" data-act="resume">Resume</button></div>`:'')+(ui.tab==='today'&&HOME()?vToday():ui.tab==='week'?vWeek():ui.tab==='workouts'?vWorkouts():ui.tab==='physio'&&S.main.settings.physio?vPhysio():ui.tab==='coach'&&COACH()?vCoach():vProgress())}
+  else{ui.screen=null;h=(S.main.active?`<div class="banner"><span>${esc(S.main.active.name)} in progress</span><button class="btn sm" data-act="resume">Resume</button></div>`:'')+(ui.tab==='today'&&HOME()?vToday():ui.tab==='week'?vWeek():ui.tab==='workouts'?vTrain():ui.tab==='coach'&&COACH()?vCoach():vProgress())}
   $('#top').style.display=ui.screen?'none':'flex';
   $('#nav').style.display=ui.screen?'none':'flex';
   if(ui.tab==='today'&&!HOME())ui.tab='week';
-  const tabs=[...(HOME()?[['today','Today']]:[]),['week','Week'],['workouts','Workouts'],...(S.main.settings.physio?[['physio','Physio']]:[]),['progress','Progress'],...(COACH()?[['coach','Coach']]:[])];
+  const tabs=[...(HOME()?[['today','Today']]:[]),['week','Week'],['workouts','Workouts'],['progress','Progress'],...(COACH()?[['coach','Coach']]:[])];
   $('#nav').classList.toggle('many',tabs.length>5);
   $('#nav').innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-tab="${k}" ${ui.tab===k&&!ui.screen?'aria-current="page"':''}>${k==='coach'?`<span class="cpill">${ICON.chat}</span>`:ICON[k]}${l}</button>`).join('');
   $('#main').innerHTML=h;
@@ -1120,6 +1122,12 @@ function md(t){
 }
 const chatBottom=()=>{const m=$('#main');if(m)requestAnimationFrame(()=>{m.scrollTop=m.scrollHeight})};
 const coachMsgs=()=>(S.coach&&S.coach.msgs)||[];
+/* Workouts tab: gym workouts, with the physio list one tap away when it is switched on */
+function vTrain(){
+  if(!S.main.settings.physio)return vWorkouts();
+  const ph=ui.wtab==='physio',d=phDay(iso(new Date()));
+  return `<div class="seg" role="group" aria-label="Section"><button class="${ph?'':'on'}" data-act="wtab" data-t="gym" aria-pressed="${!ph}">Workouts</button><button class="${ph?'on':''}" data-act="wtab" data-t="physio" aria-pressed="${ph}">Physio${d.need?` <span class="segn${d.full?' ok':''}">${d.done}/${d.need}</span>`:''}</button></div>`+(ph?vPhysio():vWorkouts());
+}
 function vCoach(){
   const ms=coachMsgs(),nm=S.main.settings.name;
   const qs=['How did I sleep this week?','Should I train today?','How is my training going?','What should I focus on this week?'];
@@ -1592,7 +1600,8 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#pb')){$('#pb').classList.remove('on');return}
   const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset,A=S.main.active,sc=ui.screen;
   switch(d.act){
-    case 'tab':ui.tab=d.tab;ui.moved=true;if(d.tab==='week'&&d.now)ui.weekOff=0;ui.screen=null;render();$('#main').scrollTop=0;break;
+    case 'wtab':ui.wtab=d.t;render();$('#main').scrollTop=0;break;
+    case 'tab':if(d.tab==='physio'){d.tab='workouts';ui.wtab='physio'}ui.tab=d.tab;ui.moved=true;if(d.tab==='week'&&d.now)ui.weekOff=0;ui.screen=null;render();$('#main').scrollTop=0;break;
     case 'wtab':ui.wtab=d.t;render();$('#main').scrollTop=0;break;
     case 'week':ui.weekOff=d.d==='0'?0:ui.weekOff+Number(d.d);render();break;
     case 'tray':sheet(`<h2>Add ${esc(W(d.w).name)} to</h2><div class="opts">${DAYS.map((n,i)=>`<button class="opt" data-act="add-pick" data-day="${i}" data-w="${d.w}">${n}</button>`).join('')}</div><p class="small muted">Tip: you can also drag it straight onto a day.</p><button class="btn quiet" data-act="close">Cancel</button>`);break;
