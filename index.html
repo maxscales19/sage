@@ -490,6 +490,61 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 .irow span{display:flex;align-items:center;gap:10px}
 .irow i,.lemo{font-style:normal;font-size:22px;width:28px;text-align:center}
 .mhero,.mbanner,.mcard,.mday{flex-shrink:0}
+/* meals v3 */
+.seg.three button{flex:1}
+.mweek{margin:-4px 4px}
+.mweek b{font-size:15px}
+.dstrip{display:flex;gap:6px;flex-shrink:0}
+.dstrip button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 7px;border-radius:16px;background:var(--surface);box-shadow:var(--shadow);min-width:0}
+.dstrip small{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.dstrip b{font-size:17px;font-variant-numeric:tabular-nums}
+.dstrip i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.dstrip i.part{background:var(--accent-text);opacity:.5}.dstrip i.full{background:var(--accent-text)}
+.dstrip button.now b{color:var(--accent-text)}
+.dstrip button.on{background:var(--ink);color:var(--bg)}
+.dstrip button.on small{color:var(--bg);opacity:.75}.dstrip button.on b{color:var(--bg)}
+.dsum{background:var(--accent);color:var(--accent-ink);border-radius:24px;padding:16px 18px;flex-shrink:0}
+.dsum small{font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:12px;opacity:.85}
+.dnums{display:flex;gap:16px;margin-top:10px}
+.dnums>div{flex:1}
+.dnums b{display:block;font-size:30px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.dnums span{font-size:13px;font-weight:600;opacity:.85}
+.dnums .mbar{margin-top:8px}
+.mcard{display:flex;align-items:stretch;overflow:hidden}
+.mcard .mmain{flex:1;min-width:0;padding:10px 4px 10px 10px}
+.mcard.done .mtxt,.mcard.done .ph{opacity:.55}.mcard.done{opacity:1}
+.mtick{width:58px;min-width:58px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--accent-ink)}
+.mtick::before{content:"";position:absolute}
+.mtick{position:relative}
+.mtick::after{content:"";position:absolute;width:32px;height:32px;border-radius:50%;border:2px solid var(--line)}
+.mtick.on::after{background:var(--accent);border-color:var(--accent);z-index:0}
+.mtick.on{z-index:1}
+.mtick{isolation:isolate}.mtick.on::after{z-index:-1}
+.ph{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;background:radial-gradient(circle at 30% 25%,#fff8 0,transparent 60%),var(--mc,var(--accent-soft))}
+.ph b{line-height:1}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ph.th{width:84px;height:84px;border-radius:16px}.ph.th b{font-size:40px}
+.ph.hero{width:100%;height:100%}.ph.hero b{font-size:110px;filter:drop-shadow(0 10px 14px #0003)}
+.mtop{position:relative;height:250px;margin:-16px -16px 0;flex-shrink:0;overflow:hidden;border-radius:0 0 28px 28px}
+.back.fl{position:absolute;left:14px;top:14px;width:44px;height:44px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);font-size:26px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;padding:0 2px 3px 0;color:var(--ink)}
+.mprice{position:absolute;right:14px;top:14px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow);border-radius:99px;padding:8px 14px;font-weight:800;font-size:16px;text-align:center;line-height:1.1}
+.mprice small{display:block;font-size:10px;font-weight:700;color:var(--muted)}
+.mfacts{gap:4px;padding-left:10px;padding-right:10px}
+.mfacts b{font-size:16px;white-space:nowrap}
+.mfree{flex-shrink:0;border:2px dashed var(--line);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.mfree small{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.mfree span{font-size:13px;color:var(--muted)}
+.bcard{background:var(--surface);border-radius:22px;box-shadow:var(--shadow);padding:16px 14px 8px;flex-shrink:0}
+.bcard.done{opacity:.6}
+.bhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:0 4px 10px;border-bottom:1px solid var(--line)}
+.bhead small{display:block;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-text)}
+.bhead b{display:block;font-size:20px}
+.bhead span{font-size:13px;color:var(--muted)}
+.brow{padding:12px 4px;border-bottom:1px solid var(--line)}
+.brow:last-child{border-bottom:0}
+.swp{padding:10px 0;border-bottom:1px solid var(--line)}
+.lhave{font-size:12px;font-weight:700;color:var(--accent-text);text-align:left;padding:6px 0 2px;text-decoration:underline}
+.lrow.got .lhave{display:none}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -510,7 +565,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795387353;
+const BUILD=1795388477;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -984,7 +1039,6 @@ function render(){
   if(inSess)h=vSession();
   else if(ui.screen&&ui.screen.wk&&W(ui.screen.wk))h=vWorkout();
   else if(ui.screen&&ui.screen.meal&&MEALS())h=vMeal();
-  else if(ui.screen&&ui.screen.mlist&&MEALS())h=vMealList();
   else{ui.screen=null;h=(S.main.active?`<div class="banner"><span>${esc(S.main.active.name)} in progress</span><button class="btn sm" data-act="resume">Resume</button></div>`:'')+(ui.tab==='today'&&HOME()?vToday():ui.tab==='week'?vWeek():ui.tab==='workouts'?vTrain():ui.tab==='meals'&&MEALS()?vMeals():ui.tab==='coach'&&COACH()?vCoach():vProgress())}
   $('#top').style.display=ui.screen?'none':'flex';
   $('#nav').style.display=ui.screen?'none':'flex';
@@ -1162,168 +1216,234 @@ function chart(pts,unit){
   return `<svg class="chart" viewBox="0 0 ${Wd} ${H}" role="img" aria-label="Progress chart in ${unit}">${ticks}${area}${dots}
     <text x="${l}" y="${H-5}">${pts[0].d}</text>${pts.length>1?`<text x="${Wd-r}" y="${H-5}" text-anchor="end">${pts[pts.length-1].d}</text>`:''}</svg>`;
 }
-/* ---------- meals: a weekly dinner plan, recipes and a priced shopping list. Runs on its own, no coach needed. ---------- */
+/* ---------- meals: plans the eating week from a calorie and protein target, in fresh-cooking or batch-prep style,
+   with a cook list and a priced shopping list. Runs on its own, no coach needed. ---------- */
 const MEALS=()=>!!S.main.settings.meals;
 const PRICED='Nov 2026';
-/* id:[name, aisle, unit, pack size, estimated pack price $, search words]. Prices are estimates, not live. */
+/* id:[name, aisle, unit, pack size, estimated pack price $, search words, picture]. Prices are estimates, not live. */
 const ING={
-  chbreast:['Chicken breast','Meat & fish','g',500,6.5,'chicken breast fillets'],chthigh:['Chicken thigh fillets','Meat & fish','g',500,6.5,'chicken thigh fillets'],
-  beefmince:['Lean beef mince','Meat & fish','g',500,8,'lean beef mince'],beefstrips:['Beef stir-fry strips','Meat & fish','g',500,11,'beef stir fry strips'],
-  steak:['Rump steak','Meat & fish','g',400,11,'rump steak'],porkmince:['Pork mince','Meat & fish','g',500,6,'pork mince'],turkmince:['Turkey mince','Meat & fish','g',500,7.5,'turkey mince'],
-  salmon:['Salmon fillets','Meat & fish','g',250,10,'salmon fillets'],prawns:['Frozen raw prawns','Frozen','g',500,14,'frozen raw prawns'],tuna:['Tinned tuna (95 g)','Pantry','g',95,1.5,'tuna 95g'],
-  eggs:['Eggs','Dairy & eggs','each',12,6.2,'eggs 12 pack'],cheddar:['Grated cheddar','Dairy & eggs','g',250,4.8,'grated cheddar'],feta:['Feta','Dairy & eggs','g',200,4,'feta'],
-  halloumi:['Halloumi','Dairy & eggs','g',180,5.5,'halloumi'],yoghurt:['Greek yoghurt','Dairy & eggs','g',1000,6.5,'greek yoghurt'],cottage:['Cottage cheese','Dairy & eggs','g',500,4.5,'cottage cheese'],milk:['Milk','Dairy & eggs','ml',2000,3.2,'milk 2l'],
-  rice:['Basmati rice','Pantry','g',1000,3.5,'basmati rice'],pasta:['Pasta','Pantry','g',500,1.2,'pasta 500g'],couscous:['Couscous','Pantry','g',500,2.5,'couscous'],noodles:['Hokkien noodles','Pantry','g',400,2.5,'hokkien noodles'],lentils:['Red lentils','Pantry','g',375,2.5,'red lentils'],
-  tomcan:['Tinned tomatoes','Pantry','g',400,1.1,'diced tomatoes can'],blackbeans:['Black beans','Pantry','g',400,1.2,'black beans can'],kidney:['Kidney beans','Pantry','g',400,1.2,'kidney beans can'],chickpeas:['Chickpeas','Pantry','g',400,1.1,'chickpeas can'],corn:['Corn kernels','Pantry','g',420,1.3,'corn kernels can'],
-  coconut:['Light coconut milk','Pantry','ml',400,1.6,'light coconut milk'],curry:['Curry paste','Pantry','g',200,3.5,'curry paste'],soy:['Soy sauce','Pantry','ml',250,2.5,'soy sauce'],oil:['Olive oil','Pantry','ml',500,9,'olive oil'],salsa:['Salsa','Pantry','g',300,3,'salsa jar'],taco:['Taco seasoning','Pantry','each',1,1.5,'taco seasoning'],
-  wraps:['Tortilla wraps','Bakery','each',8,3.5,'tortilla wraps'],bread:['Wholemeal bread','Bakery','each',20,3.8,'wholemeal bread'],
-  potato:['Potatoes','Fruit & veg','g',1000,4,'potatoes'],sweetpot:['Sweet potato','Fruit & veg','g',1000,4.5,'sweet potato'],broccoli:['Broccoli','Fruit & veg','g',350,2.6,'broccoli'],carrot:['Carrots','Fruit & veg','g',1000,2.4,'carrots'],
-  capsicum:['Capsicum','Fruit & veg','each',1,2,'capsicum'],onion:['Brown onion','Fruit & veg','each',1,0.5,'brown onion'],garlic:['Garlic cloves','Fruit & veg','each',10,1.2,'garlic'],spinach:['Baby spinach','Fruit & veg','g',120,2.5,'baby spinach'],
-  zucchini:['Zucchini','Fruit & veg','each',1,1.2,'zucchini'],mushroom:['Mushrooms','Fruit & veg','g',200,3.5,'mushrooms'],avocado:['Avocado','Fruit & veg','each',1,1.8,'avocado'],lemon:['Lemon','Fruit & veg','each',1,0.9,'lemon'],
-  cucumber:['Cucumber','Fruit & veg','each',1,1.8,'cucumber'],tomato:['Tomato','Fruit & veg','each',1,0.8,'tomato'],lettuce:['Cos lettuce','Fruit & veg','each',1,3,'cos lettuce'],
-  stirveg:['Frozen stir-fry veg','Frozen','g',500,3,'frozen stir fry vegetables'],peas:['Frozen peas','Frozen','g',500,2,'frozen peas']};
+  chbreast:['Chicken breast','Meat & fish','g',500,6.5,'chicken breast fillets','🍗'],chthigh:['Chicken thigh fillets','Meat & fish','g',500,6.5,'chicken thigh fillets','🍗'],
+  beefmince:['Lean beef mince','Meat & fish','g',500,8,'lean beef mince','🥩'],beefstrips:['Beef stir-fry strips','Meat & fish','g',500,11,'beef stir fry strips','🥩'],
+  steak:['Rump steak','Meat & fish','g',400,11,'rump steak','🥩'],porkmince:['Pork mince','Meat & fish','g',500,6,'pork mince','🥓'],turkmince:['Turkey mince','Meat & fish','g',500,7.5,'turkey mince','🦃'],
+  salmon:['Salmon fillets','Meat & fish','g',250,10,'salmon fillets','🐟'],prawns:['Frozen raw prawns','Frozen','g',500,14,'frozen raw prawns','🍤'],tuna:['Tinned tuna (95 g)','Pantry','g',95,1.5,'tuna 95g','🐟'],
+  eggs:['Eggs','Dairy & eggs','each',12,6.2,'eggs 12 pack','🥚'],cheddar:['Grated cheddar','Dairy & eggs','g',250,4.8,'grated cheddar','🧀'],feta:['Feta','Dairy & eggs','g',200,4,'feta','🧀'],
+  halloumi:['Halloumi','Dairy & eggs','g',180,5.5,'halloumi','🧀'],yoghurt:['High-protein Greek yoghurt','Dairy & eggs','g',1000,6.5,'high protein greek yoghurt','🥛'],cottage:['Cottage cheese','Dairy & eggs','g',500,4.5,'cottage cheese','🥛'],milk:['Milk','Dairy & eggs','ml',2000,3.2,'milk 2l','🥛'],
+  rice:['Basmati rice','Pantry','g',1000,3.5,'basmati rice','🍚'],pasta:['Pasta','Pantry','g',500,1.2,'pasta 500g','🍝'],couscous:['Couscous','Pantry','g',500,2.5,'couscous','🌾'],noodles:['Hokkien noodles','Pantry','g',400,2.5,'hokkien noodles','🍜'],lentils:['Red lentils','Pantry','g',375,2.5,'red lentils','🫘'],
+  oats:['Rolled oats','Pantry','g',750,2.2,'rolled oats','🌾'],pb:['Peanut butter','Pantry','g',375,3.5,'peanut butter','🥜'],
+  tomcan:['Tinned tomatoes','Pantry','g',400,1.1,'diced tomatoes can','🥫'],blackbeans:['Black beans','Pantry','g',400,1.2,'black beans can','🫘'],kidney:['Kidney beans','Pantry','g',400,1.2,'kidney beans can','🫘'],chickpeas:['Chickpeas','Pantry','g',400,1.1,'chickpeas can','🫘'],corn:['Corn kernels','Pantry','g',420,1.3,'corn kernels can','🌽'],
+  coconut:['Light coconut milk','Pantry','ml',400,1.6,'light coconut milk','🥥'],curry:['Curry paste','Pantry','g',200,3.5,'curry paste','🍛'],soy:['Soy sauce','Pantry','ml',250,2.5,'soy sauce','🧂'],oil:['Olive oil','Pantry','ml',500,9,'olive oil','🫒'],salsa:['Salsa','Pantry','g',300,3,'salsa jar','🍅'],taco:['Taco seasoning','Pantry','each',1,1.5,'taco seasoning','🌮'],
+  wraps:['Tortilla wraps','Bakery','each',8,3.5,'tortilla wraps','🫓'],bread:['Wholemeal bread','Bakery','each',20,3.8,'wholemeal bread','🍞'],
+  potato:['Potatoes','Fruit & veg','g',1000,4,'potatoes','🥔'],sweetpot:['Sweet potato','Fruit & veg','g',1000,4.5,'sweet potato','🍠'],broccoli:['Broccoli','Fruit & veg','g',350,2.6,'broccoli','🥦'],carrot:['Carrots','Fruit & veg','g',1000,2.4,'carrots','🥕'],
+  capsicum:['Capsicum','Fruit & veg','each',1,2,'capsicum','🫑'],onion:['Brown onion','Fruit & veg','each',1,0.5,'brown onion','🧅'],garlic:['Garlic cloves','Fruit & veg','each',10,1.2,'garlic','🧄'],spinach:['Baby spinach','Fruit & veg','g',120,2.5,'baby spinach','🥬'],
+  zucchini:['Zucchini','Fruit & veg','each',1,1.2,'zucchini','🥒'],mushroom:['Mushrooms','Fruit & veg','g',200,3.5,'mushrooms','🍄'],avocado:['Avocado','Fruit & veg','each',1,1.8,'avocado','🥑'],lemon:['Lemon','Fruit & veg','each',1,0.9,'lemon','🍋'],
+  cucumber:['Cucumber','Fruit & veg','each',1,1.8,'cucumber','🥒'],tomato:['Tomato','Fruit & veg','each',1,0.8,'tomato','🍅'],lettuce:['Cos lettuce','Fruit & veg','each',1,3,'cos lettuce','🥬'],banana:['Bananas','Fruit & veg','each',1,0.7,'banana','🍌'],
+  stirveg:['Frozen stir-fry veg','Frozen','g',500,3,'frozen stir fry vegetables','🥦'],peas:['Frozen peas','Frozen','g',500,2,'frozen peas','🫛'],berries:['Frozen mixed berries','Frozen','g',500,5.5,'frozen mixed berries','🫐']};
 const AISLES=['Fruit & veg','Meat & fish','Dairy & eggs','Bakery','Pantry','Frozen'];
-/* [id, name, description, main, has dairy, minutes, kcal, protein, carbs, fat, ingredients per serve, steps]. Macros are approximate. */
+const STAPLES=['oil','soy','garlic','taco','curry'];
+/* [id, type (b breakfast, m main, s snack), name, description, main protein, has dairy, keeps well for prep, minutes, kcal, protein, carbs, fat, picture, ingredients per portion, steps]. Macros are approximate. */
 const REC=[
- ['burrito','Chicken Burrito Bowl','Spiced chicken over rice with black beans, corn and salsa.','chicken',0,25,640,55,75,10,{chbreast:180,rice:75,blackbeans:100,corn:60,capsicum:.5,salsa:40,taco:.25},['Cook the rice.','Dice the chicken and capsicum, toss with taco seasoning and pan-fry 8 to 10 minutes until cooked through.','Warm the beans and corn. Build the bowl and top with salsa.']],
- ['stirfry','Soy Garlic Chicken Stir-Fry','Chicken thigh and vegetables in a quick soy and garlic sauce.','chicken',0,20,620,45,70,15,{chthigh:180,stirveg:200,rice:75,soy:20,garlic:1},['Cook the rice.','Slice the chicken and fry on high heat 6 minutes. Add crushed garlic.','Add the vegetables and soy, cook 4 minutes more. Serve over rice.']],
- ['bolognese','Beef Bolognese','Lean mince simmered with tomato, carrot and onion.','beef',0,30,650,45,75,17,{beefmince:150,pasta:90,tomcan:200,onion:.5,garlic:1,carrot:60},['Soften diced onion, carrot and garlic. Add the mince and brown.','Add tomatoes, season, simmer 15 minutes.','Cook the pasta and toss through the sauce.']],
- ['salmontray','Salmon Tray Bake','Salmon roasted with sweet potato and broccoli.','fish',0,30,640,40,50,30,{salmon:180,sweetpot:250,broccoli:150,oil:10,lemon:.5},['Heat oven to 200C. Roast cubed sweet potato in oil 15 minutes.','Add broccoli and salmon, season, roast 12 minutes more.','Squeeze over lemon to serve.']],
- ['tacos','Turkey Taco Wraps','Seasoned turkey mince in wraps with salad and cheese.','turkey',1,20,600,48,50,22,{turkmince:150,wraps:2,lettuce:.15,tomato:1,cheddar:30,taco:.25,salsa:30},['Brown the mince, add taco seasoning and a splash of water, cook 5 minutes.','Chop the lettuce and tomato.','Fill the wraps and top with cheese and salsa.']],
- ['chcurry','Coconut Chicken Curry','Takeaway-style curry with peas and rice.','chicken',0,25,680,45,72,22,{chthigh:180,curry:30,coconut:100,rice:75,peas:60,onion:.5},['Cook the rice.','Fry sliced onion, then the curry paste for a minute. Add diced chicken and brown.','Pour in coconut milk, simmer 10 minutes, stir in peas.']],
- ['beefbroc','Beef and Broccoli','Beef strips and broccoli in soy and garlic.','beef',0,20,620,48,68,15,{beefstrips:170,broccoli:175,rice:75,soy:20,garlic:1},['Cook the rice.','Sear the beef on high heat 3 minutes, set aside.','Stir-fry broccoli and garlic with a splash of water, return the beef, add soy.']],
- ['prawnrice','Prawn Fried Rice','Prawns, egg and vegetables through fried rice.','fish',0,20,520,42,68,9,{prawns:150,rice:75,eggs:1,peas:60,carrot:50,soy:15},['Cook the rice and let it cool a little.','Fry the prawns 3 minutes, then diced carrot and peas.','Push aside, scramble the egg, add rice and soy and toss.']],
- ['chickpea','Chickpea and Spinach Curry','A fast vegetarian curry with tomato and coconut.','veg',0,20,610,22,98,14,{chickpeas:200,spinach:60,tomcan:200,curry:25,coconut:80,rice:75},['Cook the rice.','Fry the curry paste a minute, add tomatoes, coconut milk and chickpeas.','Simmer 10 minutes and wilt in the spinach.']],
- ['shakshuka','Halloumi Shakshuka','Eggs poached in smoky tomato with grilled halloumi.','veg',1,25,560,34,45,28,{eggs:2,halloumi:60,tomcan:200,capsicum:.5,onion:.5,bread:2},['Soften sliced onion and capsicum, add tomatoes and simmer 8 minutes.','Make wells, crack in the eggs, cover and cook 5 minutes.','Top with pan-fried halloumi. Serve with toast.']],
- ['enchilada','Black Bean Enchiladas','Beans and corn rolled in wraps and baked with cheese.','veg',1,30,640,30,85,19,{blackbeans:200,wraps:2,cheddar:40,salsa:60,corn:60,onion:.5},['Heat oven to 200C. Fry diced onion, add beans, corn and half the salsa.','Roll into the wraps and place seam down in a dish.','Top with the rest of the salsa and cheese. Bake 15 minutes.']],
- ['tunamelt','Cheddar Tuna Melt','Toasted tuna and cheese sandwich with a side salad.','fish',1,15,520,50,35,19,{tuna:190,bread:2,cheddar:40,cucumber:.25,tomato:1},['Mix drained tuna with half the cheese and season.','Fill the bread, top with cheese and pan-fry both sides until golden.','Serve with sliced cucumber and tomato.']],
- ['chpasta','Creamy Chicken and Mushroom Pasta','High-protein pasta with a cottage cheese sauce.','chicken',1,25,640,62,72,10,{chbreast:150,pasta:90,mushroom:100,spinach:40,cottage:100,garlic:1},['Cook the pasta, keep a cup of the water.','Pan-fry diced chicken, then mushrooms and garlic.','Blend or mash the cottage cheese with a little pasta water, stir through with spinach.']],
- ['steak','Steak, Potatoes and Greens','Rump steak with roast potatoes and broccoli.','beef',0,35,610,52,50,20,{steak:200,potato:300,broccoli:150,oil:5},['Heat oven to 210C. Roast cubed potatoes in oil 30 minutes.','Cook the steak 3 to 4 minutes a side, then rest it.','Steam the broccoli and serve.']],
- ['greek','Greek Chicken Bowl','Lemon chicken with couscous, cucumber, feta and yoghurt.','chicken',1,20,620,62,58,14,{chbreast:180,couscous:70,cucumber:.5,tomato:1,feta:40,yoghurt:60,lemon:.5},['Pan-fry sliced chicken with lemon juice and seasoning.','Pour boiling water over the couscous, cover 5 minutes, fluff.','Add chopped cucumber and tomato, feta and a spoon of yoghurt.']],
- ['dahl','Red Lentil Dahl','Lentils cooked soft with coconut, tomato and spinach.','veg',0,30,620,28,95,13,{lentils:90,coconut:100,tomcan:150,spinach:50,onion:.5,garlic:1,curry:20,rice:60},['Cook the rice.','Fry onion, garlic and curry paste. Add lentils, tomatoes, coconut milk and a cup of water.','Simmer 20 minutes until soft, stir in spinach.']],
- ['porknoodle','Pork and Veg Noodles','Pork mince, noodles and vegetables with soy and garlic.','pork',0,15,640,40,70,20,{porkmince:150,noodles:150,stirveg:200,soy:20,garlic:1},['Brown the mince with garlic.','Add the vegetables and cook 4 minutes.','Add the noodles and soy, toss until hot.']],
- ['salmonbowl','Salmon Rice Bowl','Pan-fried salmon over rice with avocado and cucumber.','fish',0,20,690,38,65,30,{salmon:150,rice:75,avocado:.5,cucumber:.5,soy:15},['Cook the rice.','Pan-fry the salmon skin side down 4 minutes, turn for 2 more.','Flake over the rice with sliced avocado and cucumber, drizzle with soy.']],
- ['chtray','Chicken and Feta Tray Bake','Chicken thigh roasted with sweet potato and zucchini.','chicken',1,35,620,45,48,26,{chthigh:200,sweetpot:250,zucchini:1,feta:40,oil:8},['Heat oven to 200C. Toss cubed sweet potato in oil, roast 10 minutes.','Add the chicken and sliced zucchini, roast 20 minutes.','Crumble over the feta.']],
- ['chilli','Beef Chilli','Mince and kidney beans in a spiced tomato sauce over rice.','beef',0,30,690,50,82,16,{beefmince:150,kidney:120,tomcan:200,onion:.5,capsicum:.5,rice:75,taco:.25},['Cook the rice.','Brown the mince with diced onion and capsicum, add the seasoning.','Add tomatoes and beans, simmer 15 minutes.']],
- ['eggrice','Egg Fried Rice','Eggs and vegetables through soy fried rice.','veg',0,15,540,26,72,16,{eggs:3,rice:75,stirveg:200,soy:20},['Cook the rice.','Stir-fry the vegetables 4 minutes.','Scramble the eggs in the pan, add rice and soy and toss.']],
- ['loadedsp','Loaded Sweet Potato','Baked sweet potato with beans, corn and cottage cheese.','veg',1,40,610,30,95,12,{sweetpot:350,blackbeans:150,cottage:100,corn:60,avocado:.5},['Heat oven to 200C. Prick and bake the sweet potato 35 to 40 minutes.','Warm the beans and corn.','Split and load with beans, corn, cottage cheese and avocado.']],
- ['prawnpasta','Garlic Prawn Pasta','Prawns, zucchini and spinach with lemon and garlic.','fish',0,20,560,45,70,12,{prawns:160,pasta:90,zucchini:1,garlic:2,oil:10,lemon:.5,spinach:40},['Cook the pasta.','Fry garlic in oil, add prawns and sliced zucchini for 4 minutes.','Toss with the pasta, spinach and lemon juice.']],
- ['meatballs','Turkey Meatballs and Mash','Meatballs in tomato sauce with mashed potato and peas.','turkey',1,35,590,48,62,15,{turkmince:170,potato:300,peas:80,tomcan:150,onion:.5,milk:30},['Boil the potatoes until soft, mash with the milk.','Roll the mince with grated onion into balls and brown.','Add tomatoes, simmer 12 minutes. Serve with mash and peas.']]
-].map(r=>({id:r[0],n:r[1],d:r[2],m:r[3],dairy:r[4],mins:r[5],kcal:r[6],p:r[7],c:r[8],f:r[9],ing:r[10],steps:r[11]}));
+ ['oats','b','Protein Oats with Banana','Creamy oats with yoghurt, banana and berries.','veg',1,0,8,520,30,80,9,'🥣',{oats:60,milk:250,yoghurt:100,banana:1,berries:50},['Simmer the oats in the milk 4 to 5 minutes.','Stir through the yoghurt.','Top with sliced banana and berries.']],
+ ['eggstoast','b','Scrambled Eggs on Toast','Soft scrambled eggs with wilted spinach.','veg',0,0,8,430,28,30,21,'🍳',{eggs:3,bread:2,spinach:30},['Whisk the eggs and season.','Scramble gently over low heat, add the spinach at the end.','Serve on toast.']],
+ ['yogbowl','b','Greek Yoghurt Bowl','High-protein yoghurt with berries and oats.','veg',1,0,3,330,28,40,6,'🫐',{yoghurt:250,berries:80,oats:30},['Spoon the yoghurt into a bowl.','Top with berries and oats.']],
+ ['overnight','b','Overnight Oats','Make-ahead oats that sit in the fridge for days.','veg',1,1,5,440,28,62,8,'🥛',{oats:60,yoghurt:120,milk:120,berries:60},['Mix oats, yoghurt and milk in a jar.','Top with berries and chill overnight.','Keeps 4 days in the fridge.']],
+ ['bwrap','b','Egg and Cheese Breakfast Wrap','Scrambled egg, cheddar and spinach in a toasted wrap.','veg',1,0,8,450,28,30,23,'🌯',{eggs:2,wraps:1,cheddar:25,spinach:20,salsa:20},['Scramble the eggs.','Fill the wrap with egg, cheese, spinach and salsa.','Toast in a dry pan until golden.']],
+ ['smoothie','b','Banana Protein Smoothie','A drinkable breakfast with oats blended in.','veg',1,0,3,430,28,62,7,'🥤',{milk:300,banana:1,yoghurt:150,oats:30},['Blend everything until smooth.']],
+ ['yogsnack','s','Yoghurt and Berries','A quick high-protein snack.','veg',1,0,2,190,18,18,4,'🫐',{yoghurt:170,berries:60},['Top the yoghurt with berries.']],
+ ['boiledeggs','s','Two Boiled Eggs','Boil a batch and keep them in the fridge.','veg',0,1,10,150,13,1,10,'🥚',{eggs:2},['Boil 8 to 10 minutes, cool under cold water.','Keeps 5 days in the fridge, unpeeled.']],
+ ['cottoast','s','Cottage Cheese on Toast','With sliced tomato and pepper.','veg',1,0,3,190,17,18,5,'🍞',{cottage:100,bread:1,tomato:.5},['Toast the bread.','Top with cottage cheese, tomato and pepper.']],
+ ['tunatoast','s','Tuna on Toast','A tin of tuna on wholemeal toast.','fish',0,0,3,190,24,15,3,'🐟',{tuna:95,bread:1},['Toast the bread.','Top with drained tuna and season.']],
+ ['pbbanana','s','Banana and Peanut Butter','Simple and filling.','veg',0,0,1,220,6,28,10,'🍌',{banana:1,pb:20},['Slice the banana and serve with peanut butter.']],
+ ['chrice','m','Chicken, Rice and Greens','The meal-prep classic, done properly.','chicken',0,1,25,610,58,68,10,'🍱',{chbreast:200,rice:80,broccoli:150,soy:15,oil:5},['Cook the rice.','Season and pan-fry the chicken in oil 6 minutes a side, rest and slice.','Steam the broccoli. Portion up and drizzle with soy.']],
+ ['burrito','m','Chicken Burrito Bowl','Spiced chicken over rice with black beans, corn and salsa.','chicken',0,1,25,640,55,75,10,'🌯',{chbreast:180,rice:75,blackbeans:100,corn:60,capsicum:.5,salsa:40,taco:.25},['Cook the rice.','Dice the chicken and capsicum, toss with taco seasoning and pan-fry 8 to 10 minutes until cooked through.','Warm the beans and corn. Build the bowl and top with salsa.']],
+ ['stirfry','m','Soy Garlic Chicken Stir-Fry','Chicken thigh and vegetables in a quick soy and garlic sauce.','chicken',0,1,20,620,45,70,15,'🥡',{chthigh:180,stirveg:200,rice:75,soy:20,garlic:1},['Cook the rice.','Slice the chicken and fry on high heat 6 minutes. Add crushed garlic.','Add the vegetables and soy, cook 4 minutes more. Serve over rice.']],
+ ['bolognese','m','Beef Bolognese','Lean mince simmered with tomato, carrot and onion.','beef',0,1,30,650,45,75,17,'🍝',{beefmince:150,pasta:90,tomcan:200,onion:.5,garlic:1,carrot:60},['Soften diced onion, carrot and garlic. Add the mince and brown.','Add tomatoes, season, simmer 15 minutes.','Cook the pasta and toss through the sauce.']],
+ ['salmontray','m','Salmon Tray Bake','Salmon roasted with sweet potato and broccoli.','fish',0,0,30,640,40,50,30,'🐟',{salmon:180,sweetpot:250,broccoli:150,oil:10,lemon:.5},['Heat oven to 200C. Roast cubed sweet potato in oil 15 minutes.','Add broccoli and salmon, season, roast 12 minutes more.','Squeeze over lemon to serve.']],
+ ['tacos','m','Turkey Taco Wraps','Seasoned turkey mince in wraps with salad and cheese.','turkey',1,0,20,600,48,50,22,'🌮',{turkmince:150,wraps:2,lettuce:.15,tomato:1,cheddar:30,taco:.25,salsa:30},['Brown the mince, add taco seasoning and a splash of water, cook 5 minutes.','Chop the lettuce and tomato.','Fill the wraps and top with cheese and salsa.']],
+ ['chcurry','m','Coconut Chicken Curry','Takeaway-style curry with peas and rice.','chicken',0,1,25,680,45,72,22,'🍛',{chthigh:180,curry:30,coconut:100,rice:75,peas:60,onion:.5},['Cook the rice.','Fry sliced onion, then the curry paste for a minute. Add diced chicken and brown.','Pour in coconut milk, simmer 10 minutes, stir in peas.']],
+ ['beefbroc','m','Beef and Broccoli','Beef strips and broccoli in soy and garlic.','beef',0,1,20,620,48,68,15,'🥦',{beefstrips:170,broccoli:175,rice:75,soy:20,garlic:1},['Cook the rice.','Sear the beef on high heat 3 minutes, set aside.','Stir-fry broccoli and garlic with a splash of water, return the beef, add soy.']],
+ ['prawnrice','m','Prawn Fried Rice','Prawns, egg and vegetables through fried rice.','fish',0,0,20,520,42,68,9,'🍤',{prawns:150,rice:75,eggs:1,peas:60,carrot:50,soy:15},['Cook the rice and let it cool a little.','Fry the prawns 3 minutes, then diced carrot and peas.','Push aside, scramble the egg, add rice and soy and toss.']],
+ ['chickpea','m','Chickpea and Spinach Curry','A fast vegetarian curry with tomato and coconut.','veg',0,1,20,610,22,98,14,'🍛',{chickpeas:200,spinach:60,tomcan:200,curry:25,coconut:80,rice:75},['Cook the rice.','Fry the curry paste a minute, add tomatoes, coconut milk and chickpeas.','Simmer 10 minutes and wilt in the spinach.']],
+ ['shakshuka','m','Halloumi Shakshuka','Eggs poached in smoky tomato with grilled halloumi.','veg',1,0,25,560,34,45,28,'🍳',{eggs:2,halloumi:60,tomcan:200,capsicum:.5,onion:.5,bread:2},['Soften sliced onion and capsicum, add tomatoes and simmer 8 minutes.','Make wells, crack in the eggs, cover and cook 5 minutes.','Top with pan-fried halloumi. Serve with toast.']],
+ ['enchilada','m','Black Bean Enchiladas','Beans and corn rolled in wraps and baked with cheese.','veg',1,1,30,640,30,85,19,'🫔',{blackbeans:200,wraps:2,cheddar:40,salsa:60,corn:60,onion:.5},['Heat oven to 200C. Fry diced onion, add beans, corn and half the salsa.','Roll into the wraps and place seam down in a dish.','Top with the rest of the salsa and cheese. Bake 15 minutes.']],
+ ['tunamelt','m','Cheddar Tuna Melt','Toasted tuna and cheese sandwich with a side salad.','fish',1,0,15,520,50,35,19,'🥪',{tuna:190,bread:2,cheddar:40,cucumber:.25,tomato:1},['Mix drained tuna with half the cheese and season.','Fill the bread, top with cheese and pan-fry both sides until golden.','Serve with sliced cucumber and tomato.']],
+ ['chpasta','m','Creamy Chicken and Mushroom Pasta','High-protein pasta with a cottage cheese sauce.','chicken',1,1,25,640,62,72,10,'🍝',{chbreast:150,pasta:90,mushroom:100,spinach:40,cottage:100,garlic:1},['Cook the pasta, keep a cup of the water.','Pan-fry diced chicken, then mushrooms and garlic.','Blend or mash the cottage cheese with a little pasta water, stir through with spinach.']],
+ ['steak','m','Steak, Potatoes and Greens','Rump steak with roast potatoes and broccoli.','beef',0,0,35,610,52,50,20,'🥩',{steak:200,potato:300,broccoli:150,oil:5},['Heat oven to 210C. Roast cubed potatoes in oil 30 minutes.','Cook the steak 3 to 4 minutes a side, then rest it.','Steam the broccoli and serve.']],
+ ['greek','m','Greek Chicken Bowl','Lemon chicken with couscous, cucumber, feta and yoghurt.','chicken',1,1,20,620,62,58,14,'🥗',{chbreast:180,couscous:70,cucumber:.5,tomato:1,feta:40,yoghurt:60,lemon:.5},['Pan-fry sliced chicken with lemon juice and seasoning.','Pour boiling water over the couscous, cover 5 minutes, fluff.','Add chopped cucumber and tomato, feta and a spoon of yoghurt.']],
+ ['dahl','m','Red Lentil Dahl','Lentils cooked soft with coconut, tomato and spinach.','veg',0,1,30,620,28,95,13,'🍲',{lentils:90,coconut:100,tomcan:150,spinach:50,onion:.5,garlic:1,curry:20,rice:60},['Cook the rice.','Fry onion, garlic and curry paste. Add lentils, tomatoes, coconut milk and a cup of water.','Simmer 20 minutes until soft, stir in spinach.']],
+ ['porknoodle','m','Pork and Veg Noodles','Pork mince, noodles and vegetables with soy and garlic.','pork',0,1,15,640,40,70,20,'🍜',{porkmince:150,noodles:150,stirveg:200,soy:20,garlic:1},['Brown the mince with garlic.','Add the vegetables and cook 4 minutes.','Add the noodles and soy, toss until hot.']],
+ ['salmonbowl','m','Salmon Rice Bowl','Pan-fried salmon over rice with avocado and cucumber.','fish',0,0,20,690,38,65,30,'🍣',{salmon:150,rice:75,avocado:.5,cucumber:.5,soy:15},['Cook the rice.','Pan-fry the salmon skin side down 4 minutes, turn for 2 more.','Flake over the rice with sliced avocado and cucumber, drizzle with soy.']],
+ ['chtray','m','Chicken and Feta Tray Bake','Chicken thigh roasted with sweet potato and zucchini.','chicken',1,1,35,620,45,48,26,'🍗',{chthigh:200,sweetpot:250,zucchini:1,feta:40,oil:8},['Heat oven to 200C. Toss cubed sweet potato in oil, roast 10 minutes.','Add the chicken and sliced zucchini, roast 20 minutes.','Crumble over the feta.']],
+ ['chilli','m','Beef Chilli','Mince and kidney beans in a spiced tomato sauce over rice.','beef',0,1,30,690,50,82,16,'🌶️',{beefmince:150,kidney:120,tomcan:200,onion:.5,capsicum:.5,rice:75,taco:.25},['Cook the rice.','Brown the mince with diced onion and capsicum, add the seasoning.','Add tomatoes and beans, simmer 15 minutes.']],
+ ['eggrice','m','Egg Fried Rice','Eggs and vegetables through soy fried rice.','veg',0,1,15,540,26,72,16,'🍚',{eggs:3,rice:75,stirveg:200,soy:20},['Cook the rice.','Stir-fry the vegetables 4 minutes.','Scramble the eggs in the pan, add rice and soy and toss.']],
+ ['loadedsp','m','Loaded Sweet Potato','Baked sweet potato with beans, corn and cottage cheese.','veg',1,1,40,610,30,95,12,'🍠',{sweetpot:350,blackbeans:150,cottage:100,corn:60,avocado:.5},['Heat oven to 200C. Prick and bake the sweet potato 35 to 40 minutes.','Warm the beans and corn.','Split and load with beans, corn, cottage cheese and avocado.']],
+ ['prawnpasta','m','Garlic Prawn Pasta','Prawns, zucchini and spinach with lemon and garlic.','fish',0,0,20,560,45,70,12,'🍤',{prawns:160,pasta:90,zucchini:1,garlic:2,oil:10,lemon:.5,spinach:40},['Cook the pasta.','Fry garlic in oil, add prawns and sliced zucchini for 4 minutes.','Toss with the pasta, spinach and lemon juice.']],
+ ['meatballs','m','Turkey Meatballs and Mash','Meatballs in tomato sauce with mashed potato and peas.','turkey',1,1,35,590,48,62,15,'🧆',{turkmince:170,potato:300,peas:80,tomcan:150,onion:.5,milk:30},['Boil the potatoes until soft, mash with the milk.','Roll the mince with grated onion into balls and brown.','Add tomatoes, simmer 12 minutes. Serve with mash and peas.']],
+ ['turkhash','m','Turkey and Sweet Potato Bowl','Turkey mince with roast sweet potato and spinach.','turkey',0,1,30,560,42,52,19,'🍠',{turkmince:170,sweetpot:250,spinach:40,onion:.5,oil:5},['Heat oven to 200C. Roast cubed sweet potato in oil 25 minutes.','Brown the mince with diced onion and season well.','Fold through the spinach and sweet potato.']]
+].map(r=>({id:r[0],t:r[1],n:r[2],d:r[3],m:r[4],dairy:r[5],keep:r[6],mins:r[7],kcal:r[8],p:r[9],c:r[10],f:r[11],e:r[12],ing:r[13],steps:r[14]}));
+/* photos: Unsplash photo ids, loaded straight from Unsplash. A missing or broken photo falls back to the picture tile. */
+const PH={oats:'1598259298632-e785684cfa90',eggstoast:'1687630433865-f86f07be989a',yogbowl:'1621797350488-fb28c9217e3b',overnight:'1490371475955-4cb3bfc72f71',bwrap:'1635107420756-9f930ed6c97b',smoothie:'1772476379214-51ae0dc2a9e5',yogsnack:'1608753478723-494e2dc286f2',boiledeggs:'1617611647086-bccca8c2cf84',cottoast:'1634234498278-b01fbf12bf4c',tunatoast:'1779914942318-494c24cd8530',pbbanana:'1756457144649-51b00c269554',burrito:'1668665771757-4d42737d295a',stirfry:'1621515554656-3da68ba128b1',bolognese:'1761545832779-bc0b4290fc5e',tacos:'1599974579688-8dbdd335c77f',chcurry:'1708782344490-9026aaa5eec7',beefbroc:'1783375175952-705a0600e05c',prawnrice:'1551326844-4df70f78d0e9',chickpea:'1654199903998-e49181b41a95',shakshuka:'1757972367524-5272633a75df',tunamelt:'1528736235302-52922df5c122',chpasta:'1608219992759-8d74ed8d76eb',steak:'1600891964092-4316c288032e',greek:'1690573313202-4493a7d02e9c',dahl:'1708436478056-1872a208c010',porknoodle:'1758979690131-11e2aa0b142b',chtray:'1523813301608-f54a198f6b5f',chilli:'1666819632298-fe15dc7d4c34',eggrice:'1603133872878-684f208fb84b',loadedsp:'1653130893318-ac0116f4f145',prawnpasta:'1677681483419-e18aa1376db7',meatballs:'1723417148183-060675f0033b'};
 const recOf=id=>REC.find(r=>r.id===id);
-const REMO={burrito:'🌯',stirfry:'🥡',bolognese:'🍝',salmontray:'🐟',tacos:'🌮',chcurry:'🍛',beefbroc:'🥦',prawnrice:'🍤',chickpea:'🍛',shakshuka:'🍳',enchilada:'🌯',tunamelt:'🥪',chpasta:'🍝',steak:'🥩',greek:'🥗',dahl:'🍲',porknoodle:'🍜',salmonbowl:'🍣',chtray:'🍗',chilli:'🌶️',eggrice:'🍚',loadedsp:'🍠',prawnpasta:'🍤',meatballs:'🧆'};
-const IEMO={chbreast:'🍗',chthigh:'🍗',beefmince:'🥩',beefstrips:'🥩',steak:'🥩',porkmince:'🥓',turkmince:'🦃',salmon:'🐟',prawns:'🍤',tuna:'🐟',eggs:'🥚',cheddar:'🧀',feta:'🧀',halloumi:'🧀',yoghurt:'🥛',cottage:'🥛',milk:'🥛',rice:'🍚',pasta:'🍝',couscous:'🌾',noodles:'🍜',lentils:'🫘',tomcan:'🥫',blackbeans:'🫘',kidney:'🫘',chickpeas:'🫘',corn:'🌽',coconut:'🥥',curry:'🍛',soy:'🧂',oil:'🫒',salsa:'🍅',taco:'🌮',wraps:'🫓',bread:'🍞',potato:'🥔',sweetpot:'🍠',broccoli:'🥦',carrot:'🥕',capsicum:'🫑',onion:'🧅',garlic:'🧄',spinach:'🥬',zucchini:'🥒',mushroom:'🍄',avocado:'🥑',lemon:'🍋',cucumber:'🥒',tomato:'🍅',lettuce:'🥬',stirveg:'🥦',peas:'🫛'};
-const mealData=()=>S.main.meals||(S.main.meals={prefs:null,weeks:{},have:{}});
+const MT={b:'Breakfast',l:'Lunch',d:'Dinner',s:'Snack'},MORDER=['b','l','d','s'];
+const mealData=()=>S.main.meals||(S.main.meals={prefs:null,weeks:{},have:{},pantry:null});
+const pantry=()=>{const M=mealData();if(!M.pantry){M.pantry={};STAPLES.forEach(k=>M.pantry[k]=1)}return M.pantry};
 const mKey=()=>iso(addDays(mondayOf(new Date()),7*(ui.mealOff||0)));
 const priceOf=id=>{const o=(mealData().prices||{})[id];return o!=null?o:ING[id][4]};
 const recCost=r=>Object.keys(r.ing).reduce((t,k)=>t+r.ing[k]/ING[k][3]*priceOf(k),0);
 const money=n=>'$'+(Math.round(n*100)/100).toFixed(2);
-const recTags=r=>{const t=[];if(r.p>=45)t.push('High protein');if(r.mins<=20)t.push('Quick');if(recCost(r)<4)t.push('Budget pick');if(r.m==='veg')t.push('Veggie');return t};
-function mealPool(p){
-  return REC.filter(r=>(p.diet==='veg'?r.m==='veg':p.diet==='pesc'?(r.m==='veg'||r.m==='fish'):true)&&!(p.no||[]).some(x=>x==='dairy'?r.dairy:x==='seafood'?r.m==='fish':r.m===x));
+const recTags=r=>{const t=[];if(r.p/r.kcal>=.075)t.push('High protein');if(r.mins<=15)t.push('Quick');if(r.keep&&r.t==='m')t.push('Preps well');if(r.t==='m'&&recCost(r)<4.2)t.push('Budget pick');if(r.m==='veg'&&r.t==='m')t.push('Veggie');return t};
+const mPhoto=(r,cls)=>`<span class="ph m-${r.m} ${cls||''}" aria-hidden="true"><b>${r.e}</b>${PH[r.id]?`<img loading="lazy" alt="" src="https://images.unsplash.com/photo-${PH[r.id]}?auto=format&fit=crop&w=${cls==='hero'?900:320}&q=70" onerror="this.remove()">`:''}</span>`;
+const DEFP=()=>({store:'coles',mode:'prep',days:[0,1,2,3],preps:{6:3,2:2},variety:2,serves:1,kcal:apiUser==='max'?2300:2000,protein:apiUser==='max'?165:120,eat:{b:1,l:1,d:1,s:1},lunchLeft:1,diet:'any',no:[],budget:0});
+function mealPool(p,t){
+  return REC.filter(r=>r.t===t&&(p.diet==='veg'?r.m==='veg':p.diet==='pesc'?(r.m==='veg'||r.m==='fish'):true)&&!(p.no||[]).some(x=>x==='dairy'?r.dairy:x==='seafood'?r.m==='fish':r.m===x));
 }
-function mealScore(r,p){return (p.goal==='protein'?r.p/r.kcal*600:p.goal==='budget'?-recCost(r)*6:0)+Math.random()*(p.goal==='balanced'?100:18)}
-function mealPick(p,avoid){const pool=mealPool(p).filter(r=>avoid.indexOf(r.id)<0).map(r=>[mealScore(r,p),r]).sort((a,b)=>b[0]-a[0]);return pool.length?pool[0][1]:null}
-const totalPortions=(p,covers)=>covers*(p.perDay||1)*p.serves;
-function mealSlots(p){
-  if(p.mode==='prep')return Object.keys(p.preps||{}).map(Number).sort().map(d=>({d,covers:p.preps[d],kinds:Math.max(1,Math.min(p.variety||1,3))}));
-  return p.days.slice().sort().map(d=>({d,covers:1,kinds:1}));
+/* picks recipes that suit the targets: enough protein for the calories first, cheaper when there is a budget, then some luck */
+function mealPicks(p,t,n,avoid,needKeep){
+  const want=p.protein/p.kcal;
+  let pool=mealPool(p,t).filter(r=>avoid.indexOf(r.id)<0);if(needKeep&&pool.filter(r=>r.keep).length)pool=pool.filter(r=>r.keep);
+  const sc=pool.map(r=>[Math.min(1,(r.p/r.kcal)/want)*60-(p.budget?recCost(r)*4:0)+Math.random()*34,r]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]);
+  const out=[];sc.forEach(r=>{if(out.length<n&&!out.some(o=>o.m===r.m&&t==='m'&&sc.length>n*2))out.push(r)});
+  sc.forEach(r=>{if(out.length<n&&out.indexOf(r)<0)out.push(r)});return out;
 }
 function mealPlan(key){
-  const M=mealData(),p=M.prefs,old=weekOf(iso(addDays(new Date(key+'T00:00:00'),-7))),prev=[],wk={},used=[];
-  Object.values(old).forEach(sl=>sl.items.forEach(x=>prev.push(x.id)));
-  let last=null;
-  mealSlots(p).forEach(sl=>{
-    const items=[],tot=totalPortions(p,sl.covers);
-    for(let k=0;k<sl.kinds;k++){
-      let r=null;for(let i=0;i<6&&!r;i++){const c=mealPick(p,used.concat(i<3?prev:[]));if(c&&(c.m!==last||i>3))r=c}
-      r=r||mealPick(p,used)||(k?null:mealPick(p,[]));if(!r)break;items.push({id:r.id,n:0});used.push(r.id);last=r.m}
-    if(!items.length)return;
-    items.forEach((x,i)=>{x.n=Math.max(1,Math.floor(tot/items.length)+(i<tot%items.length?1:0))});
-    wk[sl.d]={covers:sl.covers,items}});
-  M.weeks[key]=wk;M.have[key]={};
-  Object.keys(M.weeks).sort().slice(0,-8).forEach(k=>{delete M.weeks[k];delete M.have[k]});
+  const M=mealData(),p=M.prefs,prev=[],old=M.weeks[iso(addDays(new Date(key+'T00:00:00'),-7))];
+  if(old&&old.v===2)Object.values(old.days).forEach(dy=>MORDER.forEach(k=>{if(dy[k]&&dy[k].id)prev.push(dy[k].id)}));
+  const days={},batches=[],used=[];for(let i=0;i<7;i++)days[i]={};
+  const take=(n,keep)=>{let r=mealPicks(p,'m',n,used.concat(prev),keep);if(r.length<n)r=mealPicks(p,'m',n,used,keep);if(r.length<n)r=r.concat(mealPicks(p,'m',n-r.length,r.map(x=>x.id),false));r.forEach(x=>used.push(x.id));return r};
+  if(p.mode==='prep'){
+    Object.keys(p.preps||{}).map(Number).sort((a,b)=>((a+1)%7)-((b+1)%7)).forEach(d=>{
+      const cov=[];for(let i=1;i<=p.preps[d];i++)cov.push((d+i)%7);
+      const slots=(p.eat.l?1:0)+(p.eat.d?1:0);if(!slots)return;
+      const recs=take(Math.max(1,Math.min(p.variety||1,3)),true);if(!recs.length)return;
+      const bi=batches.length;batches.push({d,cov,recs:recs.map(r=>({id:r.id}))});
+      cov.forEach((dy,i)=>{if(p.eat.l&&!days[dy].l)days[dy].l={id:recs[i%recs.length].id,bi};if(p.eat.d&&!days[dy].d)days[dy].d={id:recs[(i+(p.eat.l?1:0))%recs.length].id,bi}})});
+  }else{
+    p.days.slice().sort().forEach(d=>{if(!p.eat.d)return;const r=take(1,!!(p.eat.l&&p.lunchLeft))[0];if(!r)return;const bi=batches.length,cov=[d];
+      days[d].d={id:r.id,bi};if(p.eat.l&&p.lunchLeft&&d<6){days[d+1].l={id:r.id,bi,left:1};cov.push(d+1)}
+      batches.push({d,cov,recs:[{id:r.id}]})});
+  }
+  const bs=p.eat.b?mealPicks(p,'b',2,prev,false):[],sn=p.eat.s?mealPicks(p,'s',2,prev,false):[];
+  for(let i=0;i<7;i++){if(bs.length)days[i].b={id:bs[i<4?0:bs.length-1].id};if(sn.length)days[i].s={id:sn[i<4?0:sn.length-1].id}}
+  const wk={v:2,days,batches};fitWeek(wk,p);M.weeks[key]=wk;M.have[key]={};
+  Object.keys(M.weeks).sort().slice(0,-6).forEach(k=>{delete M.weeks[k];delete M.have[k]});
   saveMain();return wk;
 }
-/* a week as saved, brought up to the current shape (the first version kept one meal per day) */
-function weekOf(key){
-  const M=mealData(),wk=M.weeks[key];if(!wk)return {};
-  Object.keys(wk).forEach(d=>{const x=wk[d];if(x&&!x.items)wk[d]={covers:1,items:[{id:x.id,n:(M.prefs&&M.prefs.serves)||2,cooked:x.cooked}]}});
-  return wk;
+/* sizes each lunch and dinner so the day lands near the calorie target: the two mains share what breakfast and snack leave */
+function fitWeek(wk,p){
+  for(let i=0;i<7;i++){const dy=wk.days[i],fixed=(dy.b?recOf(dy.b.id).kcal:p.eat.b?0:450)+(dy.s?recOf(dy.s.id).kcal:p.eat.s?0:200),share=(p.kcal-fixed)/2;  /* a meal Sage is not planning is assumed to be an ordinary size */
+    ['l','d'].forEach(k=>{if(dy[k]){const r=recOf(dy[k].id);dy[k].f=Math.max(.7,Math.min(1.5,Math.round(share/r.kcal*20)/20))}});
+    ['b','s'].forEach(k=>{if(dy[k])dy[k].f=1})}
 }
-const weekItems=wk=>{const a=[];Object.keys(wk).sort().forEach(d=>wk[d].items.forEach((x,i)=>a.push({d,i,x,covers:wk[d].covers})));return a};
+const weekOf=key=>{const M=mealData();let wk=M.weeks[key];if(!wk||wk.v!==2)wk=mealPlan(key);return wk};
+const dayTot=dy=>MORDER.reduce((t,k)=>{const x=dy[k];if(x){const r=recOf(x.id);t.kcal+=r.kcal*x.f;t.p+=r.p*x.f;t.c+=r.c*x.f;t.f+=r.f*x.f;t.n++;if(x.eaten)t.eaten++}return t},{kcal:0,p:0,c:0,f:0,n:0,eaten:0});
+/* how much of each recipe a cook-up makes: portions and total size, counted from the days it feeds */
+function batchRecs(wk,bi){
+  const b=wk.batches[bi],n=mealData().prefs.serves;
+  return b.recs.map(x=>{let cnt=0,sum=0;for(let i=0;i<7;i++)['l','d'].forEach(k=>{const m=wk.days[i][k];if(m&&m.bi===bi&&m.id===x.id){cnt++;sum+=m.f}});return {x,r:recOf(x.id),portions:cnt*n,size:sum*n}});
+}
 function shopList(key){
-  const q={};
-  weekItems(weekOf(key)).forEach(({x})=>{const r=recOf(x.id);if(r)Object.keys(r.ing).forEach(k=>{q[k]=(q[k]||0)+r.ing[k]*x.n})});
-  return Object.keys(q).map(k=>{const g=ING[k],packs=Math.ceil(q[k]/g[3]-1e-9);return {id:k,n:g[0],aisle:g[1],qty:q[k],unit:g[2],packs,cost:packs*priceOf(k)}});
+  const wk=weekOf(key),n=mealData().prefs.serves,q={},pan=pantry();
+  for(let i=0;i<7;i++)MORDER.forEach(k=>{const m=wk.days[i][k];if(!m)return;const r=recOf(m.id);Object.keys(r.ing).forEach(g=>{q[g]=(q[g]||0)+r.ing[g]*m.f*n})});
+  return Object.keys(q).map(k=>{const g=ING[k],packs=Math.ceil(q[k]/g[3]-1e-9);return {id:k,n:g[0],aisle:g[1],qty:q[k],unit:g[2],packs,cost:packs*priceOf(k),have:!!pan[k]}});
 }
-const qtyText=(q,u)=>u==='each'?(Math.round(q*10)/10)+'':q>=1000?(Math.round(q/100)/10)+(u==='g'?' kg':' L'):Math.round(q)+' '+u;
+const qtyText=(q,u)=>u==='each'?(Math.round(q*2)/2||.5)+'':q>=1000?(Math.round(q/100)/10)+(u==='g'?' kg':' L'):(Math.round(q/5)*5||5)+' '+u;
 const storeName=()=>mealData().prefs.store==='woolies'?'Woolworths':'Coles';
 const storeLink=w=>(mealData().prefs.store==='woolies'?'https://www.woolworths.com.au/shop/search/products?searchTerm=':'https://www.coles.com.au/search/products?q=')+encodeURIComponent(w);
-const mTile=r=>`<span class="mtile m-${r.m}" aria-hidden="true">${REMO[r.id]||'🍽️'}</span>`;
-const mArt=r=>`<div class="mbanner m-${r.m}" aria-hidden="true">${Object.keys(r.ing).slice(0,6).map((k,i)=>`<i class="f${i}">${IEMO[k]||''}</i>`).join('')}<b>${REMO[r.id]||'🍽️'}</b></div>`;
-const stepper=(k,v,min,max,extra)=>`<div class="stepper"><button data-act="mp-step" data-k="${k}" data-n="-1" data-min="${min}" data-max="${max}" ${extra||''} aria-label="Less">−</button><b>${v}</b><button data-act="mp-step" data-k="${k}" data-n="1" data-min="${min}" data-max="${max}" ${extra||''} aria-label="More">+</button></div>`;
+const dayDate=(key,d)=>addDays(new Date(key+'T00:00:00'),+d);
+const dayLabel=(key,d)=>{const t=dayDate(key,d);return DAYS[d]+' '+t.getDate()+' '+MON[t.getMonth()]};
+/* a cook-up on Sunday feeds the Monday of the week on show, so its date is the Sunday before */
+const cookDate=(key,b)=>addDays(dayDate(key,b.d),b.d>b.cov[0]?-7:0);
+const stepper=(k,v,min,max,step,extra)=>`<div class="stepper"><button data-act="mp-step" data-k="${k}" data-n="${-(step||1)}" data-min="${min}" data-max="${max}" ${extra||''} aria-label="Less">−</button><b>${v}</b><button data-act="mp-step" data-k="${k}" data-n="${step||1}" data-min="${min}" data-max="${max}" ${extra||''} aria-label="More">+</button></div>`;
 function vMealSetup(){
-  const d=ui.mp||(ui.mp=Object.assign({store:'coles',mode:'fresh',days:[0,1,2,3,6],preps:{6:3,2:2},perDay:2,variety:2,serves:2,diet:'any',no:[],goal:'protein',budget:0},mealData().prefs||{}));
+  const d=ui.mp||(ui.mp=Object.assign(DEFP(),JSON.parse(JSON.stringify(mealData().prefs||{}))));
   const one=(k,opts)=>`<div class="mopts">${opts.map(([v,l])=>`<button class="mopt ${d[k]===v?'on':''}" data-act="mp-set" data-k="${k}" data-v="${v}" aria-pressed="${d[k]===v}">${l}</button>`).join('')}</div>`;
   const many=(k,opts)=>`<div class="mopts">${opts.map(([v,l])=>`<button class="mopt ${d[k].indexOf(v)>=0?'on':''}" data-act="mp-tog" data-k="${k}" data-v="${v}" aria-pressed="${d[k].indexOf(v)>=0}">${l}</button>`).join('')}</div>`;
   const prep=d.mode==='prep',pd=Object.keys(d.preps).map(Number).sort();
-  const cook=prep?`<div class="card"><h3>Which days do you prep?</h3><div class="mopts">${DAYS.map((x,i)=>`<button class="mopt ${d.preps[i]?'on':''}" data-act="mp-prep" data-d="${i}" aria-pressed="${!!d.preps[i]}">${x}</button>`).join('')}</div>
-      ${pd.map(i=>`<div class="srowx"><span><b>${DAYS[i]} prep</b><small>covers ${d.preps[i]} day${d.preps[i]===1?'':'s'}</small></span>${stepper('cov',d.preps[i],1,7,`data-d="${i}"`)}</div>`).join('')}
-      <div class="srowx"><span><b>Meals a day from prep</b><small>2 covers lunch and dinner</small></span>${stepper('perDay',d.perDay,1,4)}</div>
-      <div class="srowx"><span><b>Different recipes each prep</b><small>1 means the same meal every time</small></span>${stepper('variety',d.variety,1,3)}</div>
-      <p class="small muted" style="margin-top:10px">${pd.map(i=>DAYS[i]+': '+totalPortions(d,d.preps[i])+' portions').join(' · ')||'Pick at least one prep day.'}</p></div>`
-    :`<div class="card"><h3>Which nights are you cooking?</h3>${many('days',DAYS.map((x,i)=>[i,x]))}</div>`;
-  return `<div><h2 style="font-size:26px">Meals</h2><p class="small muted">A few questions, then Sage plans your week and writes the shopping list.</p></div>
-    <div class="card"><h3>Where do you shop?</h3>${one('store',[['coles','🔴 Coles'],['woolies','🟢 Woolworths']])}</div>
-    <div class="card"><h3>How do you cook?</h3>${one('mode',[['fresh','🍳 Fresh each night'],['prep','🥡 Meal prep in batches']])}</div>
+  const eat=`<div class="mopts">${MORDER.map(k=>`<button class="mopt ${d.eat[k]?'on':''}" data-act="mp-eat" data-k="${k}" aria-pressed="${!!d.eat[k]}">${MT[k]}</button>`).join('')}</div>`;
+  const span=i=>{const n=d.preps[i],a=DAYS[(i+1)%7],b=DAYS[(i+n)%7];return n===1?a:a+' to '+b};
+  const cook=prep?`<div class="card"><h3>When do you cook?</h3><p class="small muted">Pick your prep days, then how many days each cook-up should last.</p><div class="mopts">${DAYS.map((x,i)=>`<button class="mopt ${d.preps[i]?'on':''}" data-act="mp-prep" data-d="${i}" aria-pressed="${!!d.preps[i]}">${x}</button>`).join('')}</div>
+      ${pd.map(i=>`<div class="srowx"><span><b>${DAYS[i]} cook-up</b><small>lasts ${d.preps[i]} day${d.preps[i]===1?'':'s'}: ${span(i)}</small></span>${stepper('cov',d.preps[i],1,6,1,`data-d="${i}"`)}</div>`).join('')}
+      <div class="srowx"><span><b>Recipes per cook-up</b><small>${d.variety===1?'One recipe, eaten for lunch and dinner':'Lunch and dinner are different meals'}</small></span>${stepper('variety',d.variety,1,3)}</div></div>`
+    :`<div class="card"><h3>Which nights do you cook?</h3>${many('days',DAYS.map((x,i)=>[i,x]))}<div class="srowx"><span><b>Cook extra for lunch</b><small>Tomorrow’s lunch is tonight’s leftovers</small></span><button class="btn ${d.lunchLeft?'':'ghost'} sm" data-act="mp-flag" data-k="lunchLeft">${d.lunchLeft?'On':'Off'}</button></div></div>`;
+  return `<div><h2 style="font-size:26px">Set up your meals</h2><p class="small muted">Sage plans every meal to your numbers, tells you what to cook and when, and writes the shopping list.</p></div>
+    <div class="card"><h3>Your daily target</h3><div class="srowx" style="border:0;margin-top:4px"><span><b>Calories</b><small>per person, per day</small></span>${stepper('kcal',d.kcal,1200,4500,50)}</div><div class="srowx"><span><b>Protein</b><small>grams per day</small></span>${stepper('protein',d.protein,60,300,5)}</div></div>
+    <div class="card"><h3>Which meals should Sage plan?</h3>${eat}</div>
+    <div class="card"><h3>How do you cook?</h3>${one('mode',[['prep','Batch prep'],['fresh','Fresh each night']])}</div>
     ${cook}
-    <div class="card"><div class="srowx" style="border:0;padding:0"><span><h3 style="margin:0">How many people?</h3></span>${stepper('serves',d.serves,1,12)}</div></div>
-    <div class="card"><h3>How do you eat?</h3>${one('diet',[['any','🍽️ Everything'],['pesc','🐟 Pescatarian'],['veg','🥦 Vegetarian']])}<p class="small muted" style="margin:12px 0 8px">Leave out</p>${many('no',[['pork','Pork'],['beef','Beef'],['seafood','Seafood'],['dairy','Dairy']])}</div>
-    <div class="card"><h3>What matters most?</h3>${one('goal',[['protein','💪 High protein'],['balanced','🎲 Variety'],['budget','💰 Low cost']])}</div>
-    <div class="card"><h3>Weekly budget</h3>${one('budget',[[0,'No limit'],[80,'$80'],[120,'$120'],[160,'$160']])}<label class="small muted" style="display:block;margin:12px 0 6px" for="mp-bud">Or type your own</label><input id="mp-bud" class="inp" type="number" inputmode="numeric" min="0" max="2000" placeholder="$ a week" value="${d.budget&&[80,120,160].indexOf(d.budget)<0?d.budget:''}"></div>
+    <div class="card"><div class="srowx" style="border:0;padding:0;margin:0"><span><b>How many people?</b><small>Everyone gets the same portion</small></span>${stepper('serves',d.serves,1,12)}</div></div>
+    <div class="card"><h3>How do you eat?</h3>${one('diet',[['any','Everything'],['pesc','Pescatarian'],['veg','Vegetarian']])}<p class="small muted" style="margin:12px 0 0">Leave out</p>${many('no',[['pork','Pork'],['beef','Beef'],['seafood','Seafood'],['dairy','Dairy']])}</div>
+    <div class="card"><h3>Where do you shop?</h3>${one('store',[['coles','Coles'],['woolies','Woolworths']])}<label class="small muted" style="display:block;margin:14px 0 6px" for="mp-bud">Weekly budget (leave empty for no limit)</label><input id="mp-bud" class="inp" type="number" inputmode="numeric" min="0" max="2000" placeholder="$ a week" value="${d.budget||''}"></div>
     <button class="btn wide" data-act="mp-save">${mealData().prefs?'Save and replan':'Plan my week'}</button>${mealData().prefs?'<button class="btn quiet wide" data-act="mp-cancel">Cancel</button>':''}`;
 }
 function vMeals(){
   const M=mealData();if(!M.prefs||ui.mp)return vMealSetup();
-  const key=mKey();if(!M.weeks[key])mealPlan(key);
-  const wk=weekOf(key),p=M.prefs,list=shopList(key),total=list.reduce((t,x)=>t+x.cost,0),mon=new Date(key+'T00:00:00'),its=weekItems(wk),prep=p.mode==='prep';
-  const portions=its.reduce((t,a)=>t+a.x.n,0),cooked=its.filter(a=>a.x.cooked).length,over=p.budget&&total>p.budget;
-  const strip=`<div class="mstrip" aria-hidden="true">${its.slice(0,7).map(a=>`<span>${REMO[a.x.id]||'🍽️'}</span>`).join('')}</div>`;
-  const rows=Object.keys(wk).sort().map(d=>{const sl=wk[d],dt=addDays(mon,+d),day=`${DAYS[d]} ${dt.getDate()} ${MON[dt.getMonth()]}`;
-    const cards=sl.items.map((x,i)=>{const r=recOf(x.id);if(!r)return '';
-      return `<div class="mcard ${x.cooked?'done':''}"><button class="mmain" data-act="meal-open" data-d="${d}" data-i="${i}">${mTile(r)}<span class="mtxt">${prep?'':`<small>${day}${x.cooked?' · cooked':''}</small>`}<b>${esc(r.n)}</b><span class="mmeta">${r.mins} min · ${r.kcal} kcal · ${r.p} g protein</span><span class="mchips">${prep?`<em class="hot">${x.n} portions</em>`:''}${recTags(r).slice(0,2).map(t=>`<em>${t}</em>`).join('')}${prep&&x.cooked?'<em>Cooked</em>':''}</span></span><span class="mpp">${money(recCost(r))}<small>each</small></span></button></div>`}).join('');
-    return (prep?`<div class="mday"><b>${day} prep</b><span>covers ${sl.covers} day${sl.covers===1?'':'s'}</span></div>`:'')+cards}).join('');
-  return `<div class="mhero">${strip}<div class="row between"><small>${ui.mealOff?'Next week':'This week'} · ${storeName()}</small><button class="mswitch" data-act="meals-week">${ui.mealOff?'‹ This week':'Next week ›'}</button></div>
-      <div class="mtot">${money(total)}<span>${p.budget?'of $'+p.budget+' budget':'estimated shop'} · ${portions} portion${portions===1?'':'s'}${prep?' from '+Object.keys(wk).length+' prep'+(Object.keys(wk).length===1?'':'s'):' for '+p.serves}</span></div>
-      ${p.budget?`<div class="mbar"><i style="width:${Math.min(100,Math.round(total/p.budget*100))}%"></i></div>`:''}
-      ${over?'<p class="mnote">Over budget. Swap a meal or tap New plan.</p>':''}<p class="mnote">${cooked} of ${its.length} cooked</p></div>
-    ${rows||'<div class="card"><p class="muted">No meals match those choices. Change your preferences.</p></div>'}
-    <button class="btn wide" data-act="mlist-open">🛒 Shopping list · ${list.length} items</button>
-    <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="meals-new">New plan</button><button class="btn ghost" style="flex:1" data-act="meals-prefs">Preferences</button></div>
-    <p class="small muted" style="text-align:center">Prices are estimates from ${PRICED}, not live ${storeName()} prices.</p>`;
+  const t=ui.mtab||'plan';
+  return `<div class="seg three" role="group" aria-label="Meals"><button class="${t==='plan'?'on':''}" data-act="mtab" data-t="plan">Plan</button><button class="${t==='cook'?'on':''}" data-act="mtab" data-t="cook">Cook</button><button class="${t==='shop'?'on':''}" data-act="mtab" data-t="shop">Shop</button></div>
+    <div class="row between mweek"><b>${ui.mealOff?'Next week':'This week'}</b><button class="tlink" data-act="meals-week">${ui.mealOff?'‹ This week':'Next week ›'}</button></div>`+(t==='cook'?vMealCook():t==='shop'?vMealShop():vMealPlan());
+}
+function vMealPlan(){
+  const key=mKey(),wk=weekOf(key),p=mealData().prefs,today=iso(new Date());
+  let sel=ui.mday;if(typeof sel!=='number'||!(sel>=0&&sel<7)){const i=Math.round((new Date(today+'T00:00:00')-new Date(key+'T00:00:00'))/864e5);sel=ui.mday=i>=0&&i<7?i:0}
+  const strip=`<div class="dstrip">${DAYS.map((x,i)=>{const tt=dayTot(wk.days[i]),dt=dayDate(key,i);return `<button class="${i===sel?'on':''} ${iso(dt)===today?'now':''}" data-act="mday" data-d="${i}" aria-pressed="${i===sel}"><small>${x}</small><b>${dt.getDate()}</b><i class="${tt.n&&tt.eaten===tt.n?'full':tt.eaten?'part':''}"></i></button>`}).join('')}</div>`;
+  const dy=wk.days[sel],tt=dayTot(dy),missing=['l','d'].filter(k=>p.eat[k]&&!dy[k]);
+  const pct=Math.min(100,Math.round(tt.kcal/p.kcal*100)),ppct=Math.min(100,Math.round(tt.p/p.protein*100));
+  const sum=`<div class="dsum"><div class="row between"><small>${dayLabel(key,sel)}</small><small>${tt.eaten} of ${tt.n} eaten</small></div>
+    <div class="dnums"><div><b>${Math.round(tt.kcal)}</b><span>of ${p.kcal} kcal</span><div class="mbar"><i style="width:${pct}%"></i></div></div><div><b>${Math.round(tt.p)} g</b><span>of ${p.protein} g protein</span><div class="mbar"><i style="width:${ppct}%"></i></div></div></div>
+    ${missing.length?`<p class="mnote">${missing.map(k=>MT[k]).join(' and ')} not planned. About ${Math.max(0,Math.round((p.kcal-tt.kcal)/50)*50)} kcal left for ${missing.length>1?'them':'it'}.</p>`:''}</div>`;
+  const rows=MORDER.map(k=>{const m=dy[k];
+    if(!m)return p.eat[k]?`<div class="mfree"><small>${MT[k]}</small><b>Your choice</b><span>${k==='l'||k==='d'?'Nothing cooked for this one.':''}</span></div>`:'';
+    const r=recOf(m.id),b=m.bi!=null?wk.batches[m.bi]:null,src=!b?(r.mins+' min'):b.d===sel&&!m.left?'Cook tonight · '+r.mins+' min':m.left?'Leftovers from '+DAYS[b.d]:'From '+DAYS[b.d]+'’s cook-up';
+    return `<div class="mcard ${m.eaten?'done':''}"><button class="mmain" data-act="meal-open" data-d="${sel}" data-k="${k}">${mPhoto(r,'th')}<span class="mtxt"><small>${MT[k]}</small><b>${esc(r.n)}</b><span class="mmeta">${Math.round(r.kcal*m.f)} kcal · ${Math.round(r.p*m.f)} g protein</span><span class="mchips"><em>${src}</em>${m.f>1.02||m.f<.98?`<em>${m.f>1?'Larger':'Smaller'} portion</em>`:''}</span></span></button><button class="mtick ${m.eaten?'on':''}" data-act="meal-eat" data-d="${sel}" data-k="${k}" role="checkbox" aria-checked="${!!m.eaten}" aria-label="Eaten: ${esc(r.n)}">${m.eaten?'✓':''}</button></div>`}).join('');
+  return strip+sum+rows+`<div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="meals-new">New plan</button><button class="btn ghost" style="flex:1" data-act="meals-prefs">Preferences</button></div><p class="small muted" style="text-align:center">Photos from Unsplash.</p>`;
+}
+function vMealCook(){
+  const key=mKey(),wk=weekOf(key),p=mealData().prefs;
+  if(!wk.batches.length)return `<div class="card"><p class="muted">Nothing to cook this week. Check your preferences.</p></div>`;
+  return wk.batches.map((b,bi)=>{const recs=batchRecs(wk,bi),cd=cookDate(key,b),mins=recs.reduce((t,x)=>t+x.r.mins,0),done=b.recs.every(x=>x.cooked);
+    const feeds=b.cov.length>1||b.cov[0]!==b.d?'Feeds '+(b.cov.length===1?DAYS[b.cov[0]]:DAYS[b.cov[0]]+' to '+DAYS[b.cov[b.cov.length-1]]):'Dinner that night';
+    return `<div class="bcard ${done?'done':''}"><div class="bhead"><div><small>${p.mode==='prep'?'Cook-up':'Cook'}</small><b>${DAYS[b.d]} ${cd.getDate()} ${MON[cd.getMonth()]}</b><span>${feeds} · about ${mins} min</span></div><button class="btn ${done?'ghost':''} sm" data-act="batch-done" data-b="${bi}">${done?'Cooked ✓':'Mark cooked'}</button></div>
+      ${recs.map(({x,r,portions})=>`<button class="mmain brow" data-act="meal-open" data-b="${bi}" data-id="${r.id}">${mPhoto(r,'th')}<span class="mtxt"><b>${esc(r.n)}</b><span class="mmeta">${r.mins} min · ${money(recCost(r))} a portion</span><span class="mchips"><em class="hot">${portions} portion${portions===1?'':'s'}</em>${recTags(r).slice(0,1).map(t=>`<em>${t}</em>`).join('')}</span></span></button>`).join('')}</div>`}).join('')
+    +`<p class="small muted" style="text-align:center">Tap a recipe for the full amounts and method.</p>`;
+}
+function vMealShop(){
+  const key=mKey(),M=mealData(),p=M.prefs,list=shopList(key),have=M.have[key]||{},buy=list.filter(x=>!x.have),pan=list.filter(x=>x.have);
+  const total=buy.reduce((t,x)=>t+x.cost,0),left=buy.filter(x=>!have[x.id]).reduce((t,x)=>t+x.cost,0),got=buy.filter(x=>have[x.id]).length,over=p.budget&&total>p.budget;
+  const row=x=>`<div class="lrow ${have[x.id]?'got':''}"><button class="lchk" data-act="mlist-tick" data-id="${x.id}" role="checkbox" aria-checked="${!!have[x.id]}" aria-label="${esc(x.n)}">${have[x.id]?'✓':''}</button><span class="lemo" aria-hidden="true">${ING[x.id][6]}</span><span class="ltxt"><b>${esc(x.n)}</b><small>${ING[x.id][3]===1?'Buy '+x.packs:qtyText(x.qty,x.unit)+' needed · '+x.packs+' pack'+(x.packs===1?'':'s')}</small><button class="lhave" data-act="pantry" data-id="${x.id}">I already have this</button></span><a class="lprice" href="${storeLink(ING[x.id][5])}" target="_blank" rel="noopener">${money(x.cost)}<small>check ›</small></a></div>`;
+  const groups=AISLES.map(a=>{const it=buy.filter(x=>x.aisle===a);return it.length?`<div class="card"><h3>${a}</h3>${it.map(row).join('')}</div>`:''}).join('');
+  return `<div class="mhero"><div class="row between"><small>${storeName()} · ${buy.length} items</small><small>${got} ticked</small></div>
+      <div class="mtot">${money(total)}<span>${p.budget?'of $'+p.budget+' budget':'estimated shop'}${left<total?' · '+money(left)+' to go':''}</span></div>
+      ${p.budget?`<div class="mbar"><i style="width:${Math.min(100,Math.round(total/p.budget*100))}%"></i></div>`:''}${over?'<p class="mnote">Over budget. Swap a pricey meal or make a new plan.</p>':''}</div>
+    ${groups}
+    ${pan.length?`<div class="card"><h3>Already in your kitchen</h3><p class="small muted">Left off the list and the total. Tap one to add it back.</p><div class="mopts">${pan.map(x=>`<button class="mopt on" data-act="pantry" data-id="${x.id}">${ING[x.id][6]} ${esc(x.n)}</button>`).join('')}</div></div>`:''}
+    <p class="small muted" style="text-align:center">Prices are estimates from ${PRICED}, not live ${storeName()} prices. Tap a price to see the real one.</p>`;
+}
+/* the recipe page: opened from a day (one meal) or from a cook-up (the whole batch) */
+function mealCtx(){
+  const sc=ui.screen.meal,wk=weekOf(sc.key),n=mealData().prefs.serves;
+  if(sc.k){const m=wk.days[sc.d]&&wk.days[sc.d][sc.k];if(!m)return null;const r=recOf(m.id),bt=m.bi!=null?batchRecs(wk,m.bi).find(x=>x.r.id===m.id):null;return {wk,r,m,f:m.f,bi:m.bi,bt,n}}
+  const bt=batchRecs(wk,sc.b).find(x=>x.r.id===sc.id);if(!bt)return null;
+  let f=1;for(let i=0;i<7;i++)['l','d'].forEach(k=>{const m=wk.days[i][k];if(m&&m.bi===sc.b&&m.id===sc.id)f=m.f});
+  return {wk,r:bt.r,m:null,f,bi:sc.b,bt,n};
 }
 function vMeal(){
-  const sc=ui.screen.meal,sl=weekOf(sc.key)[sc.d],x=sl&&sl.items[sc.i],r=x&&recOf(x.id);if(!r){ui.screen=null;return vMeals()}
-  const n=x.n,prep=ui.mealTab==='prep';
-  const ings=Object.keys(r.ing).map(k=>`<div class="irow"><span><i aria-hidden="true">${IEMO[k]||''}</i>${esc(ING[k][0])}</span><b>${qtyText(r.ing[k]*n,ING[k][2])}</b></div>`).join('');
+  const c=mealCtx();if(!c){ui.screen=null;return vMeals()}
+  const {r,f,bt,n}=c,whole=bt&&(ui.mealAmt==='batch'||!c.m),mult=whole?bt.size:f*(c.m?1:n),meth=ui.mealTab==='prep';
+  const ings=Object.keys(r.ing).map(k=>`<div class="irow"><span><i aria-hidden="true">${ING[k][6]}</i>${esc(ING[k][0])}</span><b>${qtyText(r.ing[k]*mult,ING[k][2])}</b></div>`).join('');
   const steps=r.steps.map((s,i)=>`<div class="srow"><span>${i+1}</span><p>${esc(s)}</p></div>`).join('');
-  return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button><span class="mpp big">${money(recCost(r))}<small>each</small></span></div>
-    ${mArt(r)}
+  return `<div class="mtop">${mPhoto(r,'hero')}<button class="back fl" data-act="back" aria-label="Back">‹</button><span class="mprice">${money(recCost(r)*f)}<small>a portion</small></span></div>
     <div><div class="mtags">${recTags(r).map(t=>`<span class="tag">${t}</span>`).join('')}</div><h2 style="font-size:26px">${esc(r.n)}</h2><p class="muted">${esc(r.d)}</p></div>
-    <div class="card mfacts"><div><div class="stepper"><button data-act="meal-serv" data-n="-1" aria-label="Fewer portions">−</button><b>${n}</b><button data-act="meal-serv" data-n="1" aria-label="More portions">+</button></div><small>${sl.covers>1?'Portions · '+sl.covers+' days':'Portions'}</small></div><div><b>${r.mins} min</b><small>Time</small></div><div><b>${r.kcal}</b><small>kcal each</small></div></div>
-    <div class="card"><div class="macbar"><i style="flex:${r.p}"></i><i style="flex:${r.c}"></i><i style="flex:${Math.round(r.f*2.25)}"></i></div><div class="macs"><div><b>${r.p} g</b><small>Protein</small></div><div><b>${r.c} g</b><small>Carbs</small></div><div><b>${r.f} g</b><small>Fat</small></div></div><p class="small muted" style="margin-top:8px">Per portion, approximate.</p></div>
-    <div class="seg" role="group"><button class="${prep?'':'on'}" data-act="meal-tab" data-t="ing">Ingredients</button><button class="${prep?'on':''}" data-act="meal-tab" data-t="prep">Method</button></div>
-    <div class="card">${prep?steps:ings+`<p class="small muted" style="margin-top:10px">For ${n} portion${n===1?'':'s'}. Plus salt, pepper and any spices you like.</p>`}</div>
-    <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="meal-swap">Swap</button><button class="btn" style="flex:2" data-act="meal-cooked">${x.cooked?'Cooked ✓ (undo)':'I’ve cooked it'}</button></div>`;
+    <div class="card mfacts"><div><b>${r.mins} min</b><small>Time</small></div><div><b>${Math.round(r.kcal*f)}</b><small>kcal</small></div><div><b>${Math.round(r.p*f)} g</b><small>Protein</small></div><div><b>${Math.round(r.c*f)} g</b><small>Carbs</small></div><div><b>${Math.round(r.f*f)} g</b><small>Fat</small></div></div>
+    <p class="small muted" style="margin:-6px 4px 0">Per portion${f>1.02?', sized up to fit your day':f<.98?', sized down to fit your day':''}. Approximate.</p>
+    ${bt&&c.m?`<div class="seg" role="group" aria-label="Amounts"><button class="${whole?'':'on'}" data-act="meal-amt" data-t="one">One portion</button><button class="${whole?'on':''}" data-act="meal-amt" data-t="batch">Whole cook-up (${bt.portions})</button></div>`:''}
+    <div class="seg" role="group"><button class="${meth?'':'on'}" data-act="meal-tab" data-t="ing">Ingredients</button><button class="${meth?'on':''}" data-act="meal-tab" data-t="prep">Method</button></div>
+    <div class="card">${meth?steps:ings+`<p class="small muted" style="margin-top:10px">${whole?'Makes '+bt.portions+' portion'+(bt.portions===1?'':'s')+'.':c.m?'For one portion.':''} Plus salt, pepper and any spices you like.</p>`}</div>
+    <button class="btn ghost wide" data-act="meal-swap">Swap for something else</button>`;
 }
-function vMealList(){
-  const key=ui.screen.mlist,M=mealData(),list=shopList(key),have=M.have[key]||{},total=list.reduce((t,x)=>t+x.cost,0),left=list.filter(x=>!have[x.id]).reduce((t,x)=>t+x.cost,0);
-  const groups=AISLES.map(a=>{const it=list.filter(x=>x.aisle===a);if(!it.length)return '';
-    return `<div class="card"><h3>${a}</h3>${it.map(x=>`<div class="lrow ${have[x.id]?'got':''}"><button class="lchk" data-act="mlist-tick" data-id="${x.id}" role="checkbox" aria-checked="${!!have[x.id]}" aria-label="${esc(x.n)}">${have[x.id]?'✓':''}</button><span class="lemo" aria-hidden="true">${IEMO[x.id]||''}</span><span class="ltxt"><b>${esc(x.n)}</b><small>${ING[x.id][3]===1?'Buy '+x.packs:qtyText(x.qty,x.unit)+' needed · '+x.packs+' pack'+(x.packs===1?'':'s')}</small></span><a class="lprice" href="${storeLink(ING[x.id][5])}" target="_blank" rel="noopener">${money(x.cost)}<small>check ›</small></a></div>`).join('')}</div>`}).join('');
-  return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button><span class="small muted">${storeName()}</span></div>
-    <div><h2 style="font-size:26px">Shopping list</h2><p class="small muted">${list.length} items · about ${money(total)}${left<total?' · '+money(left)+' still to buy':''}</p></div>
-    ${groups}<p class="small muted" style="text-align:center">Prices are estimates from ${PRICED}. Tap a price to see the real one at ${storeName()}.</p>`;
+function swapSheet(){
+  const c=mealCtx();if(!c)return;const p=mealData().prefs,inWk=[];
+  for(let i=0;i<7;i++)MORDER.forEach(k=>{const m=c.wk.days[i][k];if(m)inWk.push(m.id)});
+  const opts=mealPicks(p,c.r.t,3,inWk,c.r.t==='m'&&p.mode==='prep');
+  if(!opts.length){toast('Nothing else fits your choices');return}
+  sheet(`<h2>Swap ${esc(c.r.n)}</h2><p class="muted">Pick a replacement. ${c.r.t==='m'?'It changes every meal from this cook-up.':'It changes this meal for the whole week.'}</p>${opts.map(r=>`<button class="mmain swp" data-act="swap-pick" data-id="${r.id}">${mPhoto(r,'th')}<span class="mtxt"><b>${esc(r.n)}</b><span class="mmeta">${r.mins} min · ${r.kcal} kcal · ${r.p} g protein · ${money(recCost(r))}</span></span></button>`).join('')}<button class="btn quiet wide" data-act="close">Keep it</button>`);
 }
 
 /* ---------- coach: Claude, running on a computer of the family's, reached through a private address ---------- */
@@ -1393,7 +1513,7 @@ async function coachSend(text){
   const i2=$('#cin'),b2=$('#chatf button');if(i2)i2.disabled=false;if(b2)b2.disabled=false;chatBottom();
 }
 document.addEventListener('submit',e=>{if(e.target.id!=='chatf')return;e.preventDefault();coachSend(($('#cin')||{}).value)});
-document.addEventListener('input',e=>{if(e.target.id==='mp-bud'&&ui.mp){ui.mp.budget=Math.max(0,Math.round(num(e.target.value)));document.querySelectorAll('[data-act="mp-set"][data-k="budget"]').forEach(b=>b.classList.toggle('on',+b.dataset.v===ui.mp.budget))}if(e.target.id==='cin'){e.target.style.height='auto';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'}});
+document.addEventListener('input',e=>{if(e.target.id==='mp-bud'&&ui.mp)ui.mp.budget=Math.max(0,Math.round(num(e.target.value)));if(e.target.id==='cin'){e.target.style.height='auto';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'}});
 /* morning brief on the Today screen: asked for once each time the app comes to the front */
 function briefCard(){
   if(!COACH())return '';const b=S.coach&&S.coach.brief,today=iso(new Date()),has=b&&b.d===today;
@@ -1843,24 +1963,35 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#pb')){$('#pb').classList.remove('on');return}
   const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset,A=S.main.active,sc=ui.screen;
   switch(d.act){
-    case 'mp-set':{const v=isNaN(+d.v)?d.v:+d.v;ui.mp[d.k]=v;if(d.k==='budget'){const bi=$('#mp-bud');if(bi)bi.value=''}const st=$('#main').scrollTop;render();$('#main').scrollTop=st;break}
+    case 'mp-set':{const v=isNaN(+d.v)?d.v:+d.v;ui.mp[d.k]=v;{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
     case 'mp-tog':{const v=isNaN(+d.v)?d.v:+d.v,a=ui.mp[d.k],i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
-    case 'mp-cancel':ui.mp=null;render();$('#main').scrollTop=0;break;
-    case 'mp-step':{const P=ui.mp,mn=+d.min,mx=+d.max;if(d.k==='cov')P.preps[d.d]=Math.max(mn,Math.min(mx,P.preps[d.d]+ +d.n));else P[d.k]=Math.max(mn,Math.min(mx,(P[d.k]||1)+ +d.n));{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
+    case 'mp-eat':ui.mp.eat[d.k]=ui.mp.eat[d.k]?0:1;{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break;
+    case 'mp-flag':ui.mp[d.k]=ui.mp[d.k]?0:1;{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break;
+    case 'mp-step':{const P=ui.mp,mn=+d.min,mx=+d.max;if(d.k==='cov')P.preps[d.d]=Math.max(mn,Math.min(mx,P.preps[d.d]+ +d.n));else P[d.k]=Math.max(mn,Math.min(mx,(P[d.k]||0)+ +d.n));{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
     case 'mp-prep':{const P=ui.mp;if(P.preps[d.d])delete P.preps[d.d];else P.preps[d.d]=2;{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
-    case 'mp-save':{const P=ui.mp,bi=$('#mp-bud'),bv=bi?num(bi.value):0;if(bv>0)P.budget=Math.round(bv);
-      if(P.mode==='prep'?!Object.keys(P.preps).length:!P.days.length){toast(P.mode==='prep'?'Pick at least one prep day':'Pick at least one night');break}
-      if(!mealPool(P).length){toast('Nothing matches. Loosen a choice.');break}const M=mealData();M.prefs=P;ui.mp=null;mealPlan(mKey());render();$('#main').scrollTop=0;break}
-    case 'meals-prefs':ui.mp=JSON.parse(JSON.stringify(mealData().prefs));render();$('#main').scrollTop=0;break;
+    case 'mp-cancel':ui.mp=null;render();$('#main').scrollTop=0;break;
+    case 'mp-save':{const P=ui.mp,bi=$('#mp-bud');if(bi)P.budget=Math.max(0,Math.round(num(bi.value)));
+      if(!MORDER.some(k=>P.eat[k])){toast('Pick at least one meal to plan');break}
+      if((P.eat.l||P.eat.d)&&(P.mode==='prep'?!Object.keys(P.preps).length:!P.days.length)){toast(P.mode==='prep'?'Pick at least one prep day':'Pick at least one night');break}
+      if((P.eat.l||P.eat.d)&&!mealPool(P,'m').length){toast('Nothing matches. Loosen a choice.');break}
+      const M=mealData();M.prefs=P;ui.mp=null;ui.mday=null;ui.mtab='plan';mealPlan(mKey());render();$('#main').scrollTop=0;break}
+    case 'meals-prefs':ui.mp=Object.assign(DEFP(),JSON.parse(JSON.stringify(mealData().prefs)));render();$('#main').scrollTop=0;break;
     case 'meals-new':mealPlan(mKey());render();toast('New plan for the week');break;
-    case 'meals-week':ui.mealOff=ui.mealOff?0:1;render();$('#main').scrollTop=0;break;
-    case 'meal-open':ui.mealTab='ing';ui.screen={meal:{key:mKey(),d:d.d,i:+d.i||0}};render();$('#main').scrollTop=0;break;
+    case 'meals-week':ui.mealOff=ui.mealOff?0:1;ui.mday=null;render();$('#main').scrollTop=0;break;
+    case 'mtab':ui.mtab=d.t;render();$('#main').scrollTop=0;break;
+    case 'mday':ui.mday=+d.d;{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break;
+    case 'meal-open':ui.mealTab='ing';ui.mealAmt=d.k?'one':'batch';ui.screen={meal:d.k?{key:mKey(),d:+d.d,k:d.k}:{key:mKey(),b:+d.b,id:d.id}};render();$('#main').scrollTop=0;break;
     case 'meal-tab':ui.mealTab=d.t;render();break;
-    case 'meal-serv':{const x=weekOf(sc.meal.key)[sc.meal.d].items[sc.meal.i];x.n=Math.max(1,Math.min(60,x.n+ +d.n));saveMain();render();break}
-    case 'meal-swap':{const M=mealData(),wk=weekOf(sc.meal.key),r=mealPick(M.prefs,weekItems(wk).map(a=>a.x.id));if(!r){toast('No other meals fit your choices');break}const x=wk[sc.meal.d].items[sc.meal.i];x.id=r.id;delete x.cooked;saveMain();render();$('#main').scrollTop=0;toast('Meal swapped');break}
-    case 'meal-cooked':{const x=weekOf(sc.meal.key)[sc.meal.d].items[sc.meal.i];x.cooked=!x.cooked;saveMain();render();if(x.cooked)toast('Nice. Marked as cooked');break}
-    case 'mlist-open':ui.screen={mlist:mKey()};render();$('#main').scrollTop=0;break;
-    case 'mlist-tick':{const M=mealData(),h=M.have[sc.mlist]||(M.have[sc.mlist]={});if(h[d.id])delete h[d.id];else h[d.id]=1;saveMain();render();break}
+    case 'meal-amt':ui.mealAmt=d.t;render();break;
+    case 'meal-eat':{const m=weekOf(mKey()).days[d.d][d.k];m.eaten=!m.eaten;saveMain();const st=$('#main').scrollTop;render();$('#main').scrollTop=st;break}
+    case 'batch-done':{const b=weekOf(mKey()).batches[d.b],on=!b.recs.every(x=>x.cooked);b.recs.forEach(x=>x.cooked=on);saveMain();render();if(on)toast('Cooked. Nice work');break}
+    case 'meal-swap':swapSheet();break;
+    case 'swap-pick':{const c=mealCtx();if(!c)break;const wk=c.wk,from=c.r.id,to=d.id;
+      for(let i=0;i<7;i++)MORDER.forEach(k=>{const m=wk.days[i][k];if(m&&m.id===from&&(c.r.t!=='m'||m.bi===c.bi)){m.id=to;delete m.eaten}});
+      if(c.bi!=null)wk.batches[c.bi].recs.forEach(x=>{if(x.id===from){x.id=to;delete x.cooked}});
+      if(sc.meal.id)sc.meal.id=to;fitWeek(wk,mealData().prefs);saveMain();closeSheet();render();$('#main').scrollTop=0;toast('Swapped');break}
+    case 'mlist-tick':{const M=mealData(),k=mKey(),h=M.have[k]||(M.have[k]={});if(h[d.id])delete h[d.id];else h[d.id]=1;saveMain();const st=$('#main').scrollTop;render();$('#main').scrollTop=st;break}
+    case 'pantry':{const pn=pantry();if(pn[d.id])delete pn[d.id];else pn[d.id]=1;saveMain();const st=$('#main').scrollTop;render();$('#main').scrollTop=st;toast(pn[d.id]?'Moved to your kitchen':'Back on the list');break}
     case 'wtab':ui.wtab=d.t;render();$('#main').scrollTop=0;break;
     case 'tab':if(d.tab==='physio'){d.tab='workouts';ui.wtab='physio'}ui.tab=d.tab;ui.moved=true;if(d.tab==='week'&&d.now)ui.weekOff=0;ui.screen=null;render();$('#main').scrollTop=0;break;
     case 'week':ui.weekOff=d.d==='0'?0:ui.weekOff+Number(d.d);render();break;
@@ -1884,7 +2015,7 @@ document.addEventListener('click',e=>{
       const v=en.v!=null?en.v:nextVar(en.w);ui.weekOff=0;ui.screen={wk:en.w,v,edit:false,from:{day:+d.day,id:d.id,key}};startWorkout(en.w,v);break}
     case 'start-force':startWorkout(d.w,+d.v,true);break;
     case 'resume':closeSheet();ui.screen='session';render();break;
-    case 'back':if(sc&&(sc.meal||sc.mlist)){ui.screen=null;render();break}if(sc&&sc.from)ui.tab='week';else if(sc&&sc.wk)ui.tab='workouts';ui.screen=null;render();break;
+    case 'back':if(sc&&sc.meal){ui.screen=null;render();break}if(sc&&sc.from)ui.tab='week';else if(sc&&sc.wk)ui.tab='workouts';ui.screen=null;render();break;
     case 'close':closeSheet();break;
     case 'ph-new':phForm(null);break;
     case 'ph-edit':phForm(phItems().find(x=>x.id===d.id));break;
@@ -1989,7 +2120,7 @@ document.addEventListener('click',e=>{
       <div class="row between"><div><b>Today screen</b><div class="small muted">A home screen with today’s numbers, plan and physio at a glance.</div></div><button class="btn ${HOME()?'':'ghost'} sm" data-act="flag" data-k="home">${HOME()?'On':'Off'}</button></div>
       <div class="row between"><div><b>Levels and points</b><div class="small muted">The level name and points. Achievements stay either way.</div></div><button class="btn ${LV()?'':'ghost'} sm" data-act="flag" data-k="levels">${LV()?'On':'Off'}</button></div>
       ${API?`<div class="row between"><div><b>Coach</b><div class="small muted" id="cst">${coachLine()}</div></div><button class="btn ${COACHON()?'':'ghost'} sm" data-act="flag" data-k="coach">${COACHON()?'On':'Off'}</button></div>`:''}
-      <div class="row between"><div><b>Meal planner</b><div class="small muted">Weekly dinners, recipes and a shopping list.</div></div><button class="btn ${MEALS()?'':'ghost'} sm" data-act="flag" data-k="meals">${MEALS()?'On':'Off'}</button></div>
+      <div class="row between"><div><b>Meal planner</b><div class="small muted">Every meal planned to your calories, with a cook list and shopping list.</div></div><button class="btn ${MEALS()?'':'ghost'} sm" data-act="flag" data-k="meals">${MEALS()?'On':'Off'}</button></div>
       <div class="row between"><div><b>Physio section</b><div class="small muted">A daily tick-off list for exercises from your physio.</div></div><button class="btn ${S.main.settings.physio?'':'ghost'} sm" data-act="physio-toggle">${S.main.settings.physio?'On':'Off'}</button></div>
       ${GW()?`<div><b>Watch link</b><div class="small muted">Garmin is connected. Sage fetches the latest each time you open it, so it is as fresh as the watch’s last sync with the Garmin Connect app.${gwExpiry()?' The link runs out on '+nice(gwExpiry().date)+' '+gwExpiry().date.slice(0,4)+(gwExpiry().left<=30?' ('+Math.max(0,gwExpiry().left)+' days left). Ask Max to renew it.':'.'):''}</div></div>`:''}
       <div><b>Where your data lives</b><div class="small muted">${API?(cloud==='cloud'?'Saved privately and backed up, so it survives a new phone.':cloud==='checking'?'Connecting…':cloud==='locked'?'Locked.':'Saved on this phone for now. It will back up when Sage can connect.'):cloud==='cloud'?'Saved to your Claude account, so it follows you across devices.':cloud==='checking'?'Checking…':'Saved in this browser on this device.'}</div></div>
