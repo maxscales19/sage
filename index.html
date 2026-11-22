@@ -465,6 +465,31 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 .ltxt small{font-size:13px;color:var(--muted)}
 .lprice{text-align:right;font-weight:800;color:var(--ink);text-decoration:none;font-variant-numeric:tabular-nums;padding:6px 0 6px 8px}
 .lprice small{display:block;font-size:11px;font-weight:700;color:var(--accent-text)}
+.inp{width:100%;min-height:48px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);padding:10px 14px;font:inherit;font-size:16px;color:var(--ink)}
+.inp:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.srowx{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line);margin-top:12px}
+.srowx+.srowx{margin-top:0}
+.srowx span{display:flex;flex-direction:column}
+.srowx small{font-size:13px;color:var(--muted)}
+.stepper b{min-width:26px;text-align:center;font-size:18px;font-variant-numeric:tabular-nums}
+.mtile{font-size:32px;line-height:1;background:radial-gradient(circle at 30% 25%,#fff8 0,transparent 60%),var(--mc,var(--accent-soft))}
+.mbanner{position:relative;height:190px;overflow:hidden;background:radial-gradient(circle at 50% 45%,#fff9 0,transparent 55%),var(--mc,var(--accent-soft))}
+.mbanner b{font-size:96px;line-height:1;filter:drop-shadow(0 10px 14px #0003)}
+.mbanner i{position:absolute;font-style:normal;font-size:30px;opacity:.9}
+.mbanner .f0{left:8%;top:14%;transform:rotate(-14deg)}.mbanner .f1{right:9%;top:12%;transform:rotate(12deg)}
+.mbanner .f2{left:14%;bottom:12%;transform:rotate(10deg)}.mbanner .f3{right:14%;bottom:14%;transform:rotate(-10deg)}
+.mbanner .f4{left:30%;top:6%;font-size:22px}.mbanner .f5{right:30%;bottom:6%;font-size:22px}
+.mhero{position:relative;overflow:hidden}
+.mstrip{display:flex;gap:6px;margin-bottom:12px}
+.mstrip span{width:40px;height:40px;border-radius:50%;background:#fff6;display:flex;align-items:center;justify-content:center;font-size:22px}
+.mchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.mchips em{font-style:normal;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+.mchips em.hot{background:var(--accent);color:var(--accent-ink)}
+.mday{display:flex;align-items:baseline;justify-content:space-between;margin:6px 4px -4px}
+.mday b{font-size:18px}.mday span{font-size:13px;font-weight:600;color:var(--muted)}
+.irow span{display:flex;align-items:center;gap:10px}
+.irow i,.lemo{font-style:normal;font-size:22px;width:28px;text-align:center}
+.mhero,.mbanner,.mcard,.mday{flex-shrink:0}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -485,7 +510,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795386756;
+const BUILD=1795387353;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1186,6 +1211,8 @@ const REC=[
  ['meatballs','Turkey Meatballs and Mash','Meatballs in tomato sauce with mashed potato and peas.','turkey',1,35,590,48,62,15,{turkmince:170,potato:300,peas:80,tomcan:150,onion:.5,milk:30},['Boil the potatoes until soft, mash with the milk.','Roll the mince with grated onion into balls and brown.','Add tomatoes, simmer 12 minutes. Serve with mash and peas.']]
 ].map(r=>({id:r[0],n:r[1],d:r[2],m:r[3],dairy:r[4],mins:r[5],kcal:r[6],p:r[7],c:r[8],f:r[9],ing:r[10],steps:r[11]}));
 const recOf=id=>REC.find(r=>r.id===id);
+const REMO={burrito:'🌯',stirfry:'🥡',bolognese:'🍝',salmontray:'🐟',tacos:'🌮',chcurry:'🍛',beefbroc:'🥦',prawnrice:'🍤',chickpea:'🍛',shakshuka:'🍳',enchilada:'🌯',tunamelt:'🥪',chpasta:'🍝',steak:'🥩',greek:'🥗',dahl:'🍲',porknoodle:'🍜',salmonbowl:'🍣',chtray:'🍗',chilli:'🌶️',eggrice:'🍚',loadedsp:'🍠',prawnpasta:'🍤',meatballs:'🧆'};
+const IEMO={chbreast:'🍗',chthigh:'🍗',beefmince:'🥩',beefstrips:'🥩',steak:'🥩',porkmince:'🥓',turkmince:'🦃',salmon:'🐟',prawns:'🍤',tuna:'🐟',eggs:'🥚',cheddar:'🧀',feta:'🧀',halloumi:'🧀',yoghurt:'🥛',cottage:'🥛',milk:'🥛',rice:'🍚',pasta:'🍝',couscous:'🌾',noodles:'🍜',lentils:'🫘',tomcan:'🥫',blackbeans:'🫘',kidney:'🫘',chickpeas:'🫘',corn:'🌽',coconut:'🥥',curry:'🍛',soy:'🧂',oil:'🫒',salsa:'🍅',taco:'🌮',wraps:'🫓',bread:'🍞',potato:'🥔',sweetpot:'🍠',broccoli:'🥦',carrot:'🥕',capsicum:'🫑',onion:'🧅',garlic:'🧄',spinach:'🥬',zucchini:'🥒',mushroom:'🍄',avocado:'🥑',lemon:'🍋',cucumber:'🥒',tomato:'🍅',lettuce:'🥬',stirveg:'🥦',peas:'🫛'};
 const mealData=()=>S.main.meals||(S.main.meals={prefs:null,weeks:{},have:{}});
 const mKey=()=>iso(addDays(mondayOf(new Date()),7*(ui.mealOff||0)));
 const priceOf=id=>{const o=(mealData().prices||{})[id];return o!=null?o:ING[id][4]};
@@ -1197,71 +1224,103 @@ function mealPool(p){
 }
 function mealScore(r,p){return (p.goal==='protein'?r.p/r.kcal*600:p.goal==='budget'?-recCost(r)*6:0)+Math.random()*(p.goal==='balanced'?100:18)}
 function mealPick(p,avoid){const pool=mealPool(p).filter(r=>avoid.indexOf(r.id)<0).map(r=>[mealScore(r,p),r]).sort((a,b)=>b[0]-a[0]);return pool.length?pool[0][1]:null}
+const totalPortions=(p,covers)=>covers*(p.perDay||1)*p.serves;
+function mealSlots(p){
+  if(p.mode==='prep')return Object.keys(p.preps||{}).map(Number).sort().map(d=>({d,covers:p.preps[d],kinds:Math.max(1,Math.min(p.variety||1,3))}));
+  return p.days.slice().sort().map(d=>({d,covers:1,kinds:1}));
+}
 function mealPlan(key){
-  const M=mealData(),p=M.prefs,prev=Object.values(M.weeks[iso(addDays(new Date(key+'T00:00:00'),-7))]||{}).map(x=>x.id),wk={},used=[];
+  const M=mealData(),p=M.prefs,old=weekOf(iso(addDays(new Date(key+'T00:00:00'),-7))),prev=[],wk={},used=[];
+  Object.values(old).forEach(sl=>sl.items.forEach(x=>prev.push(x.id)));
   let last=null;
-  p.days.slice().sort().forEach(d=>{
-    let r=null;for(let i=0;i<6&&!r;i++){const c=mealPick(p,used.concat(i<3?prev:[]));if(c&&(c.m!==last||i>3))r=c}
-    r=r||mealPick(p,used)||mealPick(p,[]);if(!r)return;wk[d]={id:r.id};used.push(r.id);last=r.m});
+  mealSlots(p).forEach(sl=>{
+    const items=[],tot=totalPortions(p,sl.covers);
+    for(let k=0;k<sl.kinds;k++){
+      let r=null;for(let i=0;i<6&&!r;i++){const c=mealPick(p,used.concat(i<3?prev:[]));if(c&&(c.m!==last||i>3))r=c}
+      r=r||mealPick(p,used)||(k?null:mealPick(p,[]));if(!r)break;items.push({id:r.id,n:0});used.push(r.id);last=r.m}
+    if(!items.length)return;
+    items.forEach((x,i)=>{x.n=Math.max(1,Math.floor(tot/items.length)+(i<tot%items.length?1:0))});
+    wk[sl.d]={covers:sl.covers,items}});
   M.weeks[key]=wk;M.have[key]={};
   Object.keys(M.weeks).sort().slice(0,-8).forEach(k=>{delete M.weeks[k];delete M.have[k]});
   saveMain();return wk;
 }
+/* a week as saved, brought up to the current shape (the first version kept one meal per day) */
+function weekOf(key){
+  const M=mealData(),wk=M.weeks[key];if(!wk)return {};
+  Object.keys(wk).forEach(d=>{const x=wk[d];if(x&&!x.items)wk[d]={covers:1,items:[{id:x.id,n:(M.prefs&&M.prefs.serves)||2,cooked:x.cooked}]}});
+  return wk;
+}
+const weekItems=wk=>{const a=[];Object.keys(wk).sort().forEach(d=>wk[d].items.forEach((x,i)=>a.push({d,i,x,covers:wk[d].covers})));return a};
 function shopList(key){
-  const M=mealData(),wk=M.weeks[key]||{},n=M.prefs.serves,q={};
-  Object.values(wk).forEach(x=>{const r=recOf(x.id);if(r)Object.keys(r.ing).forEach(k=>{q[k]=(q[k]||0)+r.ing[k]*n})});
+  const q={};
+  weekItems(weekOf(key)).forEach(({x})=>{const r=recOf(x.id);if(r)Object.keys(r.ing).forEach(k=>{q[k]=(q[k]||0)+r.ing[k]*x.n})});
   return Object.keys(q).map(k=>{const g=ING[k],packs=Math.ceil(q[k]/g[3]-1e-9);return {id:k,n:g[0],aisle:g[1],qty:q[k],unit:g[2],packs,cost:packs*priceOf(k)}});
 }
 const qtyText=(q,u)=>u==='each'?(Math.round(q*10)/10)+'':q>=1000?(Math.round(q/100)/10)+(u==='g'?' kg':' L'):Math.round(q)+' '+u;
 const storeName=()=>mealData().prefs.store==='woolies'?'Woolworths':'Coles';
 const storeLink=w=>(mealData().prefs.store==='woolies'?'https://www.woolworths.com.au/shop/search/products?searchTerm=':'https://www.coles.com.au/search/products?q=')+encodeURIComponent(w);
-const mTile=r=>`<span class="mtile m-${r.m}">${ICON.meals}</span>`;
+const mTile=r=>`<span class="mtile m-${r.m}" aria-hidden="true">${REMO[r.id]||'🍽️'}</span>`;
+const mArt=r=>`<div class="mbanner m-${r.m}" aria-hidden="true">${Object.keys(r.ing).slice(0,6).map((k,i)=>`<i class="f${i}">${IEMO[k]||''}</i>`).join('')}<b>${REMO[r.id]||'🍽️'}</b></div>`;
+const stepper=(k,v,min,max,extra)=>`<div class="stepper"><button data-act="mp-step" data-k="${k}" data-n="-1" data-min="${min}" data-max="${max}" ${extra||''} aria-label="Less">−</button><b>${v}</b><button data-act="mp-step" data-k="${k}" data-n="1" data-min="${min}" data-max="${max}" ${extra||''} aria-label="More">+</button></div>`;
 function vMealSetup(){
-  const d=ui.mp||(ui.mp=Object.assign({store:'coles',days:[0,1,2,3,6],serves:2,diet:'any',no:[],goal:'protein',budget:0},mealData().prefs||{}));
+  const d=ui.mp||(ui.mp=Object.assign({store:'coles',mode:'fresh',days:[0,1,2,3,6],preps:{6:3,2:2},perDay:2,variety:2,serves:2,diet:'any',no:[],goal:'protein',budget:0},mealData().prefs||{}));
   const one=(k,opts)=>`<div class="mopts">${opts.map(([v,l])=>`<button class="mopt ${d[k]===v?'on':''}" data-act="mp-set" data-k="${k}" data-v="${v}" aria-pressed="${d[k]===v}">${l}</button>`).join('')}</div>`;
   const many=(k,opts)=>`<div class="mopts">${opts.map(([v,l])=>`<button class="mopt ${d[k].indexOf(v)>=0?'on':''}" data-act="mp-tog" data-k="${k}" data-v="${v}" aria-pressed="${d[k].indexOf(v)>=0}">${l}</button>`).join('')}</div>`;
-  return `<div><h2 style="font-size:26px">Meals</h2><p class="small muted">A few questions, then Sage plans your dinners for the week and writes the shopping list.</p></div>
-    <div class="card"><h3>Where do you shop?</h3>${one('store',[['coles','Coles'],['woolies','Woolworths']])}</div>
-    <div class="card"><h3>Which nights are you cooking?</h3>${many('days',DAYS.map((x,i)=>[i,x]))}</div>
-    <div class="card"><h3>How many people?</h3>${one('serves',[[1,'1'],[2,'2'],[3,'3'],[4,'4']])}</div>
-    <div class="card"><h3>How do you eat?</h3>${one('diet',[['any','Everything'],['pesc','Pescatarian'],['veg','Vegetarian']])}<p class="small muted" style="margin:12px 0 8px">Leave out</p>${many('no',[['pork','Pork'],['beef','Beef'],['seafood','Seafood'],['dairy','Dairy']])}</div>
-    <div class="card"><h3>What matters most?</h3>${one('goal',[['protein','High protein'],['balanced','Variety'],['budget','Low cost']])}</div>
-    <div class="card"><h3>Weekly budget</h3>${one('budget',[[0,'No limit'],[60,'$60'],[80,'$80'],[100,'$100'],[140,'$140']])}</div>
+  const prep=d.mode==='prep',pd=Object.keys(d.preps).map(Number).sort();
+  const cook=prep?`<div class="card"><h3>Which days do you prep?</h3><div class="mopts">${DAYS.map((x,i)=>`<button class="mopt ${d.preps[i]?'on':''}" data-act="mp-prep" data-d="${i}" aria-pressed="${!!d.preps[i]}">${x}</button>`).join('')}</div>
+      ${pd.map(i=>`<div class="srowx"><span><b>${DAYS[i]} prep</b><small>covers ${d.preps[i]} day${d.preps[i]===1?'':'s'}</small></span>${stepper('cov',d.preps[i],1,7,`data-d="${i}"`)}</div>`).join('')}
+      <div class="srowx"><span><b>Meals a day from prep</b><small>2 covers lunch and dinner</small></span>${stepper('perDay',d.perDay,1,4)}</div>
+      <div class="srowx"><span><b>Different recipes each prep</b><small>1 means the same meal every time</small></span>${stepper('variety',d.variety,1,3)}</div>
+      <p class="small muted" style="margin-top:10px">${pd.map(i=>DAYS[i]+': '+totalPortions(d,d.preps[i])+' portions').join(' · ')||'Pick at least one prep day.'}</p></div>`
+    :`<div class="card"><h3>Which nights are you cooking?</h3>${many('days',DAYS.map((x,i)=>[i,x]))}</div>`;
+  return `<div><h2 style="font-size:26px">Meals</h2><p class="small muted">A few questions, then Sage plans your week and writes the shopping list.</p></div>
+    <div class="card"><h3>Where do you shop?</h3>${one('store',[['coles','🔴 Coles'],['woolies','🟢 Woolworths']])}</div>
+    <div class="card"><h3>How do you cook?</h3>${one('mode',[['fresh','🍳 Fresh each night'],['prep','🥡 Meal prep in batches']])}</div>
+    ${cook}
+    <div class="card"><div class="srowx" style="border:0;padding:0"><span><h3 style="margin:0">How many people?</h3></span>${stepper('serves',d.serves,1,12)}</div></div>
+    <div class="card"><h3>How do you eat?</h3>${one('diet',[['any','🍽️ Everything'],['pesc','🐟 Pescatarian'],['veg','🥦 Vegetarian']])}<p class="small muted" style="margin:12px 0 8px">Leave out</p>${many('no',[['pork','Pork'],['beef','Beef'],['seafood','Seafood'],['dairy','Dairy']])}</div>
+    <div class="card"><h3>What matters most?</h3>${one('goal',[['protein','💪 High protein'],['balanced','🎲 Variety'],['budget','💰 Low cost']])}</div>
+    <div class="card"><h3>Weekly budget</h3>${one('budget',[[0,'No limit'],[80,'$80'],[120,'$120'],[160,'$160']])}<label class="small muted" style="display:block;margin:12px 0 6px" for="mp-bud">Or type your own</label><input id="mp-bud" class="inp" type="number" inputmode="numeric" min="0" max="2000" placeholder="$ a week" value="${d.budget&&[80,120,160].indexOf(d.budget)<0?d.budget:''}"></div>
     <button class="btn wide" data-act="mp-save">${mealData().prefs?'Save and replan':'Plan my week'}</button>${mealData().prefs?'<button class="btn quiet wide" data-act="mp-cancel">Cancel</button>':''}`;
 }
 function vMeals(){
   const M=mealData();if(!M.prefs||ui.mp)return vMealSetup();
-  const key=mKey(),wk=M.weeks[key]||mealPlan(key),p=M.prefs,list=shopList(key),total=list.reduce((t,x)=>t+x.cost,0),mon=new Date(key+'T00:00:00'),n=Object.keys(wk).length;
-  const cooked=Object.values(wk).filter(x=>x.cooked).length,over=p.budget&&total>p.budget;
-  const rows=Object.keys(wk).sort().map(d=>{const x=wk[d],r=recOf(x.id);if(!r)return '';const dt=addDays(mon,+d);
-    return `<div class="mcard ${x.cooked?'done':''}"><button class="mmain" data-act="meal-open" data-d="${d}">${mTile(r)}<span class="mtxt"><small>${DAYS[d]} ${dt.getDate()} ${MON[dt.getMonth()]}${x.cooked?' · cooked':''}</small><b>${esc(r.n)}</b><span class="mmeta">${r.mins} min · ${r.kcal} kcal · ${r.p} g protein</span></span><span class="mpp">${money(recCost(r))}<small>each</small></span></button></div>`}).join('');
-  return `<div class="mhero"><div class="row between"><small>${ui.mealOff?'Next week':'This week'} · ${storeName()}</small><button class="mswitch" data-act="meals-week">${ui.mealOff?'‹ This week':'Next week ›'}</button></div>
-      <div class="mtot">${money(total)}<span>${p.budget?'of $'+p.budget+' budget':'estimated shop'} · ${n} meal${n===1?'':'s'} for ${p.serves}</span></div>
+  const key=mKey();if(!M.weeks[key])mealPlan(key);
+  const wk=weekOf(key),p=M.prefs,list=shopList(key),total=list.reduce((t,x)=>t+x.cost,0),mon=new Date(key+'T00:00:00'),its=weekItems(wk),prep=p.mode==='prep';
+  const portions=its.reduce((t,a)=>t+a.x.n,0),cooked=its.filter(a=>a.x.cooked).length,over=p.budget&&total>p.budget;
+  const strip=`<div class="mstrip" aria-hidden="true">${its.slice(0,7).map(a=>`<span>${REMO[a.x.id]||'🍽️'}</span>`).join('')}</div>`;
+  const rows=Object.keys(wk).sort().map(d=>{const sl=wk[d],dt=addDays(mon,+d),day=`${DAYS[d]} ${dt.getDate()} ${MON[dt.getMonth()]}`;
+    const cards=sl.items.map((x,i)=>{const r=recOf(x.id);if(!r)return '';
+      return `<div class="mcard ${x.cooked?'done':''}"><button class="mmain" data-act="meal-open" data-d="${d}" data-i="${i}">${mTile(r)}<span class="mtxt">${prep?'':`<small>${day}${x.cooked?' · cooked':''}</small>`}<b>${esc(r.n)}</b><span class="mmeta">${r.mins} min · ${r.kcal} kcal · ${r.p} g protein</span><span class="mchips">${prep?`<em class="hot">${x.n} portions</em>`:''}${recTags(r).slice(0,2).map(t=>`<em>${t}</em>`).join('')}${prep&&x.cooked?'<em>Cooked</em>':''}</span></span><span class="mpp">${money(recCost(r))}<small>each</small></span></button></div>`}).join('');
+    return (prep?`<div class="mday"><b>${day} prep</b><span>covers ${sl.covers} day${sl.covers===1?'':'s'}</span></div>`:'')+cards}).join('');
+  return `<div class="mhero">${strip}<div class="row between"><small>${ui.mealOff?'Next week':'This week'} · ${storeName()}</small><button class="mswitch" data-act="meals-week">${ui.mealOff?'‹ This week':'Next week ›'}</button></div>
+      <div class="mtot">${money(total)}<span>${p.budget?'of $'+p.budget+' budget':'estimated shop'} · ${portions} portion${portions===1?'':'s'}${prep?' from '+Object.keys(wk).length+' prep'+(Object.keys(wk).length===1?'':'s'):' for '+p.serves}</span></div>
       ${p.budget?`<div class="mbar"><i style="width:${Math.min(100,Math.round(total/p.budget*100))}%"></i></div>`:''}
-      ${over?'<p class="mnote">Over budget. Swap a meal or tap New plan.</p>':''}<p class="mnote">${cooked} of ${n} cooked</p></div>
+      ${over?'<p class="mnote">Over budget. Swap a meal or tap New plan.</p>':''}<p class="mnote">${cooked} of ${its.length} cooked</p></div>
     ${rows||'<div class="card"><p class="muted">No meals match those choices. Change your preferences.</p></div>'}
-    <button class="btn wide" data-act="mlist-open">Shopping list · ${list.length} items</button>
+    <button class="btn wide" data-act="mlist-open">🛒 Shopping list · ${list.length} items</button>
     <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="meals-new">New plan</button><button class="btn ghost" style="flex:1" data-act="meals-prefs">Preferences</button></div>
     <p class="small muted" style="text-align:center">Prices are estimates from ${PRICED}, not live ${storeName()} prices.</p>`;
 }
 function vMeal(){
-  const sc=ui.screen.meal,M=mealData(),x=(M.weeks[sc.key]||{})[sc.d],r=x&&recOf(x.id);if(!r){ui.screen=null;return vMeals()}
-  const n=M.prefs.serves,prep=ui.mealTab==='prep';
-  const ings=Object.keys(r.ing).map(k=>`<div class="irow"><span>${esc(ING[k][0])}</span><b>${qtyText(r.ing[k]*n,ING[k][2])}</b></div>`).join('');
+  const sc=ui.screen.meal,sl=weekOf(sc.key)[sc.d],x=sl&&sl.items[sc.i],r=x&&recOf(x.id);if(!r){ui.screen=null;return vMeals()}
+  const n=x.n,prep=ui.mealTab==='prep';
+  const ings=Object.keys(r.ing).map(k=>`<div class="irow"><span><i aria-hidden="true">${IEMO[k]||''}</i>${esc(ING[k][0])}</span><b>${qtyText(r.ing[k]*n,ING[k][2])}</b></div>`).join('');
   const steps=r.steps.map((s,i)=>`<div class="srow"><span>${i+1}</span><p>${esc(s)}</p></div>`).join('');
   return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button><span class="mpp big">${money(recCost(r))}<small>each</small></span></div>
-    <div class="mbanner m-${r.m}">${ICON.meals}</div>
+    ${mArt(r)}
     <div><div class="mtags">${recTags(r).map(t=>`<span class="tag">${t}</span>`).join('')}</div><h2 style="font-size:26px">${esc(r.n)}</h2><p class="muted">${esc(r.d)}</p></div>
-    <div class="card mfacts"><div><div class="stepper"><button data-act="meal-serv" data-n="-1" aria-label="Fewer serves">−</button><b>${n}</b><button data-act="meal-serv" data-n="1" aria-label="More serves">+</button></div><small>Serves</small></div><div><b>${r.mins} min</b><small>Time</small></div><div><b>${r.kcal}</b><small>kcal each</small></div></div>
-    <div class="card"><div class="macbar"><i style="flex:${r.p}"></i><i style="flex:${r.c}"></i><i style="flex:${Math.round(r.f*2.25)}"></i></div><div class="macs"><div><b>${r.p} g</b><small>Protein</small></div><div><b>${r.c} g</b><small>Carbs</small></div><div><b>${r.f} g</b><small>Fat</small></div></div><p class="small muted" style="margin-top:8px">Per serve, approximate.</p></div>
+    <div class="card mfacts"><div><div class="stepper"><button data-act="meal-serv" data-n="-1" aria-label="Fewer portions">−</button><b>${n}</b><button data-act="meal-serv" data-n="1" aria-label="More portions">+</button></div><small>${sl.covers>1?'Portions · '+sl.covers+' days':'Portions'}</small></div><div><b>${r.mins} min</b><small>Time</small></div><div><b>${r.kcal}</b><small>kcal each</small></div></div>
+    <div class="card"><div class="macbar"><i style="flex:${r.p}"></i><i style="flex:${r.c}"></i><i style="flex:${Math.round(r.f*2.25)}"></i></div><div class="macs"><div><b>${r.p} g</b><small>Protein</small></div><div><b>${r.c} g</b><small>Carbs</small></div><div><b>${r.f} g</b><small>Fat</small></div></div><p class="small muted" style="margin-top:8px">Per portion, approximate.</p></div>
     <div class="seg" role="group"><button class="${prep?'':'on'}" data-act="meal-tab" data-t="ing">Ingredients</button><button class="${prep?'on':''}" data-act="meal-tab" data-t="prep">Method</button></div>
-    <div class="card">${prep?steps:ings+'<p class="small muted" style="margin-top:10px">Plus salt, pepper and any spices you like.</p>'}</div>
+    <div class="card">${prep?steps:ings+`<p class="small muted" style="margin-top:10px">For ${n} portion${n===1?'':'s'}. Plus salt, pepper and any spices you like.</p>`}</div>
     <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="meal-swap">Swap</button><button class="btn" style="flex:2" data-act="meal-cooked">${x.cooked?'Cooked ✓ (undo)':'I’ve cooked it'}</button></div>`;
 }
 function vMealList(){
   const key=ui.screen.mlist,M=mealData(),list=shopList(key),have=M.have[key]||{},total=list.reduce((t,x)=>t+x.cost,0),left=list.filter(x=>!have[x.id]).reduce((t,x)=>t+x.cost,0);
   const groups=AISLES.map(a=>{const it=list.filter(x=>x.aisle===a);if(!it.length)return '';
-    return `<div class="card"><h3>${a}</h3>${it.map(x=>`<div class="lrow ${have[x.id]?'got':''}"><button class="lchk" data-act="mlist-tick" data-id="${x.id}" role="checkbox" aria-checked="${!!have[x.id]}" aria-label="${esc(x.n)}">${have[x.id]?'✓':''}</button><span class="ltxt"><b>${esc(x.n)}</b><small>${ING[x.id][3]===1?'Buy '+x.packs:qtyText(x.qty,x.unit)+' needed · '+x.packs+' pack'+(x.packs===1?'':'s')}</small></span><a class="lprice" href="${storeLink(ING[x.id][5])}" target="_blank" rel="noopener">${money(x.cost)}<small>check ›</small></a></div>`).join('')}</div>`}).join('');
+    return `<div class="card"><h3>${a}</h3>${it.map(x=>`<div class="lrow ${have[x.id]?'got':''}"><button class="lchk" data-act="mlist-tick" data-id="${x.id}" role="checkbox" aria-checked="${!!have[x.id]}" aria-label="${esc(x.n)}">${have[x.id]?'✓':''}</button><span class="lemo" aria-hidden="true">${IEMO[x.id]||''}</span><span class="ltxt"><b>${esc(x.n)}</b><small>${ING[x.id][3]===1?'Buy '+x.packs:qtyText(x.qty,x.unit)+' needed · '+x.packs+' pack'+(x.packs===1?'':'s')}</small></span><a class="lprice" href="${storeLink(ING[x.id][5])}" target="_blank" rel="noopener">${money(x.cost)}<small>check ›</small></a></div>`).join('')}</div>`}).join('');
   return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button><span class="small muted">${storeName()}</span></div>
     <div><h2 style="font-size:26px">Shopping list</h2><p class="small muted">${list.length} items · about ${money(total)}${left<total?' · '+money(left)+' still to buy':''}</p></div>
     ${groups}<p class="small muted" style="text-align:center">Prices are estimates from ${PRICED}. Tap a price to see the real one at ${storeName()}.</p>`;
@@ -1334,7 +1393,7 @@ async function coachSend(text){
   const i2=$('#cin'),b2=$('#chatf button');if(i2)i2.disabled=false;if(b2)b2.disabled=false;chatBottom();
 }
 document.addEventListener('submit',e=>{if(e.target.id!=='chatf')return;e.preventDefault();coachSend(($('#cin')||{}).value)});
-document.addEventListener('input',e=>{if(e.target.id==='cin'){e.target.style.height='auto';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'}});
+document.addEventListener('input',e=>{if(e.target.id==='mp-bud'&&ui.mp){ui.mp.budget=Math.max(0,Math.round(num(e.target.value)));document.querySelectorAll('[data-act="mp-set"][data-k="budget"]').forEach(b=>b.classList.toggle('on',+b.dataset.v===ui.mp.budget))}if(e.target.id==='cin'){e.target.style.height='auto';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'}});
 /* morning brief on the Today screen: asked for once each time the app comes to the front */
 function briefCard(){
   if(!COACH())return '';const b=S.coach&&S.coach.brief,today=iso(new Date()),has=b&&b.d===today;
@@ -1784,18 +1843,22 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#pb')){$('#pb').classList.remove('on');return}
   const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset,A=S.main.active,sc=ui.screen;
   switch(d.act){
-    case 'mp-set':{const v=isNaN(+d.v)?d.v:+d.v;ui.mp[d.k]=v;render();break}
-    case 'mp-tog':{const v=isNaN(+d.v)?d.v:+d.v,a=ui.mp[d.k],i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);render();break}
+    case 'mp-set':{const v=isNaN(+d.v)?d.v:+d.v;ui.mp[d.k]=v;if(d.k==='budget'){const bi=$('#mp-bud');if(bi)bi.value=''}const st=$('#main').scrollTop;render();$('#main').scrollTop=st;break}
+    case 'mp-tog':{const v=isNaN(+d.v)?d.v:+d.v,a=ui.mp[d.k],i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
     case 'mp-cancel':ui.mp=null;render();$('#main').scrollTop=0;break;
-    case 'mp-save':{if(!ui.mp.days.length){toast('Pick at least one night');break}if(!mealPool(ui.mp).length){toast('Nothing matches. Loosen a choice.');break}const M=mealData();M.prefs=ui.mp;ui.mp=null;mealPlan(mKey());render();$('#main').scrollTop=0;break}
+    case 'mp-step':{const P=ui.mp,mn=+d.min,mx=+d.max;if(d.k==='cov')P.preps[d.d]=Math.max(mn,Math.min(mx,P.preps[d.d]+ +d.n));else P[d.k]=Math.max(mn,Math.min(mx,(P[d.k]||1)+ +d.n));{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
+    case 'mp-prep':{const P=ui.mp;if(P.preps[d.d])delete P.preps[d.d];else P.preps[d.d]=2;{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
+    case 'mp-save':{const P=ui.mp,bi=$('#mp-bud'),bv=bi?num(bi.value):0;if(bv>0)P.budget=Math.round(bv);
+      if(P.mode==='prep'?!Object.keys(P.preps).length:!P.days.length){toast(P.mode==='prep'?'Pick at least one prep day':'Pick at least one night');break}
+      if(!mealPool(P).length){toast('Nothing matches. Loosen a choice.');break}const M=mealData();M.prefs=P;ui.mp=null;mealPlan(mKey());render();$('#main').scrollTop=0;break}
     case 'meals-prefs':ui.mp=JSON.parse(JSON.stringify(mealData().prefs));render();$('#main').scrollTop=0;break;
     case 'meals-new':mealPlan(mKey());render();toast('New plan for the week');break;
     case 'meals-week':ui.mealOff=ui.mealOff?0:1;render();$('#main').scrollTop=0;break;
-    case 'meal-open':ui.mealTab='ing';ui.screen={meal:{key:mKey(),d:d.d}};render();$('#main').scrollTop=0;break;
+    case 'meal-open':ui.mealTab='ing';ui.screen={meal:{key:mKey(),d:d.d,i:+d.i||0}};render();$('#main').scrollTop=0;break;
     case 'meal-tab':ui.mealTab=d.t;render();break;
-    case 'meal-serv':{const P=mealData().prefs;P.serves=Math.max(1,Math.min(8,P.serves+ +d.n));saveMain();render();break}
-    case 'meal-swap':{const M=mealData(),wk=M.weeks[sc.meal.key],r=mealPick(M.prefs,Object.values(wk).map(x=>x.id));if(!r){toast('No other meals fit your choices');break}wk[sc.meal.d]={id:r.id};saveMain();render();$('#main').scrollTop=0;toast('Meal swapped');break}
-    case 'meal-cooked':{const x=mealData().weeks[sc.meal.key][sc.meal.d];x.cooked=!x.cooked;saveMain();render();if(x.cooked)toast('Nice. Marked as cooked');break}
+    case 'meal-serv':{const x=weekOf(sc.meal.key)[sc.meal.d].items[sc.meal.i];x.n=Math.max(1,Math.min(60,x.n+ +d.n));saveMain();render();break}
+    case 'meal-swap':{const M=mealData(),wk=weekOf(sc.meal.key),r=mealPick(M.prefs,weekItems(wk).map(a=>a.x.id));if(!r){toast('No other meals fit your choices');break}const x=wk[sc.meal.d].items[sc.meal.i];x.id=r.id;delete x.cooked;saveMain();render();$('#main').scrollTop=0;toast('Meal swapped');break}
+    case 'meal-cooked':{const x=weekOf(sc.meal.key)[sc.meal.d].items[sc.meal.i];x.cooked=!x.cooked;saveMain();render();if(x.cooked)toast('Nice. Marked as cooked');break}
     case 'mlist-open':ui.screen={mlist:mKey()};render();$('#main').scrollTop=0;break;
     case 'mlist-tick':{const M=mealData(),h=M.have[sc.mlist]||(M.have[sc.mlist]={});if(h[d.id])delete h[d.id];else h[d.id]=1;saveMain();render();break}
     case 'wtab':ui.wtab=d.t;render();$('#main').scrollTop=0;break;
