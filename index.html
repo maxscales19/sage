@@ -403,10 +403,10 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
 @keyframes dot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
 .card.brief{border-left:5px solid var(--accent)}
-:root[data-palette="lime"]{--bg:#F3F6EC;--surface:#FDFEFA;--surface2:#E6ECD8;--ink:#1B2210;--muted:#626B52;--line:#D5DCC4;--accent:#B4E61E;--accent-ink:#1A2406;--accent-text:#4C7A00;--accent-soft:#E6F5BD;--w1:#6FA800;--w2:#2F8F83;--w3:#B8862F;--w4:#6C7BB8;--w5:#C0603F}
-@media (prefers-color-scheme: dark){:root[data-palette="lime"]:not([data-theme="light"]){--bg:#10130B;--surface:#191D11;--surface2:#232917;--ink:#EEF3E2;--muted:#9FA88D;--line:#2F361F;--accent:#C4F24A;--accent-ink:#151E05;--accent-text:#C4F24A;--accent-soft:#2A3415;--w1:#C4F24A;--w2:#7FD1C4;--w3:#E2B95A;--w4:#A9B5EA;--w5:#EFA084}}
-:root[data-palette="lime"][data-theme="dark"]{--bg:#10130B;--surface:#191D11;--surface2:#232917;--ink:#EEF3E2;--muted:#9FA88D;--line:#2F361F;--accent:#C4F24A;--accent-ink:#151E05;--accent-text:#C4F24A;--accent-soft:#2A3415;--w1:#C4F24A;--w2:#7FD1C4;--w3:#E2B95A;--w4:#A9B5EA;--w5:#EFA084}
-.seg .sw[data-p="lime"]{background:#B4E61E}
+:root[data-palette="lime"]{--bg:#F7F8F3;--surface:#FFFFFF;--surface2:#E9EDE2;--ink:#0B1A2B;--muted:#5A6676;--line:#DADFD3;--accent:#BAC653;--accent-ink:#0A1626;--accent-text:#5F6E12;--accent-soft:#EEF2CE;--w1:#8E9C2A;--w2:#2F8F83;--w3:#B8862F;--w4:#5E73B5;--w5:#C0603F;--navy:#06101C;--display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif}
+@media (prefers-color-scheme: dark){:root[data-palette="lime"]:not([data-theme="light"]){--bg:#06101C;--surface:#0E1B2B;--surface2:#16273A;--ink:#F1F4EC;--muted:#9AA7B6;--line:#22344A;--accent:#BAC653;--accent-ink:#0A1626;--accent-text:#C6D160;--accent-soft:#232F1C;--w1:#C6D160;--w2:#7FD1C4;--w3:#E2B95A;--w4:#A9B5EA;--w5:#EFA084;--navy:#0E1B2B;--display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif}}
+:root[data-palette="lime"][data-theme="dark"]{--bg:#06101C;--surface:#0E1B2B;--surface2:#16273A;--ink:#F1F4EC;--muted:#9AA7B6;--line:#22344A;--accent:#BAC653;--accent-ink:#0A1626;--accent-text:#C6D160;--accent-soft:#232F1C;--w1:#C6D160;--w2:#7FD1C4;--w3:#E2B95A;--w4:#A9B5EA;--w5:#EFA084;--navy:#0E1B2B;--display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif}
+.seg .sw[data-p="lime"]{background:linear-gradient(135deg,#06101C 50%,#BAC653 50%)}
 #nav.many{padding-left:4px;padding-right:4px}
 #nav.many button{font-size:11px;letter-spacing:-.01em;min-width:0}
 #nav .cpill{display:flex;align-items:center;justify-content:center;width:40px;height:26px;margin:-2px 0;border-radius:99px;background:var(--accent-soft);color:var(--accent-text)}
@@ -545,6 +545,23 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 .swp{padding:10px 0;border-bottom:1px solid var(--line)}
 .lhave{font-size:12px;font-weight:700;color:var(--accent-text);text-align:left;padding:6px 0 2px;text-decoration:underline}
 .lrow.got .lhave{display:none}
+/* the EstiMate look: navy bands, olive-lime accents, serif headings */
+[data-palette="lime"] #top{background:var(--navy);color:#fff;padding-bottom:14px}
+[data-palette="lime"] #top .brand{color:#fff;font-weight:600;letter-spacing:0}
+[data-palette="lime"] #top .brand small{color:#B9C3CF}
+[data-palette="lime"] #top .icon-b{background:#ffffff1a;color:#fff;box-shadow:none}
+[data-palette="lime"] #top .lvchip{background:var(--accent);color:var(--accent-ink)}
+[data-palette="lime"] #main{padding-top:16px}
+[data-palette="lime"] h2{font-weight:600;letter-spacing:-.01em}
+[data-palette="lime"] .dsum,[data-palette="lime"] .mhero,[data-palette="lime"] .hero,[data-palette="lime"] .phhero{background:var(--navy);color:#fff}
+[data-palette="lime"] .dsum .mbar,[data-palette="lime"] .mhero .mbar{background:#ffffff26}
+[data-palette="lime"] .dsum .mbar i,[data-palette="lime"] .mhero .mbar i{background:var(--accent)}
+[data-palette="lime"] .dnums b,[data-palette="lime"] .mtot{font-family:var(--display);font-weight:600}
+[data-palette="lime"] .dstrip button.on{background:var(--navy);color:#fff}
+[data-palette="lime"] .dstrip button.on b,[data-palette="lime"] .dstrip button.on small{color:#fff}
+[data-palette="lime"] .dstrip button.on i{background:var(--accent)}
+[data-palette="lime"] .btn:not(.ghost):not(.quiet):not(.danger){border-radius:14px}
+[data-palette="lime"] .mtxt b,[data-palette="lime"] .bhead b{font-family:var(--body)}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -565,11 +582,11 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795388477;
+const BUILD=1795389068;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
-const PALETTES=[['sage','Sage'],['harbour','Harbour'],['clay','Clay'],['slate','Slate'],['lime','Lime']],PALLS='sage-palette-v1';
+const PALETTES=[['sage','Sage'],['harbour','Harbour'],['clay','Clay'],['slate','Slate'],['lime','EstiMate']],PALLS='sage-palette-v1';
 let palette='sage';try{palette=localStorage.getItem(PALLS)||'sage'}catch(e){}
 function applyTheme(){const r=document.documentElement;if(theme==='light'||theme==='dark')r.dataset.theme=theme;else delete r.dataset.theme;
   if(palette&&palette!=='sage')r.dataset.palette=palette;else delete r.dataset.palette;
