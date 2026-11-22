@@ -565,7 +565,7 @@ select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);ba
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795389217;
+const BUILD=1795389580;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -779,7 +779,7 @@ const API=((document.querySelector('meta[name="sage-api"]')||{}).content||'').tr
 const KEYLS='sage-key-v1';
 const USERLS='sage-user-v1';
 /* what a brand-new account starts with, by the name typed on the way in */
-const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:4,palette:'lime',name:'Max',seed:'paddle1',meals:true}};
+const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:5,palette:'lime',name:'Max',seed:'paddle1',meals:true}};
 let apiKey=null,apiUser='',webSteps=null,webStepsAt=0,retries=0;
 if(API){try{apiKey=localStorage.getItem(KEYLS);apiUser=localStorage.getItem(USERLS)||''}catch(e){}}
 function applyProfile(p){
@@ -828,7 +828,7 @@ function seedProfile(p){
   d.sessions.forEach(x=>{S.sessions.push(x);saveSession(x)});S.sessions.sort((a,b)=>a.startedAt-b.startedAt);return true;
 }
 /* settings a profile switches on; also catches an account up when its profile gains something later */
-function profileFlags(p){if(!p||S.main.settings.pv===p.v)return false;const st=S.main.settings;if(p.home&&st.home===undefined)st.home=true;if(p.levels===false&&st.levels===undefined)st.levels=false;if(p.name&&!st.name)st.name=p.name;if(p.coach&&st.coach===undefined)st.coach=true;if(p.meals&&st.meals===undefined)st.meals=true;st.pv=p.v;return true}
+function profileFlags(p){if(!p||S.main.settings.pv===p.v)return false;const st=S.main.settings;if(p.home&&st.home===undefined)st.home=true;if(p.levels===false&&st.levels===undefined)st.levels=false;if(p.name&&!st.name)st.name=p.name;if(p.coach&&st.coach===undefined)st.coach=true;if(p.meals&&st.meals===undefined)st.meals=true;if(p.palette&&st.ppal!==p.palette){st.palette=st.ppal=p.palette}st.pv=p.v;return true}
 async function api(q,open){
   const r=await fetch(API,{method:'POST',body:JSON.stringify(open?q:Object.assign({k:apiKey,u:apiUser},q))});
   const j=await r.json();if(!j||!j.ok){const e=new Error((j&&j.err)||'error');e.code=(j&&j.err)||'error';throw e}return j;
