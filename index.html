@@ -615,7 +615,7 @@ textarea.inp{resize:vertical;line-height:1.4}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795419365;
+const BUILD=1795419645;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1276,9 +1276,11 @@ function chart(pts,unit){
    minutes (so a vigorous minute is worth two moderate ones), and step benefits that climb fastest up to about 7,000 a day. ---------- */
 /* cardio has diminishing returns (points grow with the square root of the minutes), and a day tops out at dayCap,
    so one huge session cannot carry the week: 100 takes four or five good days. */
-const PTS={workout:15,physio:2,walk:1,mod:1.5,vig:2.1,dayCap:25,maxWorkoutsDay:1};
+const PTS={workout:15,physio:3,walk:1,mod:1.5,vig:2.1,dayCap:30,maxWorkoutsDay:2};
 const VIGT=['Run','Stair climber','Rowing','Swim'],WALKT=['Walk','Treadmill'];
-const stepPts=s=>s>=10000?7:s>=8500?6:s>=7000?5:s>=6000?4:s>=5000?3:s>=4000?2:s>=3000?1:0;
+const stepPts=s=>s>=20000?13:s>=15000?12:s>=12500?11:s>=10000?10:s>=9000?8:s>=8000?7:s>=7000?6:s>=6000?4:s>=5000?3:s>=4000?2:s>=3000?1:0;
+/* a full session scores 15; a short one scores less, and one with nothing ticked scores nothing */
+const workoutPts=s=>{const sets=(s.entries||[]).reduce((n,e)=>n+(e.type==='k'?0:e.sets.length),0);return s.cls||(s.entries||[]).some(e=>e.type==='k')||sets>=8?PTS.workout:sets>=4?10:sets>=1?5:0};
 const wkGoal=()=>S.main.settings.wkGoal||100;
 const cardioPts=(type,mins)=>mins>0?Math.max(1,Math.round((VIGT.indexOf(type)>=0?PTS.vig:WALKT.indexOf(type)>=0?PTS.walk:PTS.mod)*Math.sqrt(mins))):0;
 const watchKind=t=>{t=String(t||'').toLowerCase();return /strength|pilates|yoga|weight/.test(t)?'gym':/run|swim|row|stair|hiit|cardio|elliptical/.test(t)?'Run':/walk|hik/.test(t)?'Walk':'Other'};
@@ -1287,7 +1289,7 @@ function weekPoints(mon){
   for(let i=0;i<7;i++){
     const ds=iso(addDays(mon,i)),d={ds,i,items:[],pts:0,raw:0},add=(k,n,p)=>{if(p<=0)return;d.raw+=p;const got=Math.max(0,Math.min(p,PTS.dayCap-d.pts));d.items.push({k,n,p:got,full:p});d.pts+=got;o[k]+=got;o.total+=got};
     if(ds<=today){
-      const ss=S.sessions.filter(s=>s.date===ds);ss.slice(0,PTS.maxWorkoutsDay).forEach(s=>add('workout',s.name,PTS.workout));
+      const ss=S.sessions.filter(s=>s.date===ds);ss.slice(0,PTS.maxWorkoutsDay).forEach(s=>add('workout',s.name,workoutPts(s)));
       const mine=acts().filter(a=>a.date===ds),sa=mine.find(a=>a.type==='Steps'),st=Math.max(g&&g.days[ds]&&g.days[ds].st||0,sa?sa.steps:0);
       add('steps',st.toLocaleString()+' steps',stepPts(st));
       const logged=mine.filter(a=>a.type!=='Steps'&&a.mins>0);logged.forEach(a=>add('cardio',a.type+' · '+a.mins+' min',cardioPts(a.type,a.mins)));
@@ -1310,16 +1312,17 @@ function wkSheet(key){
   sheet(`<h2>Week points</h2><p class="muted num">${p.total} of ${goal} · ${nice(key)} to ${nice(iso(addDays(mon,6)))}</p>
     ${days?`<div class="hist">${days}</div>`:'<p class="muted">Nothing scored this week yet.</p>'}
     <h3 style="margin-top:18px">How points are earned</h3>
-    <div class="hist"><div class="h"><span>A workout or class</span><span class="num muted">${PTS.workout}</span></div>
-      <div class="h"><span>Steps: 7,000 in a day</span><span class="num muted">5</span></div><div class="h"><span>Steps: 10,000 in a day</span><span class="num muted">7</span></div>
-      <div class="h"><span>Steps: smaller days, from 3,000</span><span class="num muted">1 to 4</span></div>
+    <div class="hist"><div class="h"><span>A full workout (8 sets or more) or a class</span><span class="num muted">${PTS.workout}</span></div>
+      <div class="h"><span>A shorter workout</span><span class="num muted">5 or 10</span></div>
+      <div class="h"><span>Steps: 5,000 in a day</span><span class="num muted">${stepPts(5000)}</span></div><div class="h"><span>Steps: 7,000 in a day</span><span class="num muted">${stepPts(7000)}</span></div>
+      <div class="h"><span>Steps: 10,000 in a day</span><span class="num muted">${stepPts(10000)}</span></div><div class="h"><span>Steps: 15,000 in a day</span><span class="num muted">${stepPts(15000)}</span></div>
       ${S.main.settings.physio?`<div class="h"><span>All physio done for the day</span><span class="num muted">${PTS.physio}</span></div>`:''}</div>
     <h3 style="margin-top:14px">Cardio, by how long you go</h3>
     <div class="ptab"><span></span><span>30 min</span><span>1 hour</span><span>2 hours</span>
       <span>Run, swim, row, stairs</span>${[30,60,120].map(m=>`<b class="num">${cardioPts('Run',m)}</b>`).join('')}
       <span>Bike ride, other</span>${[30,60,120].map(m=>`<b class="num">${cardioPts('Other',m)}</b>`).join('')}
       <span>Walk, treadmill</span>${[30,60,120].map(m=>`<b class="num">${cardioPts('Walk',m)}</b>`).join('')}</div>
-    <p class="small muted" style="margin-top:10px">The first half hour is worth the most and extra time adds less, so a long session is rewarded without swallowing the week. A single day tops out at ${PTS.dayCap} points. That makes 100 a week of four or five good days, not one big one: for example four workouts with 7,000 steps a day and one run. Walks score lower because your steps already count them.</p>
+    <p class="small muted" style="margin-top:10px">The first half hour is worth the most and extra time adds less, so a long session is rewarded without swallowing the week. A single day tops out at ${PTS.dayCap} points. Steps are one score for the day from your total, not added up along the way. 100 is a solid week of four or more good days: for example four full workouts with 7,000 steps a day. Walks score lower because your steps already count them.</p>
     <div class="srowx"><span><b>My weekly goal</b><small>Points to aim for each week</small></span><div class="stepper"><button data-act="wkg" data-n="-10" data-k="${key}" aria-label="Lower goal">−</button><b>${goal}</b><button data-act="wkg" data-n="10" data-k="${key}" aria-label="Raise goal">+</button></div></div>
     <button class="btn wide" style="margin-top:14px" data-act="close">Done</button>`);
 }
@@ -1990,7 +1993,7 @@ function finish(){
     ${pbList?`<div class="pbl"><small>Personal bests</small>${pbList}</div>`:''}
     ${COACH()&&coachCfg?'<div class="pbl" id="csum"><small style="color:var(--accent-text)">From your coach</small><div class="cmd"><span class="dots"><i></i><i></i><i></i></span></div></div>':''}
     ${unlockHTML(gain)}
-    <p class="num" style="text-align:center;font-weight:700">+${PTS.workout} week points · ${weekPoints(mondayOf(new Date(sess.date+'T00:00:00'))).total} of ${wkGoal()}</p>
+    <p class="num" style="text-align:center;font-weight:700">+${workoutPts(sess)} week points · ${weekPoints(mondayOf(new Date(sess.date+'T00:00:00'))).total} of ${wkGoal()}</p>
     ${LV()?`<p class="small muted num" style="text-align:center">+${(100+sets*5+pbs*50+gain.newB.length*100).toLocaleString()} XP</p>`:''}
     <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="sess" data-id="${sess.id}">Review it</button><button class="btn" style="flex:1" data-act="close">Lovely</button></div>`);
   if(COACH()&&coachCfg){const sid=sess.id;chain.then(()=>coachSummary(sid),()=>coachSummary(sid))}
