@@ -568,6 +568,29 @@ textarea.inp{resize:vertical;line-height:1.4}
 .addrow{display:flex;gap:8px;margin-top:10px}
 .addrow .inp{flex:1}
 .m-own{--mc:var(--accent-soft)}
+/* week points */
+.wkp{flex-shrink:0;display:flex;flex-direction:column;gap:8px;width:100%;text-align:left;background:var(--surface);border-radius:22px;box-shadow:var(--shadow);padding:16px 18px}
+.wkp small{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.wkp.hit small:last-child{color:var(--accent-text)}
+.wkn{display:flex;align-items:baseline;gap:8px}
+.wkn b{font-size:40px;font-weight:800;line-height:1}
+.wkn span{font-size:15px;font-weight:600;color:var(--muted)}
+.wkp .mbar{display:block;margin:0;background:var(--surface2)}
+.wkp .mbar i{background:var(--accent)}
+.wkp.hit .mbar i{background:var(--accent-text)}
+.wkc{display:flex;flex-wrap:wrap;gap:6px}
+.wkc em{font-style:normal;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+.wkd{padding:8px 0;border-bottom:1px solid var(--line)}
+.wkd:last-child{border-bottom:0}
+.wkd>b{display:flex;justify-content:space-between;font-size:15px}
+.wkd .h{border:0;padding:3px 0;font-size:14px}
+.wkbars{position:relative;display:flex;gap:8px;align-items:flex-end;height:150px}
+.wkbars::before{content:"";position:absolute;left:0;right:0;bottom:calc(22px + (100% - 44px)*var(--gf,1));border-top:2px dashed var(--line)}
+.wkbars button{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;min-width:0}
+.wkbars b{font-size:13px}
+.wkbars i{display:block;width:100%;max-width:34px;border-radius:8px 8px 3px 3px;background:var(--surface2);max-height:calc(100% - 44px)}
+.wkbars i.hit{background:var(--accent)}
+.wkbars small{font-size:10px;color:var(--muted);white-space:nowrap}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -588,7 +611,7 @@ textarea.inp{resize:vertical;line-height:1.4}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795390527;
+const BUILD=1795419082;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1064,6 +1087,7 @@ function render(){
   else if(ui.screen&&ui.screen.meal&&MEALS())h=vMeal();
   else if(ui.screen&&ui.screen.pick&&MEALS())h=vPick();
   else if(ui.screen&&ui.screen.mine&&MEALS())h=vMine();
+  else if(ui.screen&&ui.screen.hist)h=vHistory();
   else{ui.screen=null;h=(S.main.active?`<div class="banner"><span>${esc(S.main.active.name)} in progress</span><button class="btn sm" data-act="resume">Resume</button></div>`:'')+(ui.tab==='today'&&HOME()?vToday():ui.tab==='week'?vWeek():ui.tab==='workouts'?vTrain():ui.tab==='meals'&&MEALS()?vMeals():ui.tab==='coach'&&COACH()?vCoach():vProgress())}
   $('#top').style.display=ui.screen?'none':'flex';
   $('#nav').style.display=ui.screen?'none':'flex';
@@ -1124,12 +1148,14 @@ function vWeek(){
       <div style="text-align:center"><h2>${label}</h2><div class="small muted num">${nice(key)} to ${nice(iso(addDays(mon,6)))}</div></div>
       <button class="mini" data-act="week" data-d="1" aria-label="Next week">›</button></div>
     ${gwWarn()}${HOME()?'':gwStrip()}${upNext()}
+    ${wkCard(mon)}
     <div class="row"><div class="prog"><i style="width:${planned?Math.round(done/planned*100):0}%"></i></div><span class="small muted num"><b>${done}</b> of ${planned} done</span></div>
     <div><h3 style="margin-bottom:8px">${GW()?'Hold a workout, then drag it onto a day':'Hold a bubble, then drag it onto a day'}</h3><div class="tray">${tray}${GW()?'':`<button class="chip" style="--c:var(--ws)" data-drag="steps" data-label="Steps" data-c="s" data-act="tray-steps">${ICON.drag}<span>Steps</span></button>`}</div></div>
     <div class="small muted">${isStarter?'This is a starter week to show how it works. ':''}Tap a workout in your week to see its exercises. Hold and drag it to move or reorder.</div>
     <div class="days">${rows}</div>
     <button class="btn ghost wide" data-act="act-new">+ Log cardio or steps</button>
     <div class="row" style="justify-content:center;flex-wrap:wrap">
+      <button class="btn quiet sm" data-act="hist-open">Past workouts</button>
       <button class="btn quiet sm" data-act="copy-last">Copy last week</button>
       ${planned?'<button class="btn quiet sm" data-act="clear-week">Clear week</button>':''}
       ${ui.weekOff?'<button class="btn quiet sm" data-act="week" data-d="0">Back to this week</button>':''}</div>`;
@@ -1216,7 +1242,7 @@ function vSession(){
       body=`<span class="tag">Superset: do A then B, then rest</span>${g.map((ei,k)=>exHead(ei,'ABCD'[k])).join('')}${r}`;
     }
     const linkIdx=g[g.length-1];
-    return `<div class="card">${body}<div class="row" style="flex-wrap:wrap">${restB}<button class="btn quiet sm" data-act="add-set" data-g="${g.join(',')}">+ Add ${g.length>1?'round':'set'}</button>${A.entries[g[0]].sets.length>1?`<button class="btn quiet sm" data-act="del-set" data-g="${g.join(',')}">Remove last</button>`:''}</div></div>
+    return `<div class="card">${body}<div class="row" style="flex-wrap:wrap">${restB}<button class="btn quiet sm" data-act="add-set" data-g="${g.join(',')}">+ Add ${g.length>1?'round':'set'}</button>${A.entries[g[0]].sets.length>1?`<button class="btn quiet sm" data-act="del-set" data-g="${g.join(',')}">Remove last</button>`:''}${g.length>1?`<button class="btn quiet sm" data-act="s-unlink" data-g="${g.join(',')}">Split superset</button>`:''}</div></div>
       ${linkIdx<A.entries.length-1?`<button class="linkbtn ${last.link?'on':''}" data-act="s-link" data-e="${linkIdx}">${last.link?'Superset with next ✓':'Pair with next as a superset'}</button>`:''}`}).join('');
   const cwRow=k=>{const ls=lastSets(cwId(A.workoutId,k));return `<div class="set cw"><span class="lab">${CWL[k]}<div class="small muted" style="font-weight:500">${ls?'last '+fmt(num(ls[0].w))+' kg':'kg'}</div></span><div class="fld"><button data-act="cw-step" data-k="${k}" data-d="-0.5" aria-label="Less">−</button><input id="f-cw-${k}" inputmode="decimal" autocomplete="off" data-f="cw" data-k="${k}" value="${esc(A.cls.wts[k]??'')}" placeholder="kg" aria-label="${CWL[k]} weight in kg"><button data-act="cw-step" data-k="${k}" data-d="0.5" aria-label="More">+</button></div></div>`};
   const classOnly=!A.entries.length&&!!A.cls;
@@ -1241,6 +1267,71 @@ function chart(pts,unit){
   return `<svg class="chart" viewBox="0 0 ${Wd} ${H}" role="img" aria-label="Progress chart in ${unit}">${ticks}${area}${dots}
     <text x="${l}" y="${H-5}">${pts[0].d}</text>${pts.length>1?`<text x="${Wd-r}" y="${H-5}" text-anchor="end">${pts[pts.length-1].d}</text>`:''}</svg>`;
 }
+/* ---------- week points: one score for the week, built from workouts, steps, cardio and physio.
+   100 is a solid week. Values follow the activity guidelines: strength on 2 or more days, 150 moderate or 75 vigorous
+   minutes (so a vigorous minute is worth two moderate ones), and step benefits that climb fastest up to about 7,000 a day. ---------- */
+const PTS={workout:15,physio:2,perWalk:4,perMod:2,perVig:1,maxWorkoutsDay:2};
+const VIGT=['Run','Stair climber','Rowing','Swim'],WALKT=['Walk','Treadmill'];
+const stepPts=s=>s>=10000?7:s>=8500?6:s>=7000?5:s>=6000?4:s>=5000?3:s>=4000?2:s>=3000?1:0;
+const wkGoal=()=>S.main.settings.wkGoal||100;
+const cardioPts=(type,mins)=>mins>0?Math.max(1,Math.round(mins/(VIGT.indexOf(type)>=0?PTS.perVig:WALKT.indexOf(type)>=0?PTS.perWalk:PTS.perMod))):0;
+const watchKind=t=>{t=String(t||'').toLowerCase();return /strength|pilates|yoga|weight/.test(t)?'gym':/run|swim|row|stair|hiit|cardio|elliptical/.test(t)?'Run':/walk|hik/.test(t)?'Walk':'Other'};
+function weekPoints(mon){
+  const g=GW(),o={total:0,workout:0,steps:0,cardio:0,physio:0,days:[]},today=iso(new Date());
+  for(let i=0;i<7;i++){
+    const ds=iso(addDays(mon,i)),d={ds,i,items:[],pts:0},add=(k,n,p)=>{if(p>0){d.items.push({k,n,p});d.pts+=p;o[k]+=p;o.total+=p}};
+    if(ds<=today){
+      const ss=S.sessions.filter(s=>s.date===ds);ss.slice(0,PTS.maxWorkoutsDay).forEach(s=>add('workout',s.name,PTS.workout));
+      const mine=acts().filter(a=>a.date===ds),sa=mine.find(a=>a.type==='Steps'),st=Math.max(g&&g.days[ds]&&g.days[ds].st||0,sa?sa.steps:0);
+      add('steps',st.toLocaleString()+' steps',stepPts(st));
+      const logged=mine.filter(a=>a.type!=='Steps'&&a.mins>0);logged.forEach(a=>add('cardio',a.type+' · '+a.mins+' min',cardioPts(a.type,a.mins)));
+      if(g&&!logged.length)(g.acts||[]).filter(a=>a.t&&a.t.slice(0,10)===ds&&a.dur>0).forEach(a=>{const k=watchKind(a.type),m=Math.round(a.dur/60);
+        if(k==='gym'){if(!ss.length)add('workout',a.n,PTS.workout)}else add('cardio',a.n+' · '+m+' min',cardioPts(k,m))});
+      if(S.main.settings.physio&&phDay(ds).full)add('physio','Physio done',PTS.physio);
+    }
+    o.days.push(d)}
+  return o;
+}
+function wkCard(mon){
+  const p=weekPoints(mon),goal=wkGoal(),hit=p.total>=goal;
+  const chips=[['workout','Workouts'],['steps','Steps'],['cardio','Cardio'],['physio','Physio']].filter(x=>p[x[0]]).map(x=>`<em>${x[1]} ${p[x[0]]}</em>`).join('');
+  return `<button class="wkp ${hit?'hit':''}" data-act="wkp-open" data-k="${iso(mon)}"><span class="row between"><small>Week points</small><small>${hit?'Goal reached ✓':'How it works ›'}</small></span>
+    <span class="wkn"><b class="num">${p.total}</b><span>of ${goal}</span></span><span class="mbar"><i style="width:${Math.min(100,Math.round(p.total/goal*100))}%"></i></span>${chips?`<span class="wkc">${chips}</span>`:'<span class="wkc"><em>Finish a workout or get your steps in to start scoring</em></span>'}</button>`;
+}
+function wkSheet(key){
+  const mon=new Date(key+'T00:00:00'),p=weekPoints(mon),goal=wkGoal();
+  const days=p.days.filter(d=>d.items.length).map(d=>`<div class="wkd"><b>${DAYS[d.i]} <span class="num">+${d.pts}</span></b>${d.items.map(x=>`<div class="h"><span>${esc(x.n)}</span><span class="num muted">+${x.p}</span></div>`).join('')}</div>`).join('');
+  sheet(`<h2>Week points</h2><p class="muted num">${p.total} of ${goal} · ${nice(key)} to ${nice(iso(addDays(mon,6)))}</p>
+    ${days?`<div class="hist">${days}</div>`:'<p class="muted">Nothing scored this week yet.</p>'}
+    <h3 style="margin-top:18px">How points are earned</h3>
+    <div class="hist"><div class="h"><span>A workout or class</span><span class="num muted">${PTS.workout}</span></div>
+      <div class="h"><span>A 7,000-step day</span><span class="num muted">5</span></div><div class="h"><span>A 10,000-step day</span><span class="num muted">7</span></div>
+      <div class="h"><span>Smaller step days (from 3,000)</span><span class="num muted">1 to 4</span></div>
+      <div class="h"><span>Run, swim, row or stairs</span><span class="num muted">1 a minute</span></div>
+      <div class="h"><span>Bike ride or other cardio</span><span class="num muted">1 per 2 min</span></div>
+      <div class="h"><span>Walk or treadmill</span><span class="num muted">1 per 4 min</span></div>
+      ${S.main.settings.physio?`<div class="h"><span>All physio done for the day</span><span class="num muted">${PTS.physio}</span></div>`:''}</div>
+    <p class="small muted" style="margin-top:10px">100 is a solid week: for example four workouts, 7,000 steps a day and one short run. Walks score lower because your steps already count them. The values follow the activity guidelines (strength on two or more days, 150 moderate or 75 hard minutes a week) and the research on daily steps.</p>
+    <div class="srowx"><span><b>My weekly goal</b><small>Points to aim for each week</small></span><div class="stepper"><button data-act="wkg" data-n="-10" data-k="${key}" aria-label="Lower goal">−</button><b>${goal}</b><button data-act="wkg" data-n="10" data-k="${key}" aria-label="Raise goal">+</button></div></div>
+    <button class="btn wide" style="margin-top:14px" data-act="close">Done</button>`);
+}
+function wkTrend(){
+  const mon=mondayOf(new Date()),goal=wkGoal(),w=[];for(let i=5;i>=0;i--){const m=addDays(mon,-7*i);w.push({m,t:weekPoints(m).total})}
+  const mx=Math.max(goal,...w.map(x=>x.t))||1;let streak=0;for(let i=w.length-2;i>=0&&w[i].t>=goal;i--)streak++;if(w[5].t>=goal)streak++;
+  return `<div class="card"><div class="row between" style="margin-bottom:10px"><h3>Week points</h3><span class="small muted">${streak?streak+' week'+(streak>1?'s':'')+' on goal in a row':'Goal '+goal}</span></div>
+    <div class="wkbars" style="--gf:${(goal/mx).toFixed(3)}">${w.map((x,i)=>`<button data-act="wkp-open" data-k="${iso(x.m)}" aria-label="Week of ${nice(iso(x.m))}: ${x.t} points"><b class="num">${x.t}</b><i class="${x.t>=goal?'hit':''}" style="height:calc((100% - 44px)*${(Math.max(.03,x.t/mx)).toFixed(3)})"></i><small>${i===5?'Now':x.m.getDate()+' '+MON[x.m.getMonth()]}</small></button>`).join('')}</div></div>`;
+}
+/* ---------- past workouts ---------- */
+function vHistory(){
+  const all=S.sessions.slice().sort((a,b)=>(b.startedAt||0)-(a.startedAt||0));let cur='',h='';
+  all.forEach(s=>{const d=new Date(s.date+'T00:00:00'),m=MON[d.getMonth()]+' '+d.getFullYear();if(m!==cur){if(cur)h+='</div></div>';cur=m;h+=`<div class="card"><h3 style="margin-bottom:4px">${m}</h3><div class="hist">`}
+    const sets=(s.entries||[]).reduce((n,e)=>n+(e.type==='k'?0:e.sets.length),0),pbs=(s.entries||[]).reduce((n,e)=>n+e.sets.filter(x=>x.pb).length,0),mins=s.finishedAt&&s.startedAt?Math.round((s.finishedAt-s.startedAt)/60000):0;
+    h+=`<button data-act="sess" data-id="${s.id}"><span><span class="dot" style="--c:var(--w${s.c||1})"></span>${esc(s.name)}${pbs?` <span class="pbm">★ ${pbs}</span>`:''}</span><span class="muted num">${DAYS[(d.getDay()+6)%7]} ${d.getDate()} · ${sets?sets+' sets':'class'}${mins>0&&mins<300?' · '+mins+' min':''}</span></button>`});
+  if(cur)h+='</div></div>';
+  return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button><span class="small muted">${all.length} workout${all.length===1?'':'s'}</span></div>
+    <div><h2 style="font-size:26px">Past workouts</h2><p class="small muted">Tap one to see every set you did.</p></div>${h||'<div class="card"><p class="muted">Your finished workouts will be listed here.</p></div>'}`;
+}
+
 /* ---------- meals: plans the eating week from a calorie and protein target, in fresh-cooking or batch-prep style,
    with a cook list and a priced shopping list. Runs on its own, no coach needed. ---------- */
 const MEALS=()=>!!S.main.settings.meals;
@@ -1643,7 +1734,7 @@ function vToday(){
   const weekCard=`<button class="card twk" data-act="tab" data-tab="week" data-now="1"><h3 style="margin-bottom:10px">This week</h3><div class="tw">${wk}</div><div class="small muted" style="margin-top:10px">Bars are steps against your goal. A ring is a planned workout, a tick is one done.</div></button>`;
   const la=g&&(g.acts||[])[0],recent=la&&la.t&&la.t.slice(0,10)>=iso(addDays(now,-7))?`<div class="card"><h3 style="margin-bottom:8px">Last recorded on your watch</h3><div class="gwa" style="border:0;padding:0"><span><b>${esc(la.n)}</b><small>${nice(la.t.slice(0,10))}${la.t.length>11?' · '+la.t.slice(11,16):''}</small></span><span class="num">${[la.dur?Math.round(la.dur/60)+' min':'',la.dist?fmt(la.dist/1000)+' km':'',la.cal?la.cal+' kcal':''].filter(Boolean).join(' · ')}</span></div></div>`:'';
   if(COACH()&&coachCfg)setTimeout(briefAsk,0);
-  return gwWarn()+hero+briefCard()+tiles+planCard+weekCard+recent;
+  return gwWarn()+hero+wkCard(mon)+briefCard()+tiles+planCard+weekCard+recent;
 }
 function vPhysioStats(){
   if(!S.main.settings.physio||!phItems().length)return '';
@@ -1733,8 +1824,10 @@ function vProgress(){
   recs.sort((a,b)=>a.bd<b.bd?1:a.bd>b.bd?-1:b.bw-a.bw);
   const big=n=>n>=10000?(Math.round(n/100)/10).toLocaleString()+'k':Math.round(n).toLocaleString();
   return `<div class="hero"><div style="flex:1;min-width:0">${LV()?`<div class="k">Level ${lv.i+1} of ${LEVELS.length}</div><div class="lv">${lv.name}</div>
-      <div class="xpb"><i style="width:${Math.max(3,lv.pct)}%"></i></div><div class="small num">${lv.xp.toLocaleString()} points${lv.next?' · '+(lv.next[1]-lv.xp).toLocaleString()+' to '+lv.next[0]:' · top level'}</div>`:`<div class="k">Workouts this week</div><div class="lv">${planned?done+' of '+planned:'None planned'}</div><div class="small num">${c.streak} week streak · best ${c.best} · ${S.sessions.length} workout${S.sessions.length===1?'':'s'} all time</div>`}</div>
+      <div class="xpb"><i style="width:${Math.max(3,lv.pct)}%"></i></div><div class="small num">${lv.xp.toLocaleString()} XP${lv.next?' · '+(lv.next[1]-lv.xp).toLocaleString()+' to '+lv.next[0]:' · top level'}</div>`:`<div class="k">Workouts this week</div><div class="lv">${planned?done+' of '+planned:'None planned'}</div><div class="small num">${c.streak} week streak · best ${c.best} · ${S.sessions.length} workout${S.sessions.length===1?'':'s'} all time</div>`}</div>
       <div class="ringw"><svg viewBox="0 0 92 92"><circle cx="46" cy="46" r="40" class="rt"/><circle cx="46" cy="46" r="40" class="rp" stroke-dasharray="${(RC*rp).toFixed(1)} ${RC.toFixed(1)}" transform="rotate(-90 46 46)"/></svg><div><b class="num">${LV()?done+'/'+planned:(planned?Math.round(done/planned*100):0)+'%'}</b><span>${LV()?'this week':'of the plan'}</span></div></div></div>
+    ${wkTrend()}
+    <button class="btn ghost wide" data-act="hist-open">Past workouts · ${S.sessions.length}</button>
     ${vWatch()}${vPhysioStats()}
     <div class="tiles"><div class="tile"><b>${c.streak}</b><span>week streak</span></div><div class="tile"><b>${c.best}</b><span>best streak</span></div><div class="tile"><b style="color:var(--gold)">${c.pbs}</b><span>personal bests</span></div></div>
     <div class="card"><div class="row between" style="margin-bottom:12px"><h3>Achievements</h3><span class="small muted num"><b style="color:var(--ink)">${earned}</b> of ${bs.length}</span></div>
@@ -1743,12 +1836,12 @@ function vProgress(){
       <div class="tile flat"><b>${c.n}</b><span>workouts</span></div><div class="tile flat"><b>${big(c.vol)}</b><span>kg lifted</span></div>
       <div class="tile flat"><b>${c.sets.toLocaleString()}</b><span>sets</span></div><div class="tile flat"><b>${c.classes}</b><span>classes</span></div>
       <div class="tile flat"><b>${c.cmin.toLocaleString()}</b><span>cardio minutes</span></div><div class="tile flat"><b>${big(c.steps)}</b><span>steps logged</span></div></div>
-      ${LV()?'<p class="small muted" style="margin-top:10px">Points: 100 a workout, 5 a set, 50 a PB, 25 a cardio log, 100 an achievement.</p>':''}</div>
+      ${LV()?'<p class="small muted" style="margin-top:10px">XP for your level: 100 a workout, 5 a set, 50 a PB, 25 a cardio log, 100 an achievement.</p>':''}</div>
     ${recs.length?`<div class="card"><h3 style="margin-bottom:4px">Your records</h3><div class="hist">${recs.slice(0,8).map(r=>`<div class="h"><span>${esc(r.n)}</span><span class="num"><b>${fmt(r.bw)} kg${r.t==='w'?' × '+r.br:''}</b> <span class="muted">· ${nice(r.bd)}</span></span></div>`).join('')}</div></div>`:''}
     ${exBlock}
     <div class="card"><h3 style="margin-bottom:10px">Last six weeks</h3><div class="grid7">${grid}</div></div>
     ${cardio}
-    ${recent?`<div class="card"><h3 style="margin-bottom:4px">Recent workouts</h3><div class="hist">${recent}</div></div>`:''}`;
+    ${recent?`<div class="card"><div class="row between" style="margin-bottom:4px"><h3>Recent workouts</h3><button class="tlink" data-act="hist-open">See all ›</button></div><div class="hist">${recent}</div></div>`:''}`;
 }
 
 /* ---------- sheets / toast / pickers ---------- */
@@ -1889,8 +1982,9 @@ function finish(){
     ${pbList?`<div class="pbl"><small>Personal bests</small>${pbList}</div>`:''}
     ${COACH()&&coachCfg?'<div class="pbl" id="csum"><small style="color:var(--accent-text)">From your coach</small><div class="cmd"><span class="dots"><i></i><i></i><i></i></span></div></div>':''}
     ${unlockHTML(gain)}
-    ${LV()?`<p class="small muted num" style="text-align:center">+${(100+sets*5+pbs*50+gain.newB.length*100).toLocaleString()} points</p>`:''}
-    <button class="btn wide" data-act="close">Lovely</button>`);
+    <p class="num" style="text-align:center;font-weight:700">+${PTS.workout} week points · ${weekPoints(mondayOf(new Date(sess.date+'T00:00:00'))).total} of ${wkGoal()}</p>
+    ${LV()?`<p class="small muted num" style="text-align:center">+${(100+sets*5+pbs*50+gain.newB.length*100).toLocaleString()} XP</p>`:''}
+    <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="sess" data-id="${sess.id}">Review it</button><button class="btn" style="flex:1" data-act="close">Lovely</button></div>`);
   if(COACH()&&coachCfg){const sid=sess.id;chain.then(()=>coachSummary(sid),()=>coachSummary(sid))}
   const bigWin=gain.newB.length||gain.lvl;
   if(cpb)celebrate(cpb.pb,cpb.name);else confetti(pbs||bigWin?1:.45);
@@ -2090,6 +2184,9 @@ document.addEventListener('click',e=>{
     case 'extra-tick':{const x=weekOf(mKey()).extra[d.i];if(x)x.got=x.got?0:1;saveMain();{const st=$('#main').scrollTop;render();$('#main').scrollTop=st};break}
     case 'extra-del':weekOf(mKey()).extra.splice(+d.i,1);saveMain();{const st=$('#main').scrollTop;render();$('#main').scrollTop=st};break;
     case 'pantry':{const pn=pantry();if(pn[d.id])delete pn[d.id];else pn[d.id]=1;saveMain();{const st=$('#main').scrollTop;render();$('#main').scrollTop=st};toast(pn[d.id]?'Moved to your kitchen':'Back on the list');break}
+    case 'wkp-open':wkSheet(d.k);break;
+    case 'wkg':S.main.settings.wkGoal=Math.max(30,Math.min(400,wkGoal()+ +d.n));saveMain();render();wkSheet(d.k);break;
+    case 'hist-open':closeSheet();ui.screen={hist:1};render();$('#main').scrollTop=0;break;
     case 'wtab':ui.wtab=d.t;render();$('#main').scrollTop=0;break;
     case 'tab':if(d.tab==='physio'){d.tab='workouts';ui.wtab='physio'}ui.tab=d.tab;ui.moved=true;if(d.tab==='week'&&d.now)ui.weekOff=0;ui.screen=null;render();$('#main').scrollTop=0;break;
     case 'week':ui.weekOff=d.d==='0'?0:ui.weekOff+Number(d.d);render();break;
@@ -2113,7 +2210,7 @@ document.addEventListener('click',e=>{
       const v=en.v!=null?en.v:nextVar(en.w);ui.weekOff=0;ui.screen={wk:en.w,v,edit:false,from:{day:+d.day,id:d.id,key}};startWorkout(en.w,v);break}
     case 'start-force':startWorkout(d.w,+d.v,true);break;
     case 'resume':closeSheet();ui.screen='session';render();break;
-    case 'back':if(sc&&sc.meal){ui.screen=sc.meal.back||null;render();break}if(sc&&(sc.pick||sc.mine)){ui.screen=null;render();break}if(sc&&sc.from)ui.tab='week';else if(sc&&sc.wk)ui.tab='workouts';ui.screen=null;render();break;
+    case 'back':if(sc&&sc.meal){ui.screen=sc.meal.back||null;render();break}if(sc&&(sc.pick||sc.mine||sc.hist)){ui.screen=null;render();break}if(sc&&sc.from)ui.tab='week';else if(sc&&sc.wk)ui.tab='workouts';ui.screen=null;render();break;
     case 'close':closeSheet();break;
     case 'ph-new':phForm(null);break;
     case 'ph-edit':phForm(phItems().find(x=>x.id===d.id));break;
@@ -2169,7 +2266,8 @@ document.addEventListener('click',e=>{
     case 'cw-step':{const v=Math.max(0,num(A.cls.wts[d.k])+Number(d.d));A.cls.wts[d.k]=v?fmt(v):'';const i=document.getElementById('f-cw-'+d.k);if(i)i.value=A.cls.wts[d.k];saveMain();break}
     case 'add-set':d.g.split(',').forEach(i=>{const en=A.entries[+i],l=en.sets[en.sets.length-1];en.sets.push({w:l?l.w:'',r:l?l.r:'10',done:false})});saveMain();render();break;
     case 'del-set':d.g.split(',').forEach(i=>{const en=A.entries[+i];if(en.sets.length>1)en.sets.pop()});saveMain();render();break;
-    case 's-link':{const en=A.entries[+d.e];en.link=!en.link;saveMain();render();break}
+    case 's-link':{const en=A.entries[+d.e];en.link=!en.link;saveMain();render();if(en.link)toast('Paired as a superset. Tap Split superset to undo.');break}
+    case 's-unlink':d.g.split(',').slice(0,-1).forEach(i=>{A.entries[+i].link=false});saveMain();render();toast('Back to separate exercises');break;
     case 's-add':openPicker('sessAdd',null,'Add an exercise');break;
     case 'swap':{const en=A.entries[+d.e],x=X(en.ex)||{s:[]};ui.pick=null;const subs=(x.s||[]).filter(X);
       sheet(`<h2>Swap ${esc(en.name)}</h2><p class="muted">Machine taken? Pick a substitute that works the same muscles. It only changes today's workout.</p>
@@ -2216,7 +2314,7 @@ document.addEventListener('click',e=>{
       <div class="row between"><div><b>Rest timer sound</b><div class="small muted">A short chime when rest is over.</div></div><button class="btn ${S.main.settings.sound?'':'ghost'} sm" data-act="sound">${S.main.settings.sound?'On':'Off'}</button></div>
       <div><b>Look</b><div class="small muted">Pick a colour, then match your phone or go always light or dark.</div><div class="seg scroll" role="group" aria-label="Colour" style="margin-top:8px">${PALETTES.map(([k,n])=>`<button class="${palette===k?'on':''}" data-act="palette" data-t="${k}" aria-pressed="${palette===k}"><i class="sw" data-p="${k}"></i>${n}</button>`).join('')}</div><div class="seg" role="group" aria-label="Look" style="margin-top:8px">${[['auto','Match phone'],['light','Light'],['dark','Dark']].map(([k,n])=>`<button class="${theme===k?'on':''}" data-act="theme" data-t="${k}" aria-pressed="${theme===k}">${n}</button>`).join('')}</div></div>
       <div class="row between"><div><b>Today screen</b><div class="small muted">A home screen with today’s numbers, plan and physio at a glance.</div></div><button class="btn ${HOME()?'':'ghost'} sm" data-act="flag" data-k="home">${HOME()?'On':'Off'}</button></div>
-      <div class="row between"><div><b>Levels and points</b><div class="small muted">The level name and points. Achievements stay either way.</div></div><button class="btn ${LV()?'':'ghost'} sm" data-act="flag" data-k="levels">${LV()?'On':'Off'}</button></div>
+      <div class="row between"><div><b>Levels and XP</b><div class="small muted">The level name and XP. Achievements stay either way.</div></div><button class="btn ${LV()?'':'ghost'} sm" data-act="flag" data-k="levels">${LV()?'On':'Off'}</button></div>
       ${API?`<div class="row between"><div><b>Coach</b><div class="small muted" id="cst">${coachLine()}</div></div><button class="btn ${COACHON()?'':'ghost'} sm" data-act="flag" data-k="coach">${COACHON()?'On':'Off'}</button></div>`:''}
       <div class="row between"><div><b>Meal planner</b><div class="small muted">Choose your meals for the week, with a cook list and shopping list.</div></div><button class="btn ${MEALS()?'':'ghost'} sm" data-act="flag" data-k="meals">${MEALS()?'On':'Off'}</button></div>
       <div class="row between"><div><b>Physio section</b><div class="small muted">A daily tick-off list for exercises from your physio.</div></div><button class="btn ${S.main.settings.physio?'':'ghost'} sm" data-act="physio-toggle">${S.main.settings.physio?'On':'Off'}</button></div>
