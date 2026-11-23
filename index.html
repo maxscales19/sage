@@ -595,6 +595,27 @@ textarea.inp{resize:vertical;line-height:1.4}
 .ptab span{color:var(--muted)}
 .ptab span:nth-child(-n+4){font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;text-align:center}
 .ptab b{text-align:center;font-size:16px}
+/* past workouts */
+.hmon{margin:6px 4px -4px;flex-shrink:0}
+.hcard{flex-shrink:0;display:flex;align-items:stretch;gap:14px;width:100%;text-align:left;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);padding:14px 12px 14px 14px;border-left:6px solid var(--c)}
+.hdate{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-width:44px}
+.hdate small{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.hdate b{font-size:26px;line-height:1.1}
+.hbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.hbody>b{font-size:17px}
+.hmeta{font-size:13px;color:var(--muted)}
+.htop{display:flex;flex-direction:column;gap:2px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)}
+.htop span{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+.htop i{font-style:normal;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.htop b{font-weight:600;white-space:nowrap}
+.hgo{align-self:center;font-size:24px;color:var(--muted)}
+.svsets{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:12px}
+.svsets>div{background:var(--surface2);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.svsets>div.pb{background:var(--accent-soft)}
+.svsets small{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.svsets b{font-size:17px}
+.svsets .pbm{font-size:11px}
+.svsets em{font-style:normal;font-size:13px;font-weight:600;color:var(--muted)}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -615,7 +636,7 @@ textarea.inp{resize:vertical;line-height:1.4}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795419645;
+const BUILD=1795419968;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1092,6 +1113,7 @@ function render(){
   else if(ui.screen&&ui.screen.pick&&MEALS())h=vPick();
   else if(ui.screen&&ui.screen.mine&&MEALS())h=vMine();
   else if(ui.screen&&ui.screen.hist)h=vHistory();
+  else if(ui.screen&&ui.screen.sv)h=vSessView();
   else{ui.screen=null;h=(S.main.active?`<div class="banner"><span>${esc(S.main.active.name)} in progress</span><button class="btn sm" data-act="resume">Resume</button></div>`:'')+(ui.tab==='today'&&HOME()?vToday():ui.tab==='week'?vWeek():ui.tab==='workouts'?vTrain():ui.tab==='meals'&&MEALS()?vMeals():ui.tab==='coach'&&COACH()?vCoach():vProgress())}
   $('#top').style.display=ui.screen?'none':'flex';
   $('#nav').style.display=ui.screen?'none':'flex';
@@ -1333,14 +1355,41 @@ function wkTrend(){
     <div class="wkbars" style="--gf:${(goal/mx).toFixed(3)}">${w.map((x,i)=>`<button data-act="wkp-open" data-k="${iso(x.m)}" aria-label="Week of ${nice(iso(x.m))}: ${x.t} points"><b class="num">${x.t}</b><i class="${x.t>=goal?'hit':''}" style="height:calc((100% - 44px)*${(Math.max(.03,x.t/mx)).toFixed(3)})"></i><small>${i===5?'Now':x.m.getDate()+' '+MON[x.m.getMonth()]}</small></button>`).join('')}</div></div>`;
 }
 /* ---------- past workouts ---------- */
+const sessSets=s=>(s.entries||[]).reduce((n,e)=>n+(e.type==='k'?0:e.sets.length),0);
+const sessPbs=s=>(s.entries||[]).reduce((n,e)=>n+e.sets.filter(x=>x.pb).length,0);
+const sessMins=s=>{const m=s.finishedAt&&s.startedAt?Math.round((s.finishedAt-s.startedAt)/60000):0;return m>0&&m<300&&String(s.id).indexOf('s-seed-')<0?m:0};
+const sessVol=s=>(s.entries||[]).reduce((n,e)=>n+(e.type==='w'?e.sets.reduce((t,x)=>t+num(x.w)*num(x.r),0):0),0);
+const setLine=(e,x)=>e.type==='k'?`<b class="num">${fmt(num(x.w))} kg</b>`:e.type==='w'&&num(x.w)?`<b class="num">${fmt(num(x.w))} kg</b><em class="num">× ${x.r} reps</em>`:`<b class="num">${x.r} ${e.type==='t'?'sec':'reps'}</b>`;
+const setsShort=e=>e.type==='k'?fmt(num(e.sets[0].w))+' kg':e.type==='w'&&e.sets.some(x=>num(x.w))?e.sets.map(x=>fmt(num(x.w))+'×'+x.r).join(', '):e.sets.map(x=>x.r).join(', ');
+const histAll=()=>S.sessions.slice().sort((a,b)=>(b.date>a.date?1:b.date<a.date?-1:(b.startedAt||0)-(a.startedAt||0)));
 function vHistory(){
-  const all=S.sessions.slice().sort((a,b)=>(b.startedAt||0)-(a.startedAt||0));let cur='',h='';
-  all.forEach(s=>{const d=new Date(s.date+'T00:00:00'),m=MON[d.getMonth()]+' '+d.getFullYear();if(m!==cur){if(cur)h+='</div></div>';cur=m;h+=`<div class="card"><h3 style="margin-bottom:4px">${m}</h3><div class="hist">`}
-    const sets=(s.entries||[]).reduce((n,e)=>n+(e.type==='k'?0:e.sets.length),0),pbs=(s.entries||[]).reduce((n,e)=>n+e.sets.filter(x=>x.pb).length,0),mins=s.finishedAt&&s.startedAt?Math.round((s.finishedAt-s.startedAt)/60000):0;
-    h+=`<button data-act="sess" data-id="${s.id}"><span><span class="dot" style="--c:var(--w${s.c||1})"></span>${esc(s.name)}${pbs?` <span class="pbm">★ ${pbs}</span>`:''}</span><span class="muted num">${DAYS[(d.getDay()+6)%7]} ${d.getDate()} · ${sets?sets+' sets':'class'}${mins>0&&mins<300?' · '+mins+' min':''}</span></button>`});
-  if(cur)h+='</div></div>';
-  return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button><span class="small muted">${all.length} workout${all.length===1?'':'s'}</span></div>
-    <div><h2 style="font-size:26px">Past workouts</h2><p class="small muted">Tap one to see every set you did.</p></div>${h||'<div class="card"><p class="muted">Your finished workouts will be listed here.</p></div>'}`;
+  const sc=ui.screen.hist,all=histAll(),names=[];all.forEach(s=>{const n=s.name.replace(/ \d+$/,'');if(names.indexOf(n)<0)names.push(n)});
+  const f=sc.f&&names.indexOf(sc.f)>=0?sc.f:'all',list=all.filter(s=>f==='all'||s.name.replace(/ \d+$/,'')===f);
+  let cur='',h='';
+  list.forEach(s=>{const d=new Date(s.date+'T00:00:00'),m=MON[d.getMonth()]+' '+d.getFullYear();if(m!==cur){cur=m;h+=`<h3 class="hmon">${m}</h3>`}
+    const sets=sessSets(s),pbs=sessPbs(s),mins=sessMins(s),top=(s.entries||[]).slice(0,3).map(e=>`<span><i>${esc(e.name)}</i><b class="num">${setsShort(e)}</b></span>`).join('');
+    h+=`<button class="hcard" data-act="sess" data-id="${s.id}" style="--c:var(--w${s.c||1})"><span class="hdate"><small>${DAYS[(d.getDay()+6)%7]}</small><b class="num">${d.getDate()}</b></span>
+      <span class="hbody"><b>${esc(s.name)}${pbs?` <span class="pbm">★ ${pbs} PB${pbs>1?'s':''}</span>`:''}</b><span class="hmeta num">${[sets?sets+' sets':'Class',mins?mins+' min':'',(s.entries||[]).length?(s.entries.length+' exercise'+(s.entries.length>1?'s':'')):''].filter(Boolean).join(' · ')}</span>${top?`<span class="htop">${top}${(s.entries||[]).length>3?`<span><i>and ${s.entries.length-3} more</i><b></b></span>`:''}</span>`:''}</span><span class="hgo" aria-hidden="true">›</span></button>`});
+  return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button><span class="small muted">${list.length} workout${list.length===1?'':'s'}</span></div>
+    <div><h2 style="font-size:26px">Past workouts</h2><p class="small muted">Newest first. Tap one to open it.</p></div>
+    ${names.length>1?`<div class="fchips"><button class="${f==='all'?'on':''}" data-act="hist-f" data-f="all">All</button>${names.map(n=>`<button class="${f===n?'on':''}" data-act="hist-f" data-f="${esc(n)}">${esc(n)}</button>`).join('')}</div>`:''}
+    ${h||'<div class="card"><p class="muted">Your finished workouts will be listed here.</p></div>'}`;
+}
+/* one workout, full screen: every set, how it compares with the time before, and arrows to the next one */
+function vSessView(){
+  const sc=ui.screen.sv,all=histAll(),i=all.findIndex(x=>x.id===sc.id),s=all[i];if(!s){ui.screen={hist:{f:'all'}};return vHistory()}
+  const d=new Date(s.date+'T00:00:00'),sets=sessSets(s),pbs=sessPbs(s),mins=sessMins(s),vol=sessVol(s);
+  const prev=all.slice(i+1).find(x=>x.workoutId===s.workoutId&&(x.v||0)===(s.v||0));
+  const tiles=[[sets,'sets'],mins?[mins,'minutes']:null,vol?[Math.round(vol).toLocaleString(),'kg lifted']:null,pbs?[pbs,'PB'+(pbs>1?'s':'')]:null].filter(Boolean).map(t=>`<div class="tile flat"><b class="num">${t[0]}</b><span>${t[1]}</span></div>`).join('');
+  const cards=(s.entries||[]).map(e=>{const pe=prev&&(prev.entries||[]).find(x=>x.ex===e.ex);
+    return `<div class="card"><div class="ex-n">${esc(e.name)}</div>${pe?`<div class="small muted num" style="margin-top:2px">Time before (${nice(prev.date)}): ${setsShort(pe)}</div>`:''}
+      <div class="svsets">${e.sets.map((x,k)=>`<div class="${x.pb?'pb':''}"><small>${e.type==='k'?'Weight':'Set '+(k+1)}</small>${setLine(e,x)}${x.pb?'<span class="pbm">★ PB</span>':''}</div>`).join('')}</div></div>`}).join('');
+  return `<div class="sess-h"><button class="back" data-act="back">‹ All workouts</button><span class="small muted num">${i+1} of ${all.length}</span></div>
+    <div><span class="tag" style="background:var(--w${s.c||1});color:#fff">${DAYS[(d.getDay()+6)%7]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}</span><h2 style="font-size:28px;margin-top:8px">${esc(s.name)}</h2></div>
+    <div class="tiles">${tiles}</div>
+    ${cards}${s.cls?`<div class="card"><div class="ex-n">${esc(s.cls.name)}</div><div class="small muted">Class done ✓</div></div>`:''}${!cards&&!s.cls?'<div class="card"><p class="muted">No sets were ticked off in this one.</p></div>':''}
+    <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="sess" data-id="${i<all.length-1?all[i+1].id:''}" ${i<all.length-1?'':'disabled'}>‹ Older</button><button class="btn ghost" style="flex:1" data-act="sess" data-id="${i>0?all[i-1].id:''}" ${i>0?'':'disabled'}>Newer ›</button></div>
+    <button class="btn quiet wide" data-act="sess-ask" data-id="${s.id}">Delete this workout</button>`;
 }
 
 /* ---------- meals: plans the eating week from a calorie and protein target, in fresh-cooking or batch-prep style,
@@ -2197,7 +2246,9 @@ document.addEventListener('click',e=>{
     case 'pantry':{const pn=pantry();if(pn[d.id])delete pn[d.id];else pn[d.id]=1;saveMain();{const st=$('#main').scrollTop;render();$('#main').scrollTop=st};toast(pn[d.id]?'Moved to your kitchen':'Back on the list');break}
     case 'wkp-open':wkSheet(d.k);break;
     case 'wkg':S.main.settings.wkGoal=Math.max(30,Math.min(400,wkGoal()+ +d.n));saveMain();render();wkSheet(d.k);break;
-    case 'hist-open':closeSheet();ui.screen={hist:1};render();$('#main').scrollTop=0;break;
+    case 'hist-open':closeSheet();ui.screen={hist:{f:'all'}};render();$('#main').scrollTop=0;break;
+    case 'hist-f':sc.hist.f=d.f;render();break;
+    case 'sess-ask':sheet(`<h2>Delete this workout?</h2><p class="muted">It is removed from your history, charts and points. This cannot be undone.</p><button class="btn danger wide" data-act="sess-del" data-id="${d.id}">Delete it</button><button class="btn quiet wide" data-act="close">Keep it</button>`);break;
     case 'wtab':ui.wtab=d.t;render();$('#main').scrollTop=0;break;
     case 'tab':if(d.tab==='physio'){d.tab='workouts';ui.wtab='physio'}ui.tab=d.tab;ui.moved=true;if(d.tab==='week'&&d.now)ui.weekOff=0;ui.screen=null;render();$('#main').scrollTop=0;break;
     case 'week':ui.weekOff=d.d==='0'?0:ui.weekOff+Number(d.d);render();break;
@@ -2221,7 +2272,7 @@ document.addEventListener('click',e=>{
       const v=en.v!=null?en.v:nextVar(en.w);ui.weekOff=0;ui.screen={wk:en.w,v,edit:false,from:{day:+d.day,id:d.id,key}};startWorkout(en.w,v);break}
     case 'start-force':startWorkout(d.w,+d.v,true);break;
     case 'resume':closeSheet();ui.screen='session';render();break;
-    case 'back':if(sc&&sc.meal){ui.screen=sc.meal.back||null;render();break}if(sc&&(sc.pick||sc.mine||sc.hist)){ui.screen=null;render();break}if(sc&&sc.from)ui.tab='week';else if(sc&&sc.wk)ui.tab='workouts';ui.screen=null;render();break;
+    case 'back':if(sc&&sc.meal){ui.screen=sc.meal.back||null;render();break}if(sc&&sc.sv){ui.screen={hist:{f:sc.sv.f||'all'}};render();break}if(sc&&(sc.pick||sc.mine||sc.hist)){ui.screen=null;render();break}if(sc&&sc.from)ui.tab='week';else if(sc&&sc.wk)ui.tab='workouts';ui.screen=null;render();break;
     case 'close':closeSheet();break;
     case 'ph-new':phForm(null);break;
     case 'ph-edit':phForm(phItems().find(x=>x.id===d.id));break;
@@ -2346,11 +2397,8 @@ document.addEventListener('click',e=>{
     case 'sound':S.main.settings.sound=!S.main.settings.sound;saveMain();if(!S.main.settings.sound)cancelBeep();b.textContent=S.main.settings.sound?'On':'Off';b.classList.toggle('ghost',!S.main.settings.sound);break;
     case 'reset':sheet(`<h2>Reset everything?</h2><p class="muted">This deletes every logged workout and activity, your plans, your custom exercises and any changes to the workouts. It cannot be undone.</p><button class="btn danger wide" data-act="reset-yes">Yes, delete it all</button><button class="btn wide" data-act="close">Cancel</button>`);break;
     case 'reset-yes':{const ids=S.sessions.map(s=>s.id),dels=[...(S.main.deleted||[]),...ids];S=defaults();S.main.deleted=dels;migrate();if(col)ids.forEach(id=>{chain=chain.then(()=>col&&col.doc(id).delete()).catch(cloudErr)});stopRest();closeSheet();ui.screen=null;ui.tab='week';saveMain();render();break}
-    case 'sess':{const s=S.sessions.find(x=>x.id===d.id);if(!s)break;
-      sheet(`<h2>${esc(s.name)}</h2><p class="muted num">${nice(s.date)}${s.finishedAt&&(s.entries||[]).some(en=>en.type!=='k')?' · '+Math.max(1,Math.round((s.finishedAt-s.startedAt)/60000))+' min':''}</p>
-        <div class="hist">${(s.entries||[]).map(en=>`<div class="h"><span>${esc(en.name)}${en.sets.some(x=>x.pb)?' <span class="pbm">★</span>':''}</span><span class="num muted">${en.type==='k'?fmt(en.sets[0].w)+' kg':en.type==='w'?en.sets.map(x=>fmt(x.w)+'×'+x.r).join('  '):en.sets.map(x=>x.r+(en.type==='t'?'s':'')).join('  ')}</span></div>`).join('')}${s.cls?`<div class="h"><span>${esc(s.cls.name)}</span><span class="num muted">Done ✓</span></div>`:''}</div>
-        <button class="btn wide" data-act="close">Close</button><button class="btn danger" data-act="sess-del" data-id="${s.id}">Delete this workout</button>`);break}
-    case 'sess-del':S.sessions=S.sessions.filter(x=>x.id!==d.id);S.main.deleted.push(d.id);if(col){const id=d.id;chain=chain.then(()=>col&&col.doc(id).delete()).catch(cloudErr)}closeSheet();saveMain();render();break;
+    case 'sess':{if(!d.id||!S.sessions.some(x=>x.id===d.id))break;closeSheet();ui.screen={sv:{id:d.id,f:sc&&sc.hist?sc.hist.f:sc&&sc.sv?sc.sv.f:'all'}};render();$('#main').scrollTop=0;break}
+    case 'sess-del':S.sessions=S.sessions.filter(x=>x.id!==d.id);S.main.deleted.push(d.id);if(col){const id=d.id;chain=chain.then(()=>col&&col.doc(id).delete()).catch(cloudErr)}closeSheet();if(ui.screen&&ui.screen.sv)ui.screen={hist:{f:ui.screen.sv.f||'all'}};saveMain();render();break;
   }
 });
 document.addEventListener('input',e=>{
