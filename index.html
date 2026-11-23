@@ -591,6 +591,10 @@ textarea.inp{resize:vertical;line-height:1.4}
 .wkbars i{display:block;width:100%;max-width:34px;border-radius:8px 8px 3px 3px;background:var(--surface2);max-height:calc(100% - 44px)}
 .wkbars i.hit{background:var(--accent)}
 .wkbars small{font-size:10px;color:var(--muted);white-space:nowrap}
+.ptab{display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:8px 6px;align-items:center;font-size:14px}
+.ptab span{color:var(--muted)}
+.ptab span:nth-child(-n+4){font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;text-align:center}
+.ptab b{text-align:center;font-size:16px}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -611,7 +615,7 @@ textarea.inp{resize:vertical;line-height:1.4}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795419082;
+const BUILD=1795419365;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1270,16 +1274,18 @@ function chart(pts,unit){
 /* ---------- week points: one score for the week, built from workouts, steps, cardio and physio.
    100 is a solid week. Values follow the activity guidelines: strength on 2 or more days, 150 moderate or 75 vigorous
    minutes (so a vigorous minute is worth two moderate ones), and step benefits that climb fastest up to about 7,000 a day. ---------- */
-const PTS={workout:15,physio:2,perWalk:4,perMod:2,perVig:1,maxWorkoutsDay:2};
+/* cardio has diminishing returns (points grow with the square root of the minutes), and a day tops out at dayCap,
+   so one huge session cannot carry the week: 100 takes four or five good days. */
+const PTS={workout:15,physio:2,walk:1,mod:1.5,vig:2.1,dayCap:25,maxWorkoutsDay:1};
 const VIGT=['Run','Stair climber','Rowing','Swim'],WALKT=['Walk','Treadmill'];
 const stepPts=s=>s>=10000?7:s>=8500?6:s>=7000?5:s>=6000?4:s>=5000?3:s>=4000?2:s>=3000?1:0;
 const wkGoal=()=>S.main.settings.wkGoal||100;
-const cardioPts=(type,mins)=>mins>0?Math.max(1,Math.round(mins/(VIGT.indexOf(type)>=0?PTS.perVig:WALKT.indexOf(type)>=0?PTS.perWalk:PTS.perMod))):0;
+const cardioPts=(type,mins)=>mins>0?Math.max(1,Math.round((VIGT.indexOf(type)>=0?PTS.vig:WALKT.indexOf(type)>=0?PTS.walk:PTS.mod)*Math.sqrt(mins))):0;
 const watchKind=t=>{t=String(t||'').toLowerCase();return /strength|pilates|yoga|weight/.test(t)?'gym':/run|swim|row|stair|hiit|cardio|elliptical/.test(t)?'Run':/walk|hik/.test(t)?'Walk':'Other'};
 function weekPoints(mon){
   const g=GW(),o={total:0,workout:0,steps:0,cardio:0,physio:0,days:[]},today=iso(new Date());
   for(let i=0;i<7;i++){
-    const ds=iso(addDays(mon,i)),d={ds,i,items:[],pts:0},add=(k,n,p)=>{if(p>0){d.items.push({k,n,p});d.pts+=p;o[k]+=p;o.total+=p}};
+    const ds=iso(addDays(mon,i)),d={ds,i,items:[],pts:0,raw:0},add=(k,n,p)=>{if(p<=0)return;d.raw+=p;const got=Math.max(0,Math.min(p,PTS.dayCap-d.pts));d.items.push({k,n,p:got,full:p});d.pts+=got;o[k]+=got;o.total+=got};
     if(ds<=today){
       const ss=S.sessions.filter(s=>s.date===ds);ss.slice(0,PTS.maxWorkoutsDay).forEach(s=>add('workout',s.name,PTS.workout));
       const mine=acts().filter(a=>a.date===ds),sa=mine.find(a=>a.type==='Steps'),st=Math.max(g&&g.days[ds]&&g.days[ds].st||0,sa?sa.steps:0);
@@ -1300,18 +1306,20 @@ function wkCard(mon){
 }
 function wkSheet(key){
   const mon=new Date(key+'T00:00:00'),p=weekPoints(mon),goal=wkGoal();
-  const days=p.days.filter(d=>d.items.length).map(d=>`<div class="wkd"><b>${DAYS[d.i]} <span class="num">+${d.pts}</span></b>${d.items.map(x=>`<div class="h"><span>${esc(x.n)}</span><span class="num muted">+${x.p}</span></div>`).join('')}</div>`).join('');
+  const days=p.days.filter(d=>d.items.length).map(d=>`<div class="wkd"><b>${DAYS[d.i]} <span class="num">+${d.pts}${d.raw>d.pts?' (day max)':''}</span></b>${d.items.map(x=>`<div class="h"><span>${esc(x.n)}</span><span class="num muted">+${x.p}</span></div>`).join('')}</div>`).join('');
   sheet(`<h2>Week points</h2><p class="muted num">${p.total} of ${goal} · ${nice(key)} to ${nice(iso(addDays(mon,6)))}</p>
     ${days?`<div class="hist">${days}</div>`:'<p class="muted">Nothing scored this week yet.</p>'}
     <h3 style="margin-top:18px">How points are earned</h3>
     <div class="hist"><div class="h"><span>A workout or class</span><span class="num muted">${PTS.workout}</span></div>
-      <div class="h"><span>A 7,000-step day</span><span class="num muted">5</span></div><div class="h"><span>A 10,000-step day</span><span class="num muted">7</span></div>
-      <div class="h"><span>Smaller step days (from 3,000)</span><span class="num muted">1 to 4</span></div>
-      <div class="h"><span>Run, swim, row or stairs</span><span class="num muted">1 a minute</span></div>
-      <div class="h"><span>Bike ride or other cardio</span><span class="num muted">1 per 2 min</span></div>
-      <div class="h"><span>Walk or treadmill</span><span class="num muted">1 per 4 min</span></div>
+      <div class="h"><span>Steps: 7,000 in a day</span><span class="num muted">5</span></div><div class="h"><span>Steps: 10,000 in a day</span><span class="num muted">7</span></div>
+      <div class="h"><span>Steps: smaller days, from 3,000</span><span class="num muted">1 to 4</span></div>
       ${S.main.settings.physio?`<div class="h"><span>All physio done for the day</span><span class="num muted">${PTS.physio}</span></div>`:''}</div>
-    <p class="small muted" style="margin-top:10px">100 is a solid week: for example four workouts, 7,000 steps a day and one short run. Walks score lower because your steps already count them. The values follow the activity guidelines (strength on two or more days, 150 moderate or 75 hard minutes a week) and the research on daily steps.</p>
+    <h3 style="margin-top:14px">Cardio, by how long you go</h3>
+    <div class="ptab"><span></span><span>30 min</span><span>1 hour</span><span>2 hours</span>
+      <span>Run, swim, row, stairs</span>${[30,60,120].map(m=>`<b class="num">${cardioPts('Run',m)}</b>`).join('')}
+      <span>Bike ride, other</span>${[30,60,120].map(m=>`<b class="num">${cardioPts('Other',m)}</b>`).join('')}
+      <span>Walk, treadmill</span>${[30,60,120].map(m=>`<b class="num">${cardioPts('Walk',m)}</b>`).join('')}</div>
+    <p class="small muted" style="margin-top:10px">The first half hour is worth the most and extra time adds less, so a long session is rewarded without swallowing the week. A single day tops out at ${PTS.dayCap} points. That makes 100 a week of four or five good days, not one big one: for example four workouts with 7,000 steps a day and one run. Walks score lower because your steps already count them.</p>
     <div class="srowx"><span><b>My weekly goal</b><small>Points to aim for each week</small></span><div class="stepper"><button data-act="wkg" data-n="-10" data-k="${key}" aria-label="Lower goal">−</button><b>${goal}</b><button data-act="wkg" data-n="10" data-k="${key}" aria-label="Raise goal">+</button></div></div>
     <button class="btn wide" style="margin-top:14px" data-act="close">Done</button>`);
 }
