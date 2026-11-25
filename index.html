@@ -633,6 +633,13 @@ input,select,textarea{font-size:16px}
 .cstat{margin-top:6px}
 .micb.on{background:var(--accent);color:var(--accent-ink);animation:micp 1.2s ease-in-out infinite}@keyframes micp{50%{transform:scale(1.08)}}
 .micb.wait{opacity:.6}
+.acard.slim{padding:10px 12px;gap:6px}.acard.slim .ab{font-size:14px}
+.saybtn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;margin:4px 0 -4px -6px;border:0;background:none;color:var(--muted);border-radius:50%}
+.saybtn:active{background:var(--line)}
+#pprev{padding:0 2px}.pthumb{position:relative;display:inline-block;margin:0 0 8px}.pthumb img{height:72px;border-radius:12px;display:block}
+.pthumb button{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-size:16px;line-height:1}
+.pmsg{display:block;max-width:180px;max-height:180px;border-radius:12px;margin:0 0 6px}.pflag{display:block;opacity:.7;font-size:12px}
+.micb2{flex:none;padding:0;width:44px}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -653,7 +660,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795573822;
+const BUILD=1795575057;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1828,9 +1835,11 @@ function vCoach(){
   const ms=coachMsgs(),nm=S.main.settings.name;
   const watch=!!(S.garmin&&S.garmin.days),A=S.main.active;
   const qs=watch?['How did I sleep this week?','Should I train today?','How is my training going?','What should I focus on this week?']:[...(A?['How do I do this one?','Should I go up in weight?']:['What is on today?']),'How is my training going?','Weekly wrap-up'];
-  return `<div><h2 style="font-size:26px">Coach</h2><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p></div>
-    <div class="chat" id="chat">${ms.length?ms.map(m=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?esc(m.t):md(m.t)+actCards(m)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
-    <form class="chatbar" id="chatf"><textarea id="cin" rows="1" maxlength="1500" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea>${SR||canRec?`<button class="btn ghost micb" type="button" data-act="mic" aria-label="Speak your message" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button></form>`;
+  const say=!!S.main.settings.say;
+  return `<div><div class="row between"><h2 style="font-size:26px">Coach</h2>${CANSAY?`<button class="btn ${say?'':'ghost'} sm" data-act="say-tog" aria-pressed="${say}">${say?'Voice on':'Voice off'}</button>`:''}</div><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p></div>
+    <div class="chat" id="chat">${ms.length?ms.map((m,i)=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?(m.img?'<small class="pflag">Photo</small>':'')+esc(m.t):md(m.t)+actCards(m)+sayBtn(i)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
+    <div id="pprev">${ui.photo?`<span class="pthumb"><img alt="Photo to send" src="${ui.photo.url}"><button type="button" data-act="photo-x" aria-label="Remove photo">×</button></span>`:''}</div><input id="pfile" type="file" accept="image/*" hidden>
+    <form class="chatbar" id="chatf"><button class="btn ghost micb2" type="button" data-act="photo" aria-label="Add a photo" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><textarea id="cin" rows="1" maxlength="1500" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea>${SR||canRec?`<button class="btn ghost micb" type="button" data-act="mic" aria-label="Speak your message" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button></form>`;
 }
 /* the coach reads the saved copy of the account, so send any change still waiting before asking */
 async function flushMain(){if(mainTimer!==null&&col){clearTimeout(mainTimer);mainTimer=null;pushMain()}try{await Promise.race([chain,new Promise(r=>setTimeout(r,4000))])}catch(e){}}
@@ -1849,12 +1858,17 @@ function actText(a){
     case 'note':return ['Save a setup note',xn(a.ex)+': '+a.text];
     case 'plan':return ['Plan a workout',wn+' on '+dn(a.date)];
     case 'unplan':return ['Take a workout off a day',wn+' off '+dn(a.date)];
+    case 'meal':{const r=recOf(a.rid);return [MT[a.slot]+', '+dn(a.date),(r?r.n:a.n||'A meal')+(a.f?' ×'+a.f:'')+(r?' · '+Math.round(r.kcal*(a.f||1))+' kcal, '+Math.round(r.p*(a.f||1))+' g protein'+(r.own?'':' · '+money(recCost(r)*(a.f||1))):'')]}
+    case 'unmeal':return ['Clear a meal',MT[a.slot]+' on '+dn(a.date)];
+    case 'newmeal':return ['Save a new meal',a.rec.n+' · '+a.rec.kcal+' kcal, '+a.rec.p+' g protein'+(a.rec.mins?' · '+a.rec.mins+' min':'')];
+    case 'price':return ['Update a stored price',a.n+': '+money(a.price)+(a.was!=null?' (was '+money(a.was)+')':'')];
+    case 'mealprefs':{const b=[];if(a.kcal!=null)b.push(a.kcal+' kcal a day');if(a.protein!=null)b.push(a.protein+' g protein');if(a.budget!=null)b.push(a.budget?'$'+a.budget+' a week':'no budget');return ['Change your meal targets',b.join(', ')]}
   }return ['Change',''];
 }
 function actCards(m){
   if(!m||!m.acts||!m.acts.length)return '';
   return m.acts.map(a=>{const st=actState(a.id),[h,b]=actText(a);
-    return `<div class="acard ${st?'fin':''}"><small>${esc(h)}</small><div class="ab">${esc(b)}</div>${st===1?'<div class="small ok">Done</div>':st===2?'<div class="small muted">Not changed</div>':`<div class="row"><button class="btn sm" data-act="act-yes" data-id="${a.id}">Yes, do it</button><button class="btn quiet sm" data-act="act-no" data-id="${a.id}">No</button></div>`}</div>`}).join('');
+    return `<div class="acard ${st?'fin':''} ${a.do==='meal'||a.do==='price'?'slim':''}"><small>${esc(h)}</small><div class="ab">${esc(b)}</div>${st===1?'<div class="small ok">Done</div>':st===2?'<div class="small muted">Not changed</div>':`<div class="row"><button class="btn sm" data-act="act-yes" data-id="${a.id}">Yes, do it</button><button class="btn quiet sm" data-act="act-no" data-id="${a.id}">No</button></div>`}</div>`}).join('');
 }
 const actFind=id=>{for(const m of coachMsgs())for(const a of(m.acts||[]))if(a.id===id)return a;return null};
 function actApply(a){
@@ -1873,6 +1887,13 @@ function actApply(a){
     case 'note':if(!X(a.ex))return 'That exercise is no longer there.';setXN(a.ex,{note:String(a.text).slice(0,80)});return '';
     case 'plan':case 'unplan':{if(!w)return 'That workout is no longer there.';const t=new Date(a.date+'T12:00:00');if(isNaN(t))return 'That date did not make sense.';const k=iso(mondayOf(t)),di=(t.getDay()+6)%7;S.main.plans=S.main.plans||{};const wk=S.main.plans[k]=S.main.plans[k]||{};
       if(a.do==='plan'){wk[di]=wk[di]||[];if(!wk[di].some(x=>x.w===a.w))wk[di].push({id:uid('p'),w:a.w,v:0})}else if(wk[di]){wk[di]=wk[di].filter(x=>x.w!==a.w);if(!wk[di].length)delete wk[di]}return ''}
+    case 'meal':case 'unmeal':{const M=mealData();if(!M.prefs)return 'Set up Meals first, in the Meals tab.';const t=new Date(a.date+'T12:00:00');if(isNaN(t))return 'That date did not make sense.';
+      const wk=weekOf(iso(mondayOf(t))),di=(t.getDay()+6)%7;
+      if(a.do==='unmeal'){delete wk.days[di][a.slot]}else{if(!recOf(a.rid))return 'Save that new meal first, then add it.';const m={id:a.rid,f:1};if(a.slot==='l'||a.slot==='d')m.cook=di;if(a.f){m.f=a.f;m.fx=1}wk.days[di][a.slot]=m}
+      fitWeek(wk);return ''}
+    case 'newmeal':{const M=mealData(),mine=M.mine||(M.mine=[]);if(!a.rec||!a.rec.id)return 'That meal did not come through properly.';if(!mine.some(x=>x.id===a.rec.id)){const r=Object.assign({},a.rec);Object.keys(r.ing||{}).forEach(k=>{if(!ING[k])delete r.ing[k]});mine.unshift(r)}return ''}
+    case 'price':{if(!ING[a.ing])return 'Sage does not stock that ingredient.';const M=mealData();(M.prices=M.prices||{})[a.ing]=a.price;return ''}
+    case 'mealprefs':{const M=mealData();if(!M.prefs)return 'Set up Meals first, in the Meals tab.';['kcal','protein','budget'].forEach(k=>{if(a[k]!=null)M.prefs[k]=a[k]});Object.keys(M.weeks).forEach(k=>fitWeek(weekOf(k)));return ''}
   }return 'The app does not know how to do that yet.';
 }
 /* talk instead of type. The phone records, the coach computer turns it into words, and they land in the box to check before sending.
@@ -1881,6 +1902,31 @@ const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null,canRec=!
 let mic=null,rec=null,recT=null;
 const micUI=st=>{const b=$('.micb'),i=$('#cin');if(b){b.classList.toggle('on',st==='rec');b.classList.toggle('wait',st==='wait');b.disabled=st==='wait'}if(i)i.placeholder=st==='rec'?'Listening. Tap the mic to finish':st==='wait'?'Working out what you said':'Ask your coach'};
 const micPut=t=>{const el=$('#cin');if(!el||!t)return;el.value=((el.value?el.value.replace(/\s*$/,' '):'')+t).slice(0,1500);el.dispatchEvent(new Event('input',{bubbles:true}))};
+/* speaking replies: the phone's own voice. iPhones only speak after a tap, so the tap that sends a message opens the door for the reply. */
+const CANSAY=!!(window.speechSynthesis&&window.SpeechSynthesisUtterance);
+const sayBtn=i=>CANSAY?`<button class="saybtn" type="button" data-act="say" data-i="${i}" aria-label="Read this aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg></button>`:'';
+const sayText=t=>noAct(String(t||'')).replace(/```[\s\S]*?```/g,' ').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/https?:\/\/\S+/g,'').replace(/[*_#`>|]/g,'').replace(/\s+/g,' ').trim();
+function sayVoice(){try{const v=speechSynthesis.getVoices()||[];return v.find(x=>/en[-_]AU/i.test(x.lang)&&x.localService)||v.find(x=>/en[-_]AU/i.test(x.lang))||v.find(x=>/en[-_]GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){return null}}
+function sayStop(){if(CANSAY)try{speechSynthesis.cancel()}catch(e){}}
+function sayPrime(){if(!CANSAY)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}}
+function say(t){
+  if(!CANSAY)return;t=sayText(t);if(!t)return;
+  try{speechSynthesis.cancel();const v=sayVoice();(t.match(/[^.!?]+[.!?]*\s*/g)||[t]).reduce((a,x)=>{if(a.length&&(a[a.length-1]+x).length<180)a[a.length-1]+=x;else a.push(x);return a},[]).forEach(x=>{const u=new SpeechSynthesisUtterance(x.trim());if(v){u.voice=v;u.lang=v.lang}else u.lang='en-AU';u.rate=1.05;speechSynthesis.speak(u)})}catch(e){}
+}
+const sayOn=()=>CANSAY&&!!S.main.settings.say;
+/* photos: shrunk on the phone, sent to the coach computer, looked at once and not kept */
+function photoPick(f){
+  if(!f)return;const url=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{const k=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);
+    c.toBlob(b=>{if(!b){toast('Could not read that photo.');return}ui.photo={blob:b,url:c.toDataURL('image/jpeg',.5)};const el=$('#pprev');if(el)el.innerHTML=`<span class="pthumb"><img alt="Photo to send" src="${ui.photo.url}"><button type="button" data-act="photo-x" aria-label="Remove photo">×</button></span>`},'image/jpeg',.82)};
+  im.onerror=()=>{URL.revokeObjectURL(url);toast('Could not open that photo.')};im.src=url;
+}
+async function photoSend(){
+  const cfg=coachCfg;if(!cfg)throw new Error('The coach has not been set up yet.');
+  let j;try{j=await (await fetch(cfg.url+'/img',{method:'POST',headers:{'Content-Type':'image/jpeg','X-Coach-User':apiUser,'X-Coach-Token':cfg.token},body:ui.photo.blob})).json()}catch(e){throw new Error('Could not send the photo to the coach computer.')}
+  if(!j||!j.ok)throw new Error((j&&j.msg)||'The photo did not go through. Try again.');return j.id;
+}
+document.addEventListener('change',e=>{if(e.target.id==='pfile'){photoPick(e.target.files&&e.target.files[0]);e.target.value=''}});
 async function micToggle(){
   if(rec){try{rec.stop()}catch(e){}return}
   if(mic){try{mic.stop()}catch(e){}return}
@@ -1916,17 +1962,19 @@ async function coachWeek(){
   ui.coachBusy=false;persistLocal();chatBottom();
 }
 async function coachSend(text){
-  text=String(text||'').trim();if(!text||ui.coachBusy)return;
+  text=String(text||'').trim();const ph=ui.photo;if(!text&&ph)text='What do you see in this photo?';if(!text||ui.coachBusy)return;
   if(!S.coach)S.coach={msgs:[]};const box=$('#chat');if(!box)return;
   if(!coachMsgs().length)box.innerHTML='';
-  S.coach.msgs.push({r:'u',t:text,ts:Date.now()});ui.coachBusy=true;
-  box.insertAdjacentHTML('beforeend',`<div class="msg me">${esc(text)}</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>`);
+  if(sayOn())sayPrime();else sayStop();
+  S.coach.msgs.push(ph?{r:'u',t:text,ts:Date.now(),img:1}:{r:'u',t:text,ts:Date.now()});ui.coachBusy=true;
+  box.insertAdjacentHTML('beforeend',`<div class="msg me">${ph?'<img class="pmsg" alt="Your photo" src="'+ph.url+'">':''}${esc(text)}</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>`);
   const inp=$('#cin');if(inp){inp.value='';inp.style.height='';inp.disabled=true}document.querySelectorAll('#chatf button').forEach(b=>b.disabled=true);if(mic){try{mic.stop()}catch(e){}}if(rec){try{rec.stop()}catch(e){}}chatBottom();
   let acc='';
   try{await flushMain();ui.coachActs=[];
-    const full=await coachAsk({type:'chat',text},t=>{acc+=t;const el=$('#cnow');if(el){el.innerHTML=md(noAct(acc))||'<span class="dots"><i></i><i></i><i></i></span>';chatBottom()}});
+    const req={type:'chat',text};if(ph){req.img=await photoSend();ui.photo=null;const pv=$('#pprev');if(pv)pv.innerHTML=''}
+    const full=await coachAsk(req,t=>{acc+=t;const el=$('#cnow');if(el){el.innerHTML=md(noAct(acc))||'<span class="dots"><i></i><i></i><i></i></span>';chatBottom()}});
     const m={r:'a',t:full,ts:Date.now()};if(ui.coachActs&&ui.coachActs.length)m.acts=ui.coachActs;
-    S.coach.msgs.push(m);const el=$('#cnow');if(el){el.innerHTML=md(full)+actCards(m);el.removeAttribute('id')}}
+    S.coach.msgs.push(m);const el=$('#cnow');if(el){el.innerHTML=md(full)+actCards(m)+sayBtn(S.coach.msgs.length-1);el.removeAttribute('id')}if(sayOn())say(full)}
   catch(e){S.coach.msgs.pop();const el=$('#cnow');if(el){el.className='msg err';el.removeAttribute('id');el.textContent=e.message}if(inp)inp.value=text}
   ui.coachBusy=false;persistLocal();
   const i2=$('#cin');if(i2)i2.disabled=false;document.querySelectorAll('#chatf button').forEach(b=>b.disabled=false);chatBottom();
@@ -2589,7 +2637,11 @@ document.addEventListener('click',e=>{
     case 'pack':sheet(`<h2>Add demo videos</h2><p class="muted">Paste the code you were sent. It adds a demo link to your exercises. Nothing else changes.</p><label class="lbl" for="pk-code">Code</label><input class="txt" id="pk-code" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste here"><button class="btn wide" data-act="pack-go">Add them</button><button class="btn quiet" data-act="close">Cancel</button>`);break;
     case 'pack-go':{const n=packCode($('#pk-code').value);if(!n){toast('That code did not match any of your exercises');break}closeSheet();saveMain();render();toast(n+' demo videos added');break}
     case 'coach':closeSheet();ui.screen=null;ui.tab='coach';ui.moved=true;render();break;
-    case 'mic':micToggle();break;
+    case 'mic':sayStop();micToggle();break;
+    case 'photo':{const f=$('#pfile');if(f)f.click();break}
+    case 'photo-x':ui.photo=null;{const pv=$('#pprev');if(pv)pv.innerHTML=''}break;
+    case 'say':{const m=coachMsgs()[+d.i];if(m){if(speechSynthesis.speaking&&ui.saying===+d.i){sayStop();ui.saying=null}else{ui.saying=+d.i;say(m.t)}}break}
+    case 'say-tog':S.main.settings.say=S.main.settings.say?0:1;saveMain();if(S.main.settings.say){say('Voice is on.')}else sayStop();render();break;
     case 'coach-q':if(d.q==='Weekly wrap-up')coachWeek();else coachSend(d.q);break;
     case 'act-yes':{const a=actFind(d.id);if(!a||actState(a.id))break;const err=actApply(a);if(err){toast(err);break}(S.main.coachDone=S.main.coachDone||{})[a.id]=1;const ks=Object.keys(S.main.coachDone);if(ks.length>200)ks.slice(0,ks.length-200).forEach(k=>delete S.main.coachDone[k]);saveMain();render();toast('Done');break}
     case 'act-no':{const a=actFind(d.id);if(!a||actState(a.id))break;(S.main.coachDone=S.main.coachDone||{})[a.id]=2;saveMain();render();break}
