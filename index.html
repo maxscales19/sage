@@ -666,6 +666,13 @@ input,select,textarea{font-size:16px}
 .svsum .cmd{margin-top:6px}
 .pbl .cmd{display:block}.pbl .cmd b{font-weight:700}
 .seg.scroll{flex-wrap:wrap;overflow:visible}.seg.scroll button{flex:1 0 30%;min-width:0}
+.chead{display:block}.chead+p{margin-top:0}
+.cctl{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.cctl>button,.cctl>.cpick{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px;font-weight:600;white-space:nowrap}
+.cctl>button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.cctl .cpick{padding-right:4px}.cctl .cpick span{color:var(--muted);font-weight:500}.cctl .sayv{border:0;background:none;height:32px;padding:0 4px;font-weight:600;max-width:124px}
+.slp{display:flex;align-items:center;justify-content:space-between;gap:12px}.slp .stepper{margin-top:4px}.slp .stepper b{min-width:54px;text-align:center;font-size:20px}
+.xate .xh{letter-spacing:.14em;text-transform:uppercase;font:700 11px/1 var(--body);color:var(--muted)}.xrow{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:8px 0 0;margin-top:8px}.xrow b{display:block;font-size:15px}.xrow small{color:var(--muted)}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -686,7 +693,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795641537;
+const BUILD=1795641857;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -900,7 +907,7 @@ const API=((document.querySelector('meta[name="sage-api"]')||{}).content||'').tr
 const KEYLS='sage-key-v1';
 const USERLS='sage-user-v1';
 /* what a brand-new account starts with, by the name typed on the way in */
-const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:7,coach:true,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c','bryan1d','bryan1e','bryan1f']}};
+const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:8,daylog:true,coach:true,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c','bryan1d','bryan1e','bryan1f']}};
 let apiKey=null,apiUser='',webSteps=null,webStepsAt=0,retries=0;
 if(API){try{apiKey=localStorage.getItem(KEYLS);apiUser=localStorage.getItem(USERLS)||''}catch(e){}}
 function applyProfile(p){
@@ -1044,7 +1051,7 @@ function seedProfile(p){
   d.sessions.forEach(x=>{S.sessions.push(x);saveSession(x)});S.sessions.sort((a,b)=>a.startedAt-b.startedAt);return true;
 }
 /* settings a profile switches on; also catches an account up when its profile gains something later */
-function profileFlags(p){if(!p||S.main.settings.pv===p.v)return false;const st=S.main.settings;if(p.home&&st.home===undefined)st.home=true;if(p.levels===false&&st.levels===undefined)st.levels=false;if(p.name&&!st.name)st.name=p.name;if(p.coach&&st.coach===undefined)st.coach=true;if(p.meals&&st.meals===undefined)st.meals=true;if(p.palette&&st.ppal!==p.palette){st.palette=st.ppal=p.palette}st.pv=p.v;return true}
+function profileFlags(p){if(!p||S.main.settings.pv===p.v)return false;const st=S.main.settings;if(p.home&&st.home===undefined)st.home=true;if(p.levels===false&&st.levels===undefined)st.levels=false;if(p.name&&!st.name)st.name=p.name;if(p.coach&&st.coach===undefined)st.coach=true;if(p.meals&&st.meals===undefined)st.meals=true;if(p.daylog&&st.daylog===undefined)st.daylog=true;if(p.palette&&st.ppal!==p.palette){st.palette=st.ppal=p.palette}st.pv=p.v;return true}
 async function api(q,open){
   const r=await fetch(API,{method:'POST',body:JSON.stringify(open?q:Object.assign({k:apiKey,u:apiUser},q))});
   const j=await r.json();if(!j||!j.ok){const e=new Error((j&&j.err)||'error');e.code=(j&&j.err)||'error';throw e}return j;
@@ -1301,6 +1308,18 @@ function phForm(x){
     <label class="lbl" for="ph-o">Notes from your physio</label><input class="txt" id="ph-o" value="${esc(e.note||'')}" maxlength="120" autocomplete="off" placeholder="Optional">
     <button class="btn wide" data-act="ph-save">Save</button>${x?'<button class="btn danger wide" data-act="ph-del">Delete this exercise</button>':''}<button class="btn quiet wide" data-act="close">Cancel</button>`);
 }
+/* the daily log: last night's sleep and anything eaten outside the meal plan, so the coach can set training against both */
+const DAYLOG=()=>COACH()&&!!S.main.settings.daylog;
+const logOf=ds=>(S.main.log&&S.main.log[ds])||{};
+function setLog(ds,o){S.main.log=S.main.log||{};const c=Object.assign({},S.main.log[ds],o);Object.keys(c).forEach(k=>{if(c[k]==null||(Array.isArray(c[k])&&!c[k].length))delete c[k]});if(Object.keys(c).length)S.main.log[ds]=c;else delete S.main.log[ds];
+  const keep=iso(addDays(new Date(),-120));Object.keys(S.main.log).forEach(k=>{if(k<keep)delete S.main.log[k]})}
+const hrs=v=>(Math.round(v*2)/2)+' h';
+function sleepCard(){
+  if(!DAYLOG()||ui.weekOff!==0)return '';const today=iso(new Date()),L=logOf(today);
+  if(L.sl!=null&&!ui.slEdit)return `<div class="card slp"><div><div class="small muted">Sleep last night</div><div class="ex-n num">${hrs(L.sl)}</div></div><button class="btn ghost sm" data-act="sl-edit">Change</button></div>`;
+  const last=Object.keys(S.main.log||{}).sort().reverse().map(k=>S.main.log[k].sl).find(v=>v!=null),v=ui.slv!=null?ui.slv:L.sl!=null?L.sl:last!=null?last:7.5;
+  return `<div class="card slp"><div><div class="small muted">Sleep last night</div><div class="stepper"><button data-act="sl-step" data-n="-0.5" aria-label="Half an hour less">–</button><b class="num" id="slv">${hrs(v)}</b><button data-act="sl-step" data-n="0.5" aria-label="Half an hour more">+</button></div></div><button class="btn sm" data-act="sl-save" data-v="${v}">Log</button></div>`;
+}
 /* on this week's planner: today's next workout, with a start button you cannot miss */
 function upNext(){
   if(ui.weekOff!==0||S.main.active)return '';const now=new Date(),today=iso(now),di=(now.getDay()+6)%7,es=((S.main.plans[iso(mondayOf(now))]||{})[di]||[]).filter(e=>W(e.w)),e=es.find(x=>!sessDone(today,x.w));
@@ -1322,7 +1341,7 @@ function vWeek(){
   return `<div class="row between"><button class="mini" data-act="week" data-d="-1" aria-label="Previous week">‹</button>
       <div style="text-align:center"><h2>${label}</h2><div class="small muted num">${nice(key)} to ${nice(iso(addDays(mon,6)))}</div></div>
       <button class="mini" data-act="week" data-d="1" aria-label="Next week">›</button></div>
-    ${gwWarn()}${HOME()?'':gwStrip()}${upNext()}
+    ${gwWarn()}${HOME()?'':gwStrip()}${upNext()}${sleepCard()}
     ${wkCard(mon)}
     <div class="row"><div class="prog"><i style="width:${planned?Math.round(done/planned*100):0}%"></i></div><span class="small muted num"><b>${done}</b> of ${planned} done</span></div>
     <div><h3 style="margin-bottom:8px">${GW()?'Hold a workout, then drag it onto a day':'Hold a bubble, then drag it onto a day'}</h3><div class="tray">${tray}${GW()?'':`<button class="chip" style="--c:var(--ws)" data-drag="steps" data-label="Steps" data-c="s" data-act="tray-steps">${ICON.drag}<span>Steps</span></button>`}</div></div>
@@ -1419,7 +1438,7 @@ function vSession(){
     }
     const linkIdx=g[g.length-1];
     return `<div class="card">${body}<div class="row" style="flex-wrap:wrap">${restB}<button class="btn quiet sm" data-act="add-set" data-g="${g.join(',')}">+ Add ${g.length>1?'round':'set'}</button>${A.entries[g[0]].sets.length>1?`<button class="btn quiet sm" data-act="del-set" data-g="${g.join(',')}">Remove last</button>`:''}${g.length>1?`<button class="btn quiet sm" data-act="s-unlink" data-g="${g.join(',')}">Split superset</button>`:''}</div></div>
-      ${linkIdx<A.entries.length-1?`<button class="linkbtn ${last.link?'on':''}" data-act="s-link" data-e="${linkIdx}">${last.link?'Superset with next ✓':'Pair with next as a superset'}</button>`:''}`}).join('');
+      `}).join('');
   const cwRow=k=>{const ls=lastSets(cwId(A.workoutId,k));return `<div class="set cw"><span class="lab">${CWL[k]}<div class="small muted" style="font-weight:500">${ls?'last '+fmt(num(ls[0].w))+' kg':'kg'}</div></span><div class="fld"><button data-act="cw-step" data-k="${k}" data-d="-0.5" aria-label="Less">−</button><input id="f-cw-${k}" inputmode="decimal" autocomplete="off" data-f="cw" data-k="${k}" value="${esc(A.cls.wts[k]??'')}" placeholder="kg" aria-label="${CWL[k]} weight in kg"><button data-act="cw-step" data-k="${k}" data-d="0.5" aria-label="More">+</button></div></div>`};
   const classOnly=!A.entries.length&&!!A.cls;
   const cls=A.cls?`<div class="card"><div class="ex-h"><div><div class="ex-n">${esc(A.cls.name)}</div><div class="small muted">${A.cls.wts?'45 minutes with your trainer. Add the weights you used, leave any blank, then mark it done.':'Tick it off when the class is done.'}</div></div></div>
@@ -1722,7 +1741,8 @@ function vMealPlan(){
   let sel=ui.mday;if(typeof sel!=='number'||!(sel>=0&&sel<7)){const i=Math.round((new Date(today+'T00:00:00')-new Date(key+'T00:00:00'))/864e5);sel=ui.mday=i>=0&&i<7?i:0}
   const slots=MORDER.filter(k=>p.eat[k]);
   const strip=`<div class="dstrip">${DAYS.map((x,i)=>{const tt=dayTot(wk.days[i]),dt=dayDate(key,i),fill=slots.filter(k=>wk.days[i][k]).length;return `<button class="${i===sel?'on':''} ${iso(dt)===today?'now':''}" data-act="mday" data-d="${i}" aria-pressed="${i===sel}" aria-label="${DAYS[i]} ${dt.getDate()}, ${fill} of ${slots.length} meals chosen"><small>${x}</small><b>${dt.getDate()}</b><i class="${fill&&fill===slots.length?'full':fill?'part':''}"></i></button>`}).join('')}</div>`;
-  const dy=wk.days[sel],tt=dayTot(dy),left=p.kcal-tt.kcal,empty=slots.filter(k=>!dy[k]).length;
+  const dy=wk.days[sel],tt=dayTot(dy),selDs=iso(dayDate(key,sel)),xs=DAYLOG()?(logOf(selDs).ate||[]):[];xs.forEach(x=>{tt.kcal+=x.kcal||0;tt.p+=x.p||0});
+  const left=p.kcal-tt.kcal,empty=slots.filter(k=>!dy[k]).length;
   const pct=Math.min(100,Math.round(tt.kcal/p.kcal*100)),ppct=Math.min(100,Math.round(tt.p/p.protein*100));
   const sum=`<div class="dsum"><div class="row between"><small>${dayLabel(key,sel)}</small><small>${tt.n?tt.eaten+' of '+tt.n+' eaten':'Nothing chosen yet'}</small></div>
     <div class="dnums"><div><b>${Math.round(tt.kcal)}</b><span>of ${p.kcal} kcal</span><div class="mbar"><i style="width:${pct}%"></i></div></div><div><b>${Math.round(tt.p)} g</b><span>of ${p.protein} g protein</span><div class="mbar"><i style="width:${ppct}%"></i></div></div></div>
@@ -1732,7 +1752,8 @@ function vMealPlan(){
     const r=recOf(m.id),cd=m.cook!=null?m.cook:sel,src=k==='b'||k==='s'?(r.mins?r.mins+' min':''):cd===sel?'Cook today'+(r.mins?' · '+r.mins+' min':''):'Cooked '+DAYS[cd];
     return `<div class="mcard ${m.eaten?'done':''}"><button class="mmain" data-act="meal-open" data-d="${sel}" data-k="${k}">${mPhoto(r,'th')}<span class="mtxt"><small>${MT[k]}</small><b>${esc(r.n)}</b><span class="mmeta">${Math.round(r.kcal*m.f)} kcal · ${Math.round(r.p*m.f)} g protein</span><span class="mchips">${src?`<em>${src}</em>`:''}${Math.abs(m.f-1)>.02?`<em>${m.f}× portion</em>`:''}</span></span></button><button class="mtick ${m.eaten?'on':''}" data-act="meal-eat" data-d="${sel}" data-k="${k}" role="checkbox" aria-checked="${!!m.eaten}" aria-label="Eaten: ${esc(r.n)}">${m.eaten?'✓':''}</button></div>`}).join('');
   const any=Object.values(wk.days).some(d=>MORDER.some(k=>d[k]));
-  return strip+sum+rows+`<div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="meals-copy">Copy last week</button><button class="btn ghost" style="flex:1" data-act="mine-open">My meals</button></div>
+  const extra=DAYLOG()?`<div class="card xate"><div class="row between"><small class="xh">Also eaten</small><button class="tlink" data-act="ate-add" data-ds="${selDs}">+ Add</button></div>${xs.length?xs.map((x,i)=>`<div class="xrow"><span><b>${esc(x.n)}</b><small class="num">${x.kcal?x.kcal+' kcal':'no calories given'}${x.p?' · '+x.p+' g protein':''}</small></span><button class="ndel" data-act="ate-del" data-ds="${selDs}" data-i="${i}" aria-label="Remove ${esc(x.n)}">×</button></div>`).join(''):'<p class="small muted" style="margin:6px 0 0">Anything off the plan. You can also tell your coach, or send it a photo.</p>'}</div>`:'';
+  return strip+sum+rows+extra+`<div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="meals-copy">Copy last week</button><button class="btn ghost" style="flex:1" data-act="mine-open">My meals</button></div>
     <div class="row" style="gap:10px"><button class="btn quiet" style="flex:1" data-act="meals-prefs">Preferences</button>${any?'<button class="btn quiet" style="flex:1" data-act="meals-clear">Clear this week</button>':''}</div><p class="small muted" style="text-align:center">Photos from Unsplash.</p>`;
 }
 function vMealCook(){
@@ -1884,7 +1905,7 @@ function vCoach(){
   const watch=!!(S.garmin&&S.garmin.days),A=S.main.active;
   const qs=watch?['How did I sleep this week?','Should I train today?','How is my training going?','What should I focus on this week?']:[...(A?['How do I do this one?','Should I go up in weight?']:['What is on today?']),'How is my training going?','Weekly wrap-up'];
   const say=!!S.main.settings.say;
-  return `<div class="chead row between"><h2 style="font-size:26px">Coach</h2><span class="row" style="gap:6px"><button class="btn ghost saytog" data-act="notes-open" aria-label="What your coach knows about you"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M6 4h12v16l-6-4-6 4z"/></svg></button>${coachCfg&&!watch?`<select id="sayv" class="sayv" aria-label="Choose your coach">${SAYV.map(v=>`<option value="${v[0]}" ${sayV()===v[0]?'selected':''}>${v[1]}</option>`).join('')}</select>`:''}<button class="btn ${say?'':'ghost'} saytog" data-act="say-tog" aria-pressed="${say}" aria-label="${say?'Spoken replies are on':'Spoken replies are off'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M4 9v6h4l5 4V5L8 9z"/>${say?'<path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>':'<path d="M17 9.5l5 5M22 9.5l-5 5"/>'}</svg></button></span></div><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p>
+  return `<div class="chead"><h2 style="font-size:26px">Coach</h2><div class="cctl"><button data-act="notes-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M6 4h12v16l-6-4-6 4z"/></svg>Memory</button>${coachCfg&&!watch?`<label class="cpick"><span>Coach</span><select id="sayv" class="sayv" aria-label="Choose your coach">${SAYV.map(v=>`<option value="${v[0]}" ${sayV()===v[0]?'selected':''}>${v[1]}</option>`).join('')}</select></label>`:''}<button class="${say?'on':''}" data-act="say-tog" aria-pressed="${say}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 9v6h4l5 4V5L8 9z"/>${say?'<path d="M16.5 8.5a5 5 0 0 1 0 7"/>':'<path d="M17 9.5l5 5M22 9.5l-5 5"/>'}</svg>${say?'Voice on':'Voice off'}</button></div></div><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p>
     <div class="chat" id="chat">${ms.length?ms.map((m,i)=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?(m.img?'<small class="pflag">'+(m.img>1?m.img+' photos':'Photo')+'</small>':'')+esc(m.t):md(m.t)+actCards(m)+notedLine(m)+sayBtn(i)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
     <div id="pprev">${photoThumbs()}</div><input id="pfile" type="file" accept="image/*" multiple hidden>
     <form class="chatbar" id="chatf"><button class="btn ghost micb2" type="button" data-act="photo" aria-label="Add a photo" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><textarea id="cin" rows="1" maxlength="1500" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea>${SR||canRec?`<button class="btn ghost micb" type="button" data-act="mic" aria-label="Speak your message" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button>
@@ -1911,6 +1932,8 @@ function actText(a){
     case 'unmeal':return ['Clear a meal',MT[a.slot]+' on '+dn(a.date)];
     case 'newmeal':return ['Save a new meal',a.rec.n+' · '+a.rec.kcal+' kcal, '+a.rec.p+' g protein'+(a.rec.mins?' · '+a.rec.mins+' min':'')];
     case 'price':return ['Update a stored price',a.n+': '+money(a.price)+(a.was!=null?' (was '+money(a.was)+')':'')];
+    case 'sleep':return ['Log your sleep',dn(a.date)+' night: '+hrs(a.hours)];
+    case 'ate':return ['Log something you ate',a.name+(a.kcal?' · '+a.kcal+' kcal':'')+(a.p?', '+a.p+' g protein':'')+' · '+dn(a.date)];
     case 'mealprefs':{const b=[];if(a.kcal!=null)b.push(a.kcal+' kcal a day');if(a.protein!=null)b.push(a.protein+' g protein');if(a.budget!=null)b.push(a.budget?'$'+a.budget+' a week':'no budget');return ['Change your meal targets',b.join(', ')]}
   }return ['Change',''];
 }
@@ -1955,6 +1978,8 @@ function actApply(a){
       if(a.do==='unmeal'){delete wk.days[di][a.slot]}else{if(!recOf(a.rid))return 'Save that new meal first, then add it.';const m={id:a.rid,f:1};if(a.slot==='l'||a.slot==='d')m.cook=di;if(a.f){m.f=a.f;m.fx=1}wk.days[di][a.slot]=m}
       fitWeek(wk);return ''}
     case 'newmeal':{const M=mealData(),mine=M.mine||(M.mine=[]);if(!a.rec||!a.rec.id)return 'That meal did not come through properly.';if(!mine.some(x=>x.id===a.rec.id)){const r=Object.assign({},a.rec);Object.keys(r.ing||{}).forEach(k=>{if(!ING[k])delete r.ing[k]});mine.unshift(r)}return ''}
+    case 'sleep':setLog(a.date,{sl:a.hours});return '';
+    case 'ate':{const cur=(logOf(a.date).ate||[]).slice();cur.push({n:a.name,kcal:a.kcal||0,p:a.p||0});setLog(a.date,{ate:cur});return ''}
     case 'price':{if(!ING[a.ing])return 'Sage does not stock that ingredient.';const M=mealData();(M.prices=M.prices||{})[a.ing]=a.price;return ''}
     case 'mealprefs':{const M=mealData();if(!M.prefs)return 'Set up Meals first, in the Meals tab.';['kcal','protein','budget'].forEach(k=>{if(a[k]!=null)M.prefs[k]=a[k]});Object.keys(M.weeks).forEach(k=>fitWeek(weekOf(k)));return ''}
   }return 'The app does not know how to do that yet.';
@@ -2782,6 +2807,14 @@ document.addEventListener('click',e=>{
     case 'reset':sheet(`<h2>Reset everything?</h2><p class="muted">This deletes every logged workout and activity, your plans, your custom exercises and any changes to the workouts. It cannot be undone.</p><button class="btn danger wide" data-act="reset-yes">Yes, delete it all</button><button class="btn wide" data-act="close">Cancel</button>`);break;
     case 'reset-yes':{const ids=S.sessions.map(s=>s.id),dels=[...(S.main.deleted||[]),...ids];S=defaults();S.main.deleted=dels;migrate();if(col)ids.forEach(id=>{chain=chain.then(()=>col&&col.doc(id).delete()).catch(cloudErr)});stopRest();closeSheet();ui.screen=null;ui.tab='week';saveMain();render();break}
     case 'sess':{if(!d.id||!S.sessions.some(x=>x.id===d.id))break;closeSheet();ui.screen={sv:{id:d.id,f:sc&&sc.hist?sc.hist.f:sc&&sc.sv?sc.sv.f:'all'}};render();$('#main').scrollTop=0;break}
+    case 'sl-step':{const el=$('#slv'),b=$('[data-act="sl-save"]');if(!b)break;const v=Math.max(0,Math.min(16,(+b.dataset.v)+(+d.n)));ui.slv=v;b.dataset.v=v;if(el)el.textContent=hrs(v);break}
+    case 'sl-save':setLog(iso(new Date()),{sl:+d.v});ui.slEdit=false;ui.slv=null;saveMain();render();toast('Sleep logged');break;
+    case 'sl-edit':ui.slEdit=true;render();break;
+    case 'ate-add':sheet(`<h2>Something else you ate</h2><label class="lbl" for="ate-n">What was it</label><input class="txt" id="ate-n" maxlength="60" autocomplete="off" placeholder="e.g. Burger and chips">
+      <div class="phf"><div><label class="lbl" for="ate-k">Calories</label><input class="txt" id="ate-k" inputmode="numeric" placeholder="Rough is fine"></div><div><label class="lbl" for="ate-p">Protein (g)</label><input class="txt" id="ate-p" inputmode="numeric" placeholder="Optional"></div></div>
+      <p class="small muted">Not sure of the numbers? Leave them empty, or ask your coach to estimate from a photo.</p><button class="btn wide" data-act="ate-save" data-ds="${d.ds}">Add</button><button class="btn quiet wide" data-act="close">Cancel</button>`);break;
+    case 'ate-save':{const n=$('#ate-n').value.trim();if(!n){toast('Give it a name');break}const cur=(logOf(d.ds).ate||[]).slice();cur.push({n:n.slice(0,60),kcal:Math.max(0,Math.min(5000,Math.round(+$('#ate-k').value||0))),p:Math.max(0,Math.min(400,Math.round(+$('#ate-p').value||0)))});setLog(d.ds,{ate:cur});saveMain();closeSheet();render();break}
+    case 'ate-del':{const cur=(logOf(d.ds).ate||[]).slice();cur.splice(+d.i,1);setLog(d.ds,{ate:cur});saveMain();{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
     case 'sv-sum':svSumGet(d.id);break;
     case 'sess-del':S.sessions=S.sessions.filter(x=>x.id!==d.id);S.main.deleted.push(d.id);if(col){const id=d.id;chain=chain.then(()=>col&&col.doc(id).delete()).catch(cloudErr)}closeSheet();if(ui.screen&&ui.screen.sv)ui.screen={hist:{f:ui.screen.sv.f||'all'}};saveMain();render();break;
   }
