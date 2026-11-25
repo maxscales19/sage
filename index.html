@@ -631,6 +631,7 @@ input,select,textarea{font-size:16px}
 .acard small{font:700 11px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent-text)}
 .acard .ab{font-weight:600}.acard.fin{opacity:.75}.acard .ok{color:var(--accent-text);font-weight:700}
 .cstat{margin-top:6px}
+.micb.on{background:var(--accent);color:var(--accent-ink);animation:micp 1.2s ease-in-out infinite}@keyframes micp{50%{transform:scale(1.08)}}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -651,7 +652,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795572158;
+const BUILD=1795573408;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1828,7 +1829,7 @@ function vCoach(){
   const qs=watch?['How did I sleep this week?','Should I train today?','How is my training going?','What should I focus on this week?']:[...(A?['How do I do this one?','Should I go up in weight?']:['What is on today?']),'How is my training going?','Weekly wrap-up'];
   return `<div><h2 style="font-size:26px">Coach</h2><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p></div>
     <div class="chat" id="chat">${ms.length?ms.map(m=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?esc(m.t):md(m.t)+actCards(m)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
-    <form class="chatbar" id="chatf"><textarea id="cin" rows="1" maxlength="1500" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea><button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button></form>`;
+    <form class="chatbar" id="chatf"><textarea id="cin" rows="1" maxlength="1500" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea>${SR?`<button class="btn ghost micb" type="button" data-act="mic" aria-label="Speak your message" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button></form>`;
 }
 /* the coach reads the saved copy of the account, so send any change still waiting before asking */
 async function flushMain(){if(mainTimer!==null&&col){clearTimeout(mainTimer);mainTimer=null;pushMain()}try{await Promise.race([chain,new Promise(r=>setTimeout(r,4000))])}catch(e){}}
@@ -1873,6 +1874,18 @@ function actApply(a){
       if(a.do==='plan'){wk[di]=wk[di]||[];if(!wk[di].some(x=>x.w===a.w))wk[di].push({id:uid('p'),w:a.w,v:0})}else if(wk[di]){wk[di]=wk[di].filter(x=>x.w!==a.w);if(!wk[di].length)delete wk[di]}return ''}
   }return 'The app does not know how to do that yet.';
 }
+/* talk instead of type, where the phone's browser can listen. The words land in the box so they can be checked before sending. */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;let mic=null;
+function micToggle(){
+  const b=$('.micb'),inp=$('#cin');if(!SR||!inp)return;
+  if(mic){try{mic.stop()}catch(e){}return}
+  let r;try{r=new SR()}catch(e){toast('This phone cannot listen here. Use the microphone on the keyboard.');return}
+  const base=inp.value?inp.value.replace(/\s*$/,' '):'';r.lang='en-AU';r.interimResults=true;r.continuous=false;
+  r.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;const el=$('#cin');if(el){el.value=(base+t).slice(0,1500);el.dispatchEvent(new Event('input',{bubbles:true}))}};
+  r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')toast('Microphone is blocked. Use the microphone on the keyboard.');else if(e.error!=='no-speech'&&e.error!=='aborted')toast('Did not catch that. Try again.')};
+  r.onend=()=>{mic=null;const x=$('.micb');if(x)x.classList.remove('on')};
+  try{r.start();mic=r;if(b)b.classList.add('on')}catch(e){mic=null;toast('Could not start listening. Use the microphone on the keyboard.')}
+}
 async function coachWeek(){
   if(ui.coachBusy)return;if(!S.coach)S.coach={msgs:[]};const box=$('#chat');if(!box)return;if(!coachMsgs().length)box.innerHTML='';
   ui.coachBusy=true;box.insertAdjacentHTML('beforeend','<div class="msg me">Weekly wrap-up</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>');chatBottom();let acc='';
@@ -1887,7 +1900,7 @@ async function coachSend(text){
   if(!coachMsgs().length)box.innerHTML='';
   S.coach.msgs.push({r:'u',t:text,ts:Date.now()});ui.coachBusy=true;
   box.insertAdjacentHTML('beforeend',`<div class="msg me">${esc(text)}</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>`);
-  const inp=$('#cin'),btn=$('#chatf button');if(inp){inp.value='';inp.style.height='';inp.disabled=true}if(btn)btn.disabled=true;chatBottom();
+  const inp=$('#cin');if(inp){inp.value='';inp.style.height='';inp.disabled=true}document.querySelectorAll('#chatf button').forEach(b=>b.disabled=true);if(mic){try{mic.stop()}catch(e){}}chatBottom();
   let acc='';
   try{await flushMain();ui.coachActs=[];
     const full=await coachAsk({type:'chat',text},t=>{acc+=t;const el=$('#cnow');if(el){el.innerHTML=md(noAct(acc))||'<span class="dots"><i></i><i></i><i></i></span>';chatBottom()}});
@@ -1895,7 +1908,7 @@ async function coachSend(text){
     S.coach.msgs.push(m);const el=$('#cnow');if(el){el.innerHTML=md(full)+actCards(m);el.removeAttribute('id')}}
   catch(e){S.coach.msgs.pop();const el=$('#cnow');if(el){el.className='msg err';el.removeAttribute('id');el.textContent=e.message}if(inp)inp.value=text}
   ui.coachBusy=false;persistLocal();
-  const i2=$('#cin'),b2=$('#chatf button');if(i2)i2.disabled=false;if(b2)b2.disabled=false;chatBottom();
+  const i2=$('#cin');if(i2)i2.disabled=false;document.querySelectorAll('#chatf button').forEach(b=>b.disabled=false);chatBottom();
 }
 document.addEventListener('submit',e=>{if(e.target.id!=='chatf')return;e.preventDefault();coachSend(($('#cin')||{}).value)});
 document.addEventListener('submit',e=>{if(e.target.id!=='extraf')return;e.preventDefault();const i=$('#extra-in'),t=i.value.trim();if(!t)return;weekOf(mKey()).extra.push({t});saveMain();const st=$('#main').scrollTop;render();$('#main').scrollTop=st;const j=$('#extra-in');if(j)j.focus()});
@@ -2555,6 +2568,7 @@ document.addEventListener('click',e=>{
     case 'pack':sheet(`<h2>Add demo videos</h2><p class="muted">Paste the code you were sent. It adds a demo link to your exercises. Nothing else changes.</p><label class="lbl" for="pk-code">Code</label><input class="txt" id="pk-code" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste here"><button class="btn wide" data-act="pack-go">Add them</button><button class="btn quiet" data-act="close">Cancel</button>`);break;
     case 'pack-go':{const n=packCode($('#pk-code').value);if(!n){toast('That code did not match any of your exercises');break}closeSheet();saveMain();render();toast(n+' demo videos added');break}
     case 'coach':closeSheet();ui.screen=null;ui.tab='coach';ui.moved=true;render();break;
+    case 'mic':micToggle();break;
     case 'coach-q':if(d.q==='Weekly wrap-up')coachWeek();else coachSend(d.q);break;
     case 'act-yes':{const a=actFind(d.id);if(!a||actState(a.id))break;const err=actApply(a);if(err){toast(err);break}(S.main.coachDone=S.main.coachDone||{})[a.id]=1;const ks=Object.keys(S.main.coachDone);if(ks.length>200)ks.slice(0,ks.length-200).forEach(k=>delete S.main.coachDone[k]);saveMain();render();toast('Done');break}
     case 'act-no':{const a=actFind(d.id);if(!a||actState(a.id))break;(S.main.coachDone=S.main.coachDone||{})[a.id]=2;saveMain();render();break}
