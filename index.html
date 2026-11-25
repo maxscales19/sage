@@ -641,7 +641,7 @@ a.btn{text-decoration:none}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795568455;
+const BUILD=1795568832;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -968,6 +968,10 @@ const okUrl=u=>/^https:\/\/[^\s"'<>]+$/.test(u||'');
 function setXN(id,o){S.main.xn=S.main.xn||{};const c=Object.assign({},S.main.xn[id],o);Object.keys(c).forEach(k=>{if(!c[k])delete c[k]});if(Object.keys(c).length)S.main.xn[id]=c;else delete S.main.xn[id]}
 /* a pack is a private link the owner opens once: it fills in demo links for their exercises */
 function stashPack(){const m=/^#pack=([A-Za-z0-9_-]+)$/.exec(location.hash||'');if(!m)return;try{localStorage.setItem('sage-pack',m[1]);history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
+/* short code form: id=youtubeId pairs separated by commas, or the long link */
+function packCode(raw){raw=String(raw||'').trim();const m=/#pack=([A-Za-z0-9_-]+)/.exec(raw);let n=0;
+  if(m){try{const j=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')))));Object.keys(j).forEach(id=>{const u=String(j[id]);if(X(id)&&okUrl(u)){setXN(id,{vid:u});n++}})}catch(e){}return n}
+  raw.split(/[,\s]+/).forEach(pr=>{const q=/^([a-z0-9-]{2,12})=([A-Za-z0-9_-]{11})(?:@(\d{1,5}))?$/.exec(pr);if(q&&X(q[1])){setXN(q[1],{vid:'https://youtu.be/'+q[2]+(q[3]?'?t='+q[3]:'')});n++}});return n}
 function applyPack(){let raw;try{raw=localStorage.getItem('sage-pack')}catch(e){}if(!raw)return false;let n=0;
   try{const j=JSON.parse(decodeURIComponent(escape(atob(raw.replace(/-/g,'+').replace(/_/g,'/')))));Object.keys(j).forEach(id=>{const u=String(j[id]);if(X(id)&&okUrl(u)){setXN(id,{vid:u});n++}})}catch(e){}
   try{localStorage.removeItem('sage-pack')}catch(e){}if(n)setTimeout(()=>toast(n+' demo videos added'),600);return n>0}
@@ -2472,7 +2476,10 @@ document.addEventListener('click',e=>{
       <div><b>Where your data lives</b><div class="small muted">${API?(cloud==='cloud'?'Saved privately and backed up, so it survives a new phone.':cloud==='checking'?'Connecting…':cloud==='locked'?'Locked.':'Saved on this phone for now. It will back up when Sage can connect.'):cloud==='cloud'?'Saved to your Claude account, so it follows you across devices.':cloud==='checking'?'Checking…':'Saved in this browser on this device.'}</div></div>
       <div><b>Automatic steps</b><div class="small muted" id="drv">${driveLine()}</div><button class="btn ghost sm" style="margin-top:8px" data-act="drive-check">${API||S.main.settings.drive?'Check now':'Turn on and check'}</button></div>
       ${API?'<div><b>This phone</b><div class="small muted">Signing out removes Sage’s data from this phone only. Your backup stays, and the password brings it back.</div><button class="btn ghost sm" style="margin-top:8px" data-act="signout">Sign out on this phone</button></div>':''}
+      <button class="btn ghost wide" data-act="pack">Add demo videos from a code</button>
       <button class="btn danger" data-act="reset">Reset everything</button><button class="btn wide" data-act="close">Done</button>`);break;
+    case 'pack':sheet(`<h2>Add demo videos</h2><p class="muted">Paste the code you were sent. It adds a demo link to your exercises. Nothing else changes.</p><label class="lbl" for="pk-code">Code</label><input class="txt" id="pk-code" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste here"><button class="btn wide" data-act="pack-go">Add them</button><button class="btn quiet" data-act="close">Cancel</button>`);break;
+    case 'pack-go':{const n=packCode($('#pk-code').value);if(!n){toast('That code did not match any of your exercises');break}closeSheet();saveMain();render();toast(n+' demo videos added');break}
     case 'coach':closeSheet();ui.screen=null;ui.tab='coach';ui.moved=true;render();break;
     case 'coach-q':coachSend(d.q);break;
     case 'flag':{const on=d.k==='levels'?!LV():!S.main.settings[d.k];S.main.settings[d.k]=on;if(d.k==='home'){ui.tab=on?'today':'week'}if(d.k==='coach'&&on)coachInit();saveMain();render();b.textContent=on?'On':'Off';b.classList.toggle('ghost',!on);break}
