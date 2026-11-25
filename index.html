@@ -627,6 +627,10 @@ button,a,input,select,textarea,label,summary,[data-act]{touch-action:manipulatio
 input,select,textarea{font-size:16px}
 .fld button{width:clamp(28px,9vw,36px)}
 .set.one .fld button{width:56px}
+.acard{margin-top:10px;padding:12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);display:grid;gap:8px}
+.acard small{font:700 11px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent-text)}
+.acard .ab{font-weight:600}.acard.fin{opacity:.75}.acard .ok{color:var(--accent-text);font-weight:700}
+.cstat{margin-top:6px}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -647,7 +651,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795569757;
+const BUILD=1795572158;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -861,7 +865,7 @@ const API=((document.querySelector('meta[name="sage-api"]')||{}).content||'').tr
 const KEYLS='sage-key-v1';
 const USERLS='sage-user-v1';
 /* what a brand-new account starts with, by the name typed on the way in */
-const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:6,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c']}};
+const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:7,coach:true,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c']}};
 let apiKey=null,apiUser='',webSteps=null,webStepsAt=0,retries=0;
 if(API){try{apiKey=localStorage.getItem(KEYLS);apiUser=localStorage.getItem(USERLS)||''}catch(e){}}
 function applyProfile(p){
@@ -1377,7 +1381,7 @@ function vSession(){
   const cls=A.cls?`<div class="card"><div class="ex-h"><div><div class="ex-n">${esc(A.cls.name)}</div><div class="small muted">${A.cls.wts?'45 minutes with your trainer. Add the weights you used, leave any blank, then mark it done.':'Tick it off when the class is done.'}</div></div></div>
     ${A.cls.wts?CW.map(cwRow).join(''):''}
     ${classOnly?'':`<button class="donebtn ${A.cls.done?'on':''}" data-act="cls-check" aria-pressed="${!!A.cls.done}">${A.cls.done?'✓ Class done':'Tick when the class is done'}</button>`}</div>`:'';
-  return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button>${classOnly?'':'<span class="small muted num" id="elapsed"></span>'}<button class="btn sm" data-act="finish">${classOnly?'✓ Done':'Finish'}</button></div>
+  return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button>${classOnly?'':'<span class="small muted num" id="elapsed"></span>'}${COACH()&&!classOnly?'<button class="btn ghost sm" data-act="coach">Ask coach</button>':''}<button class="btn sm" data-act="finish">${classOnly?'✓ Done':'Finish'}</button></div>
     <div><span class="tag" style="background:var(--w${w.c});color:var(--w-ink)">${esc(w.sub||'Workout')}</span><h2>${esc(A.name)}</h2>${A.entries.length?'<p class="small muted" style="margin-top:4px">Machine taken? Tap Swap for a substitute. Anything you change in here is for today only.</p>':''}</div>
     ${cards}${classOnly?'':'<button class="btn ghost wide" data-act="s-add">+ Add an exercise</button>'}${cls}
     <button class="btn wide" data-act="finish">${classOnly?'✓ Class done':'Finish workout'}</button><button class="btn danger wide" data-act="discard">Discard this workout</button>`;
@@ -1790,11 +1794,11 @@ function coachOnce(p,onDelta){
     if(!coachCfg)return rej(Object.assign(new Error('The coach has not been set up yet.'),{code:'off'}));
     const body=JSON.stringify(Object.assign({u:apiUser||'alex',t:coachCfg.token},p)),url=coachCfg.url;let settled=false,open=false,ws=null;
     const fail=(m,c)=>{if(!settled){settled=true;rej(Object.assign(new Error(m),{code:c||'down'}))}},ok=t=>{if(!settled){settled=true;coachUp=true;res(t)}};
-    const post=()=>fetch(url+'/api',{method:'POST',body}).then(r=>r.json()).then(j=>{if(j&&j.ok){if(onDelta)onDelta(j.text);ok(j.text)}else fail((j&&j.msg)||'The coach could not answer that.',(j&&j.err)||'error')}).catch(()=>fail('Your coach is offline. The computer it runs on may be asleep or disconnected.'));
+    const post=()=>fetch(url+'/api',{method:'POST',body}).then(r=>r.json()).then(j=>{if(j&&j.ok){ui.coachActs=j.acts||[];if(onDelta)onDelta(j.text);ok(j.text)}else fail((j&&j.msg)||'The coach could not answer that.',(j&&j.err)||'error')}).catch(()=>fail('Your coach is offline. The computer it runs on may be asleep or disconnected.'));
     try{ws=new WebSocket(url.replace(/^http/,'ws')+'/ws')}catch(e){post();return}
     const t=setTimeout(()=>{if(!open){const w=ws;ws=null;try{w.close()}catch(e){}post()}},7000);
     ws.onopen=()=>{open=true;clearTimeout(t);ws.send(body)};
-    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}if(m.k==='d'){if(onDelta)onDelta(m.t)}else if(m.k==='end')ok(m.text);else if(m.k==='err')fail(m.msg,m.code||'error')};
+    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}if(m.k==='d'){if(onDelta)onDelta(m.t)}else if(m.k==='s'){const el=$('#cnow');if(el&&!el.querySelector('.cstat'))el.insertAdjacentHTML('beforeend','<p class="cstat small muted">'+esc(m.t)+'…</p>')}else if(m.k==='end'){ui.coachActs=m.acts||[];ok(m.text)}else if(m.k==='err')fail(m.msg,m.code||'error')};
     ws.onerror=()=>{if(!open&&ws){clearTimeout(t);ws=null;post()}};
     ws.onclose=()=>{if(open)fail('The coach was cut off part way through. Try again.')};
   });
@@ -1820,10 +1824,62 @@ function vTrain(){
 }
 function vCoach(){
   const ms=coachMsgs(),nm=S.main.settings.name;
-  const qs=['How did I sleep this week?','Should I train today?','How is my training going?','What should I focus on this week?'];
-  return `<div><h2 style="font-size:26px">Coach</h2><p class="small muted">Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.</p></div>
-    <div class="chat" id="chat">${ms.length?ms.map(m=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?esc(m.t):md(m.t)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}Ask me anything about your sleep, steps, training or physio. Here are a few to start.</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
+  const watch=!!(S.garmin&&S.garmin.days),A=S.main.active;
+  const qs=watch?['How did I sleep this week?','Should I train today?','How is my training going?','What should I focus on this week?']:[...(A?['How do I do this one?','Should I go up in weight?']:['What is on today?']),'How is my training going?','Weekly wrap-up'];
+  return `<div><h2 style="font-size:26px">Coach</h2><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p></div>
+    <div class="chat" id="chat">${ms.length?ms.map(m=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?esc(m.t):md(m.t)+actCards(m)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
     <form class="chatbar" id="chatf"><textarea id="cin" rows="1" maxlength="1500" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea><button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button></form>`;
+}
+/* the coach reads the saved copy of the account, so send any change still waiting before asking */
+async function flushMain(){if(mainTimer!==null&&col){clearTimeout(mainTimer);mainTimer=null;pushMain()}try{await Promise.race([chain,new Promise(r=>setTimeout(r,4000))])}catch(e){}}
+const noAct=t=>String(t||'').replace(/\[\[action[\s\S]*?\]\]/g,'').replace(/\[\[action[\s\S]*$/,'').replace(/\[+$/,'').trim();
+/* ---- changes the coach proposes: shown as cards, applied only on a tap ---- */
+const actState=id=>(S.main.coachDone||{})[id]||0;
+function actText(a){
+  const w=W(a.w),wn=w?w.name:'a workout',xn=id=>(X(id)||{n:'an exercise'}).n,it=w&&w.vars[0].items.find(i=>i.ex===a.ex);
+  const dn=d=>{const t=new Date(d+'T12:00:00');return DAYS[(t.getDay()+6)%7]+' '+t.getDate()+' '+t.toLocaleString('en-AU',{month:'short'})};
+  switch(a.do){
+    case 'set':{const b=[];if(a.sets!=null||a.reps!=null)b.push((a.sets!=null?a.sets:it?it.sets:'?')+' sets × '+(a.reps!=null?a.reps:it?it.reps:'?')+' '+unitOf(a.ex,(X(a.ex)||{}).t));if(a.rest!=null)b.push('rest '+restLabel(a.rest));
+      return ['Change '+xn(a.ex),wn+': '+b.join(', ')+(it&&!actState(a.id)?' (now '+it.sets+' × '+it.reps+', rest '+restLabel(it.rest)+')':'')]}
+    case 'swap':return ['Swap an exercise',wn+': '+xn(a.ex)+' → '+xn(a.to)];
+    case 'add':return ['Add an exercise',wn+': '+xn(a.ex)+', '+a.sets+' sets × '+a.reps+', rest '+restLabel(a.rest)+(a.after?', after '+xn(a.after):'')];
+    case 'remove':return ['Remove an exercise',wn+': '+xn(a.ex)];
+    case 'note':return ['Save a setup note',xn(a.ex)+': '+a.text];
+    case 'plan':return ['Plan a workout',wn+' on '+dn(a.date)];
+    case 'unplan':return ['Take a workout off a day',wn+' off '+dn(a.date)];
+  }return ['Change',''];
+}
+function actCards(m){
+  if(!m||!m.acts||!m.acts.length)return '';
+  return m.acts.map(a=>{const st=actState(a.id),[h,b]=actText(a);
+    return `<div class="acard ${st?'fin':''}"><small>${esc(h)}</small><div class="ab">${esc(b)}</div>${st===1?'<div class="small ok">Done</div>':st===2?'<div class="small muted">Not changed</div>':`<div class="row"><button class="btn sm" data-act="act-yes" data-id="${a.id}">Yes, do it</button><button class="btn quiet sm" data-act="act-no" data-id="${a.id}">No</button></div>`}</div>`}).join('');
+}
+const actFind=id=>{for(const m of coachMsgs())for(const a of(m.acts||[]))if(a.id===id)return a;return null};
+function actApply(a){
+  const w=W(a.w),items=w&&w.vars[0].items,A=S.main.active,idx=ex=>items?items.findIndex(i=>i.ex===ex):-1;
+  switch(a.do){
+    case 'set':{const i=idx(a.ex);if(i<0)return 'That exercise is no longer in '+(w?w.name:'the workout')+'.';const it=items[i];if(a.sets!=null)it.sets=a.sets;if(a.reps!=null)it.reps=a.reps;if(a.rest!=null)it.rest=a.rest;
+      /* a workout under way follows along: sets not yet ticked take the new numbers */
+      if(A&&A.workoutId===a.w){const e=A.entries.find(x=>x.ex===a.ex);if(e){if(a.rest!=null)e.rest=a.rest;if(a.reps!=null)e.sets.forEach(x=>{if(!x.done)x.r=a.reps});
+        if(a.sets!=null){while(e.sets.length>a.sets&&!e.sets[e.sets.length-1].done)e.sets.pop();while(e.sets.length<a.sets){const l=e.sets[e.sets.length-1]||{w:'',r:it.reps};e.sets.push({w:l.w,r:a.reps!=null?a.reps:l.r})}}}}
+      return ''}
+    case 'swap':{const i=idx(a.ex);if(i<0||!X(a.to))return 'That exercise is no longer there.';const was=(X(a.ex)||{}).t,now=X(a.to).t;items[i].ex=a.to;if(was!==now){const d=mkItem(a.to);items[i].reps=d.reps}
+      if(A&&A.workoutId===a.w){const ei=A.entries.findIndex(x=>x.ex===a.ex);if(ei>=0&&!A.entries[ei].sets.some(x=>x.done))swapEntry(ei,a.to)}return ''}
+    case 'add':{if(!w||!X(a.ex))return 'That workout is no longer there.';if(idx(a.ex)>=0)return 'It is already in '+w.name+'.';let at=items.length;if(a.after){let j=idx(a.after);if(j>=0){while(items[j]&&items[j].link)j++;at=j+1}}
+      if(at>=items.length&&items.length)items[items.length-1].link=false;items.splice(at,0,{ex:a.ex,sets:a.sets,reps:a.reps,rest:a.rest,link:false});return ''}
+    case 'remove':{const i=idx(a.ex);if(i<0)return '';if(i>0&&items[i-1].link&&!items[i].link)items[i-1].link=false;items.splice(i,1);if(items.length)items[items.length-1].link=false;return ''}
+    case 'note':if(!X(a.ex))return 'That exercise is no longer there.';setXN(a.ex,{note:String(a.text).slice(0,80)});return '';
+    case 'plan':case 'unplan':{if(!w)return 'That workout is no longer there.';const t=new Date(a.date+'T12:00:00');if(isNaN(t))return 'That date did not make sense.';const k=iso(mondayOf(t)),di=(t.getDay()+6)%7;S.main.plans=S.main.plans||{};const wk=S.main.plans[k]=S.main.plans[k]||{};
+      if(a.do==='plan'){wk[di]=wk[di]||[];if(!wk[di].some(x=>x.w===a.w))wk[di].push({id:uid('p'),w:a.w,v:0})}else if(wk[di]){wk[di]=wk[di].filter(x=>x.w!==a.w);if(!wk[di].length)delete wk[di]}return ''}
+  }return 'The app does not know how to do that yet.';
+}
+async function coachWeek(){
+  if(ui.coachBusy)return;if(!S.coach)S.coach={msgs:[]};const box=$('#chat');if(!box)return;if(!coachMsgs().length)box.innerHTML='';
+  ui.coachBusy=true;box.insertAdjacentHTML('beforeend','<div class="msg me">Weekly wrap-up</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>');chatBottom();let acc='';
+  try{await flushMain();const t=await coachAsk({type:'week'},x=>{acc+=x;const el=$('#cnow');if(el){el.innerHTML=md(acc);chatBottom()}});
+    S.coach.msgs.push({r:'u',t:'Weekly wrap-up',ts:Date.now()},{r:'a',t,ts:Date.now()});const el=$('#cnow');if(el){el.innerHTML=md(t);el.removeAttribute('id')}}
+  catch(e){const el=$('#cnow');if(el){el.className='msg err';el.removeAttribute('id');el.textContent=e.message}}
+  ui.coachBusy=false;persistLocal();chatBottom();
 }
 async function coachSend(text){
   text=String(text||'').trim();if(!text||ui.coachBusy)return;
@@ -1833,8 +1889,10 @@ async function coachSend(text){
   box.insertAdjacentHTML('beforeend',`<div class="msg me">${esc(text)}</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>`);
   const inp=$('#cin'),btn=$('#chatf button');if(inp){inp.value='';inp.style.height='';inp.disabled=true}if(btn)btn.disabled=true;chatBottom();
   let acc='';
-  try{const full=await coachAsk({type:'chat',text},t=>{acc+=t;const el=$('#cnow');if(el){el.innerHTML=md(acc);chatBottom()}});
-    S.coach.msgs.push({r:'a',t:full,ts:Date.now()});const el=$('#cnow');if(el){el.innerHTML=md(full);el.removeAttribute('id')}}
+  try{await flushMain();ui.coachActs=[];
+    const full=await coachAsk({type:'chat',text},t=>{acc+=t;const el=$('#cnow');if(el){el.innerHTML=md(noAct(acc))||'<span class="dots"><i></i><i></i><i></i></span>';chatBottom()}});
+    const m={r:'a',t:full,ts:Date.now()};if(ui.coachActs&&ui.coachActs.length)m.acts=ui.coachActs;
+    S.coach.msgs.push(m);const el=$('#cnow');if(el){el.innerHTML=md(full)+actCards(m);el.removeAttribute('id')}}
   catch(e){S.coach.msgs.pop();const el=$('#cnow');if(el){el.className='msg err';el.removeAttribute('id');el.textContent=e.message}if(inp)inp.value=text}
   ui.coachBusy=false;persistLocal();
   const i2=$('#cin'),b2=$('#chatf button');if(i2)i2.disabled=false;if(b2)b2.disabled=false;chatBottom();
@@ -2497,7 +2555,9 @@ document.addEventListener('click',e=>{
     case 'pack':sheet(`<h2>Add demo videos</h2><p class="muted">Paste the code you were sent. It adds a demo link to your exercises. Nothing else changes.</p><label class="lbl" for="pk-code">Code</label><input class="txt" id="pk-code" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste here"><button class="btn wide" data-act="pack-go">Add them</button><button class="btn quiet" data-act="close">Cancel</button>`);break;
     case 'pack-go':{const n=packCode($('#pk-code').value);if(!n){toast('That code did not match any of your exercises');break}closeSheet();saveMain();render();toast(n+' demo videos added');break}
     case 'coach':closeSheet();ui.screen=null;ui.tab='coach';ui.moved=true;render();break;
-    case 'coach-q':coachSend(d.q);break;
+    case 'coach-q':if(d.q==='Weekly wrap-up')coachWeek();else coachSend(d.q);break;
+    case 'act-yes':{const a=actFind(d.id);if(!a||actState(a.id))break;const err=actApply(a);if(err){toast(err);break}(S.main.coachDone=S.main.coachDone||{})[a.id]=1;const ks=Object.keys(S.main.coachDone);if(ks.length>200)ks.slice(0,ks.length-200).forEach(k=>delete S.main.coachDone[k]);saveMain();render();toast('Done');break}
+    case 'act-no':{const a=actFind(d.id);if(!a||actState(a.id))break;(S.main.coachDone=S.main.coachDone||{})[a.id]=2;saveMain();render();break}
     case 'flag':{const on=d.k==='levels'?!LV():!S.main.settings[d.k];S.main.settings[d.k]=on;if(d.k==='home'){ui.tab=on?'today':'week'}if(d.k==='coach'&&on)coachInit();saveMain();render();b.textContent=on?'On':'Off';b.classList.toggle('ghost',!on);break}
     case 'palette':setPalette(d.t,true);document.querySelectorAll('.seg [data-act="palette"]').forEach(x=>{x.classList.toggle('on',x.dataset.t===palette);x.setAttribute('aria-pressed',String(x.dataset.t===palette))});break;
     case 'physio-toggle':S.main.settings.physio=!S.main.settings.physio;if(!S.main.settings.physio&&ui.tab==='physio')ui.tab='week';saveMain();render();b.textContent=S.main.settings.physio?'On':'Off';b.classList.toggle('ghost',!S.main.settings.physio);break;
