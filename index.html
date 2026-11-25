@@ -664,6 +664,8 @@ input,select,textarea{font-size:16px}
 .chead{position:sticky;top:0;z-index:5;background:var(--bg);margin:0 -16px;padding:6px 16px 8px}.chead+p{margin-top:-8px}
 #pprev{display:flex;gap:10px;flex-wrap:wrap}.pmsgs{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:6px}.pmsgs .pmsg{max-width:96px;max-height:96px;margin:0}.pmsgs .pmsg:only-child{max-width:180px;max-height:180px}
 .svsum .cmd{margin-top:6px}
+.pbl .cmd{display:block}.pbl .cmd b{font-weight:700}
+.seg.scroll{flex-wrap:wrap;overflow:visible}.seg.scroll button{flex:1 0 30%;min-width:0}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -684,7 +686,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795641111;
+const BUILD=1795641537;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1540,7 +1542,7 @@ function vSessView(){
   const sc=ui.screen.sv,all=histAll(),i=all.findIndex(x=>x.id===sc.id),s=all[i];if(!s){ui.screen={hist:{f:'all'}};return vHistory()}
   const d=new Date(s.date+'T00:00:00'),sets=sessSets(s),pbs=sessPbs(s),mins=sessMins(s),vol=sessVol(s);
   const prev=all.slice(i+1).find(x=>x.workoutId===s.workoutId&&(x.v||0)===(s.v||0));
-  const tiles=[[sets,'sets'],mins?[mins,'minutes']:null,vol?[Math.round(vol).toLocaleString(),'kg lifted']:null,pbs?[pbs,'PB'+(pbs>1?'s':'')]:null].filter(Boolean).map(t=>`<div class="tile flat"><b class="num">${t[0]}</b><span>${t[1]}</span></div>`).join('');
+  const tiles=[[sets,'sets'],mins?[mins,mins===1?'minute':'minutes']:null,vol?[Math.round(vol).toLocaleString(),'kg lifted']:null,pbs?[pbs,'PB'+(pbs>1?'s':'')]:null].filter(Boolean).map(t=>`<div class="tile flat"><b class="num">${t[0]}</b><span>${t[1]}</span></div>`).join('');
   const cards=(s.entries||[]).map(e=>{const pe=prev&&(prev.entries||[]).find(x=>x.ex===e.ex);
     return `<div class="card"><div class="ex-n">${esc(e.name)}</div>${pe?`<div class="small muted num" style="margin-top:2px">Time before (${nice(prev.date)}): ${setsShort(pe)}</div>`:''}
       <div class="svsets">${e.sets.map((x,k)=>`<div class="${x.pb?'pb':''}"><small>${e.type==='k'?'Weight':'Set '+(k+1)}</small>${setLine(e,x)}${x.pb?'<span class="pbm">★ PB</span>':''}</div>`).join('')}</div></div>`}).join('');
@@ -1843,7 +1845,7 @@ async function coachInit(){
     if(had!==!!coachCfg&&!ui.screen&&!$('#sheet.on')&&!ui.coachBusy)render();
     return !!coachCfg&&coachCfg.url!==was}catch(e){return false}
 }
-const coachLine=()=>!COACHON()?'A personal trainer that reads your numbers and answers questions.':!coachCfg?'Switched on, but the coach computer has not been set up yet.':coachUp===false?'The coach computer cannot be reached right now.':'Ready. Tap the speech bubble at the top to talk to it.';
+const coachLine=()=>!COACHON()?'A personal trainer that reads your numbers and answers questions.':!coachCfg?'Switched on, but the coach computer has not been set up yet.':coachUp===false?'The coach computer cannot be reached right now.':'Ready. It lives in the Coach tab at the bottom.';
 function coachOnce(p,onDelta){
   return new Promise((res,rej)=>{
     if(!coachCfg)return rej(Object.assign(new Error('The coach has not been set up yet.'),{code:'off'}));
@@ -2402,7 +2404,7 @@ function finish(){
   markSeen();saveMain();
   ui.screen=null;ui.tab='week';ui.weekOff=0;render();
   sheet(`<div style="text-align:center"><span class="tag">${sets?'Done':'Class done'}</span><h2 style="font-size:26px">${esc(sess.name)}</h2></div>
-    ${sets?`<div class="tiles"><div class="tile"><b>${mins}</b><span>minutes</span></div><div class="tile"><b>${sets}</b><span>sets</span></div><div class="tile"><b style="color:var(--gold)">${pbs}</b><span>new PBs</span></div></div>`:''}
+    ${sets?`<div class="tiles"><div class="tile"><b>${mins}</b><span>${mins===1?'minute':'minutes'}</span></div><div class="tile"><b>${sets}</b><span>sets</span></div><div class="tile"><b style="color:var(--gold)">${pbs}</b><span>new PBs</span></div></div>`:''}
     ${entries.some(e=>e.type==='k')?`<p class="num" style="text-align:center;font-weight:700">${entries.filter(e=>e.type==='k').map(e=>CWL[e.ex.split('-').pop()]+' '+fmt(e.sets[0].w)+' kg').join(' · ')}</p>`:''}
     ${vol?`<p class="muted" style="text-align:center">You moved <b class="num" style="color:var(--ink)">${Math.round(vol).toLocaleString()} kg</b> in total${sess.cls?', plus your class':''}.</p>`:`<p class="muted" style="text-align:center">Ticked off${pbs?' with '+pbs+' new PB'+(pbs>1?'s':''):''}. Nice work.</p>`}
     ${pbList?`<div class="pbl"><small>Personal bests</small>${pbList}</div>`:''}
