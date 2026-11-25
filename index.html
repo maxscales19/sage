@@ -616,6 +616,11 @@ textarea.inp{resize:vertical;line-height:1.4}
 .svsets b{font-size:17px}
 .svsets .pbm{font-size:11px}
 .svsets em{font-style:normal;font-size:13px;font-weight:600;color:var(--muted)}
+.xmeta{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px}
+.xchip{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:99px;background:var(--surface2);color:var(--muted);font-size:13px;font-weight:600;text-decoration:none;max-width:100%;text-align:left}
+.xchip.on{color:var(--accent-text);background:var(--accent-soft)}
+.xdet{margin:10px 0 4px}.xdet summary{cursor:pointer;padding:6px 0}
+a.btn{text-decoration:none}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -636,7 +641,7 @@ textarea.inp{resize:vertical;line-height:1.4}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795419968;
+const BUILD=1795568455;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -825,7 +830,7 @@ function migrate(){
     if(w.cls&&w.cls.wts)CW.forEach(k=>{const n=w.cls.name.replace(' class','')+' '+k+' weight',e=m.exercises[cwId(id,k)];if(!e||e.n!==n){m.exercises[cwId(id,k)]={n,t:'k'};ch=true}})});
   return ch;
 }
-migrate();
+migrate();stashPack();
 const X=id=>LIB[id]||S.main.exercises[id]||null;
 const isCustom=id=>!LIB[id]&&S.main.exercises[id]&&S.main.exercises[id].t!=='k';
 const exList=()=>[...Object.keys(LIB),...Object.keys(S.main.exercises).filter(isCustom)];
@@ -850,7 +855,7 @@ const API=((document.querySelector('meta[name="sage-api"]')||{}).content||'').tr
 const KEYLS='sage-key-v1';
 const USERLS='sage-user-v1';
 /* what a brand-new account starts with, by the name typed on the way in */
-const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:5,palette:'lime',name:'Max',seed:'paddle1',meals:true}};
+const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:6,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:'bryan1'}};
 let apiKey=null,apiUser='',webSteps=null,webStepsAt=0,retries=0;
 if(API){try{apiKey=localStorage.getItem(KEYLS);apiUser=localStorage.getItem(USERLS)||''}catch(e){}}
 function applyProfile(p){
@@ -892,6 +897,80 @@ const SEEDS={paddle1:()=>{
   const now=new Date(),wk=mondayOf(now),k=iso(wk),nx=new Date(wk);nx.setDate(nx.getDate()+7);const k2=iso(nx),P=w=>[{id:uid('p'),w,v:0}];
   return {ex,workouts,order:['a','b'],sessions,plans:{[k]:{[(now.getDay()+6)%7]:P('a')},[k2]:{0:P('b'),2:P('a'),4:P('b'),5:P('a')}}};
 }};
+/* Programme upgrades: add new exercises and workouts to an account that already has history. Nothing logged is touched. */
+const UPGRADES={bryan1:()=>{
+  const E=(n,t,g,p)=>({n,t,g,q:'Custom',p,s:[]}),it=(ex,sets,reps,rest,link)=>({ex,sets,reps,rest,link:!!link});
+  const ex={'bx-yta':E('Warm-up: Prone Y-T-A Reaches','r','Shoulders','plank'),'bx-hang-s':E('Warm-up: Relaxed Hang','t','Back','hang'),
+    'bx-dbp':E('Dumbbell Press, Feet on Bench','w','Chest','bench'),'bx-ssr':E('Split Stance Row','w','Back','bentrow'),'bx-hang':E('One-Arm Hang','t','Back','hang'),
+    'bx-ksr':E('Kneeling Side Bend Reaches','r','Core','twist'),'bx-fgp':E('False Grip Pull-Up (band)','r','Back','pullup'),'bx-kpd':E('Kneeling Single-Arm Pull Down','w','Back','pulldown'),
+    'bx-rot':E('Cable Rotation, Split Stance','w','Core','twist'),'bx-ppu':E('Primal Push-Up','r','Chest','pushup'),'bx-ccl':E('Cat Crawl Hold','t','Core','birddog'),
+    'bx-rock':E('Warm-up: Kneeling Rockers','r','Legs','birddog'),'bx-ssh':E('Warm-up: Split Stance Hold','t','Legs','lunge'),'bx-sss':E('Suitcase Split Squat','w','Legs','lunge'),
+    'bx-bh':E('Bulgarian Hinge, Weight at Chest','w','Glutes','rdl'),'bx-sqp':E('Squat Pulses, Kettlebell at Chest','w','Legs','squat'),'bx-hws':E('High Wall Sit','t','Legs','squat'),
+    'bx-tsu':E('Turkish Sit-Up','w','Core','crunch'),'bx-phr':E('Prone Hold and Reach','r','Core','plank'),'bx-xss':E('Explosive Split Squat','r','Legs','lunge'),
+    'bx-ssd':E('Split Stance Deadlift, One Dumbbell','w','Glutes','rdl'),'bx-hh':E('Hamstring Hold, Feet on Bench','t','Glutes','bridge'),'bx-wl':E('Walking Lunge, Heels Up','w','Legs','lunge'),
+    'bx-pcr':E('Paleo Squat Calf Raises','r','Legs','calf'),'bx-kw':E('Kneeling Windmill','w','Core','sideplank'),'bx-sup':E('Superman Hold','t','Core','plank')};
+  const wu=()=>[it('bx-yta',2,10,30,1),it('bx-hang-s',2,20,30)],wl=()=>[it('bx-rock',2,60,30,1),it('bx-ssh',2,30,30)];
+  const workouts={
+    u1:{name:'Upper 1',sub:'Heavy pull ups, dumbbell press',c:1,vars:[{items:[...wu(),it('mx-puh',5,5,180),it('bx-dbp',3,10,120),it('bx-ssr',3,10,90),it('mx-hksp',2,12,90),it('bx-hang',3,30,60,1),it('bx-ksr',3,30,60)]}]},
+    l1:{name:'Lower 1',sub:'Split squat day, core',c:3,vars:[{items:[...wl(),it('bx-sss',3,10,120,1),it('bx-bh',3,10,120),it('bx-sqp',2,30,90),it('bx-hws',3,60,60),it('bx-tsu',3,10,60,1),it('bx-phr',3,10,60)]}]},
+    u2:{name:'Upper 2',sub:'False grip pull ups, dips',c:2,vars:[{items:[...wu(),it('bx-fgp',3,6,150),it('mx-dip',3,8,150),it('bx-kpd',3,10,60),it('bx-rot',2,10,60),it('bx-ppu',3,10,90),it('bx-ssr',3,12,60,1),it('bx-ccl',3,30,60)]}]},
+    l2:{name:'Lower 2',sub:'Hinge day, core',c:4,vars:[{items:[...wl(),it('bx-xss',3,5,90),it('bx-ssd',3,10,90),it('bx-hh',3,30,60),it('bx-wl',3,20,90,1),it('bx-pcr',3,30,90),it('bx-kw',3,6,60,1),it('bx-sup',3,30,60)]}]}};
+  return {ex,workouts,order:['u1','l1','u2','l2'],retire:['a','b'],cycle:[['u1',0],['l1',1],['u2',3],['l2',4],['u1',7],['l1',8],['u2',10],['l2',11]]};
+}};
+function upgradeProfile(p){
+  const st=S.main.settings;if(!p||!p.up||st.up===p.up||!UPGRADES[p.up])return false;
+  const d=UPGRADES[p.up](),m=S.main;st.up=p.up;
+  Object.keys(d.ex).forEach(id=>{if(!m.exercises[id])m.exercises[id]=d.ex[id]});
+  Object.keys(d.workouts).forEach(id=>{if(!m.workouts[id])m.workouts[id]=d.workouts[id]});
+  d.retire.forEach(id=>{const w=m.workouts[id];if(w&&!/\(old\)$/.test(w.name))w.name+=' (old)'});
+  m.order=[...d.order,...m.order.filter(id=>!d.order.includes(id))];
+  /* plan: drop the retired workouts from today on, then lay the new week in on free days */
+  const now=new Date(),t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());m.plans=m.plans||{};
+  for(let i=0;i<14;i++){const dt=addDays(t0,i),k=iso(mondayOf(dt)),di=(dt.getDay()+6)%7,day=m.plans[k]&&m.plans[k][di];
+    if(day){const keep=day.filter(x=>!d.retire.includes(x.w));if(keep.length)m.plans[k][di]=keep;else delete m.plans[k][di]}}
+  d.cycle.forEach(([w,off])=>{const dt=addDays(t0,off),k=iso(mondayOf(dt)),di=(dt.getDay()+6)%7;m.plans[k]=m.plans[k]||{};if(!m.plans[k][di]||!m.plans[k][di].length)m.plans[k][di]=[{id:uid('p'),w,v:0}]});
+  return true;
+}
+/* How each exercise is done. b = Bryan's own cues for this exact exercise, m = not one of Bryan's. */
+const HOW={
+'mx-puh':['b','Wide overhand grip. At the bottom let your shoulders rise up to your ears, fully reached; do not pin them back and down. Pressure through the outside edge of the palm, fingers curled tight over the bar.'],
+'mx-hksp':['b','Elbow tucked. Your torso opens as the weight goes up and closes as it comes down. Go lighter than you think.'],
+'mx-dip':['b','His only dip cues are for holds on rings: hips behind you, chest proud, look up, feet narrow and under you. He gives no spoken cues for bar dips.'],
+'bx-yta':['b','Lie face down and reach your arms into a Y, then a T, then an A shape. From one of his warm-ups; he names the shapes but gives no detailed cues. Reps are Claude’s suggestion.'],
+'bx-hang-s':['b','Hang relaxed and fully reached. Let the arm turn inwards and the elbow rotate back. Do not pull the shoulder blades down. Feet can stay on the floor.'],
+'bx-dbp':['b','Lie on the bench with your feet up on it: toes together, heels out, knees out. Dumbbells deep to the shoulders with elbows tucked, then rotate the elbows up and out as you press. Lower slowly. Sets and reps are Claude’s suggestion.'],
+'bx-ssr':['b','Head over the front foot, light on the back foot. Row with the arm opposite the front leg. Reach the shoulder fully at the bottom, let the dumbbell turn as it comes up, elbow tight at the top. He says you can go nice and heavy.'],
+'bx-hang':['b','Relaxed, fully reached, arm turning inwards. His target is 30 seconds on one arm. Use two arms, or keep your feet on the floor, until you can.'],
+'bx-ksr':['b','Kneeling, or standing if your knees complain. Lean to the left and reach the right arm over, then the other way, and flow. Let the spine move. He does 30, which is 15 each side.'],
+'bx-fgp':['b','Palm over the top of the bar or ring. Pull until your fists reach your chest and hold briefly at the top. Build up by simply hanging in the false grip first. Reps are Claude’s suggestion.'],
+'bx-kpd':['b','Kneel sitting back on your heels, toes together, heels out. Cable or band anchored high in front. Let it pull your arm and shoulder right up, then pull the elbow in to your ribs. Belly long, chest open. Reps are Claude’s suggestion.'],
+'bx-rot':['m','Your pick for golf. No demo of his ball throws was found, so there are no Bryan cues for this one. Set up his way: split stance, feet straight, hips back, and let your torso and shoulders turn freely. Do not brace stiff.'],
+'bx-ppu':['b','From a crawl position, step one hand forward so your hands are staggered. Body low, hips in a crawl shape, not a rigid plank. Knees down is fine. He does 10, then 8, then 6 per side.'],
+'bx-ccl':['b','All fours with toes tucked. Step one arm and the opposite leg forward, lift the other arm and leg off the floor, and hold. Chest up, eyes forward. Then swap sides.'],
+'bx-rock':['b','All fours with toes tucked. Rock your hips back to your heels and forward again. He does 60 pulses.'],
+'bx-ssh':['b','Front heel up and off the ground, hip back and up, front leg bowed, back knee turned in, head over the front foot, toes spread and gripping. He holds 30 seconds each side.'],
+'bx-sss':['b','Weight in the hand opposite the front leg. Foot straight, toes gripping, light on the heel, load the front leg, head over the front foot. Chin up, back knee to the floor. Do not thrust the hips at the top. He pairs this with the Bulgarian hinge, 10 per leg.'],
+'bx-bh':['b','Back foot on a low box. Reach your hips straight back; the knee barely bends. Light on the heel, head over the standing foot. Weight held at your chest. No hip thrust at the top.'],
+'bx-sqp':['b','Feet narrow and straight. Heels light or up, hips back, knees out. Pulse at about half depth. He does 30 to 50 reps for 2 or 3 sets.'],
+'bx-hws':['b','Bum just touching the wall, hips high with a shallow knee bend, knees slightly out, heels off the ground, chest leaning forward as if you are about to jump. He holds 60 seconds.'],
+'bx-tsu':['b','Lie on your back with the weight straight up in one hand, same side knee bent, other arm out on the floor. Sit up onto the opposite elbow, then back down. He does 10 a side and starts with no weight.'],
+'bx-phr':['b','Face down, toes in, heels out. Lift your chest so the breastbone is off the floor, eyes forward. Hold for 10 breaths, then 10 side bends, then 10 reaches, one arm at a time.'],
+'bx-xss':['b','From the bottom of a split squat, drive up and lift the front leg to about hip height, then land back in the split squat. Stay low and loaded over the front leg; do not lean back. Reps are Claude’s suggestion.'],
+'bx-ssd':['b','Step back into a drop in. Weight in the hand opposite the front leg. Hinge as low as you can with hips back and heel up, head over your foot. Do not thrust the hips open at the top. Reps are Claude’s suggestion.'],
+'bx-hh':['b','Lie on your back with your feet up on the bench, feet straight. Lift your hips and hold, keeping them slightly behind you. No thrust. It can be loaded. Hold time is Claude’s suggestion.'],
+'bx-wl':['b','Heels up, hips back, head over the front foot. Step straight through each time with your arms swinging. He pairs these with the squat calf raises. Step count is Claude’s suggestion.'],
+'bx-pcr':['b','Deep squat with heels up, knees out, hips back, fingertips on the floor. Pulse your heels up and down without the knees travelling forward. He does 30.'],
+'bx-kw':['b','Half kneeling with the weight overhead in the hand on the same side as the up leg. Lower your other hand to the floor, or down to the elbow, and come back up. Press strongly through the outside of your palm. Reps are Claude’s suggestion.'],
+'bx-sup':['b','Face down with feet lifted, heels out and toes in. Lift your arms and reach forward. Hold while breathing easily into your belly. He holds 30 seconds.']};
+/* per-exercise notes the person keeps themselves: a setup note (cable height, bench angle, band) and a demo link. Lives in their account data, never in this file. */
+const XN=id=>(S.main.xn&&S.main.xn[id])||{};
+const okUrl=u=>/^https:\/\/[^\s"'<>]+$/.test(u||'');
+function setXN(id,o){S.main.xn=S.main.xn||{};const c=Object.assign({},S.main.xn[id],o);Object.keys(c).forEach(k=>{if(!c[k])delete c[k]});if(Object.keys(c).length)S.main.xn[id]=c;else delete S.main.xn[id]}
+/* a pack is a private link the owner opens once: it fills in demo links for their exercises */
+function stashPack(){const m=/^#pack=([A-Za-z0-9_-]+)$/.exec(location.hash||'');if(!m)return;try{localStorage.setItem('sage-pack',m[1]);history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
+function applyPack(){let raw;try{raw=localStorage.getItem('sage-pack')}catch(e){}if(!raw)return false;let n=0;
+  try{const j=JSON.parse(decodeURIComponent(escape(atob(raw.replace(/-/g,'+').replace(/_/g,'/')))));Object.keys(j).forEach(id=>{const u=String(j[id]);if(X(id)&&okUrl(u)){setXN(id,{vid:u});n++}})}catch(e){}
+  try{localStorage.removeItem('sage-pack')}catch(e){}if(n)setTimeout(()=>toast(n+' demo videos added'),600);return n>0}
 function seedProfile(p){
   const st=S.main.settings;if(!p||!p.seed||st.seeded===p.seed||!SEEDS[p.seed])return false;
   st.seeded=p.seed;if(S.sessions.length||S.main.active)return true;
@@ -949,6 +1028,8 @@ async function initCloud(){
     S.sessions=Object.values(byId).sort((a,b)=>a.startedAt-b.startedAt);
     if(API&&profileFlags(PROFILES[apiUser]))mig=true;
     if(API&&seedProfile(PROFILES[apiUser]))mig=true;
+    if(API&&upgradeProfile(PROFILES[apiUser]))mig=true;
+    if(applyPack())mig=true;
     if(HOME()&&!ui.moved)ui.tab='today';
     if(!rmain||localNewer||mig)saveMain();else persistLocal();
     cloud='cloud';coachInit();setPalette(S.main.settings.palette||'sage');if(!$('#sheet').classList.contains('on')&&!document.activeElement.matches('input'))render();
@@ -1252,7 +1333,8 @@ function setRow(ei,si,label){
   return `<div class="set ${e.type==='w'?'':'one'} ${s.done?'done':''} ${s.pb?'pb':''}"><span class="lab">${label}</span>${flds}<button class="chk" data-act="check" data-e="${ei}" data-s="${si}" aria-label="${s.done?'Undo set':'Log set'}" aria-pressed="${!!s.done}">${s.pb?'★':'✓'}</button></div>`;
 }
 function exHead(ei,letter){const e=S.main.active.entries[ei],x=X(e.ex)||{p:'generic'};
-  return `<div class="row exhd">${fig(x.p)}<div style="flex:1;min-width:0"><div class="ex-n">${letter?`<span class="ltr">${letter}</span> `:''}${esc(e.name)}</div><div class="small muted">${esc(lastLine(e.ex,e.type))}</div></div><button class="restb" data-act="swap" data-e="${ei}" aria-label="Swap ${esc(e.name)}">${ICON.swap} Swap</button></div>`}
+  return `<div class="row exhd">${fig(x.p)}<div style="flex:1;min-width:0"><div class="ex-n">${letter?`<span class="ltr">${letter}</span> `:''}${esc(e.name)}</div><div class="small muted">${esc(lastLine(e.ex,e.type))}</div></div><button class="restb" data-act="swap" data-e="${ei}" aria-label="Swap ${esc(e.name)}">${ICON.swap} Swap</button></div>${xmeta(e.ex)}`}
+function xmeta(id){const n=XN(id);return `<div class="xmeta"><button class="xchip ${n.note?'on':''}" data-act="ex-info" data-ex="${id}">${n.note?'Setup: '+esc(n.note):(HOW[id]?'How to, setup note':'+ Setup note')}</button>${okUrl(n.vid)?`<a class="xchip" href="${esc(n.vid)}" target="_blank" rel="noopener">▶ Demo</a>`:''}</div>`}
 function vSession(){
   const A=S.main.active,w=W(A.workoutId)||{c:A.c||1};
   const gs=groupsOf(A.entries);
@@ -1941,11 +2023,16 @@ function applyPick(id){
 function exInfo(id){
   const x=X(id);if(!x)return;const st=stats(id,S.sessions);
   const best=st.has?(x.t==='w'?fmt(st.maxW)+' kg × '+(st.repsAt[st.maxW]||0):st.maxR+(x.t==='t'?' seconds':' reps')):null;
-  const subs=(x.s||[]).filter(X);
+  const subs=(x.s||[]).filter(X),how=HOW[id],xn=XN(id);
   sheet(`<div class="row">${fig(x.p,'lg')}<div><h2>${esc(x.n)}</h2><p class="muted">${esc(x.g||'Other')} · ${esc(x.q||'Custom')}</p><p class="small muted">${x.t==='w'?'Logged as weight and reps':x.t==='t'?'Logged as a timed hold':'Logged as reps'}</p></div></div>
     ${best?`<div class="card" style="background:var(--surface2);box-shadow:none"><span class="small muted">Your best</span><div class="ex-n num">${best}</div></div>`:''}
+    ${how?`<h3>${how[0]==='b'?'How Bryan does it':'How to do it'}</h3><p class="small">${esc(how[1])}</p>`:''}
+    ${okUrl(xn.vid)?`<a class="btn ghost wide" href="${esc(xn.vid)}" target="_blank" rel="noopener">${ICON.play}Watch demo</a>`:''}
+    <label class="lbl" for="xn-note">Your setup note</label><input class="txt" id="xn-note" value="${esc(xn.note||'')}" maxlength="80" autocomplete="off" placeholder="e.g. cable height 12, bench notch 3, green band">
+    <details class="xdet"><summary class="small muted">Demo video link</summary><input class="txt" id="xn-vid" value="${esc(xn.vid||'')}" maxlength="200" autocomplete="off" inputmode="url" placeholder="https://..."></details>
+    <button class="btn wide" data-act="xn-save" data-ex="${id}">Save note</button>
     ${subs.length?`<h3>Good substitutes</h3><div class="xlist">${subs.map(s=>exRow(s,'ex-info')).join('')}</div>`:''}
-    <button class="btn wide" data-act="close">Close</button>${isCustom(id)?`<button class="btn danger" data-act="ex-del" data-ex="${id}">Delete this exercise</button>`:''}`);
+    <button class="btn quiet" data-act="close">Close</button>${isCustom(id)?`<button class="btn danger" data-act="ex-del" data-ex="${id}">Delete this exercise</button>`:''}`);
 }
 
 function stepsPrev(){
@@ -2310,6 +2397,7 @@ document.addEventListener('click',e=>{
     case 'pick':applyPick(d.ex);break;
     case 'pick-all':{const p=ui.pick;openPicker(p.mode,p.arg,'Choose a substitute');break}
     case 'ex-info':exInfo(d.ex);break;
+    case 'xn-save':{const v=$('#xn-vid').value.trim();if(v&&!okUrl(v)){toast('That link needs to start with https://');break}setXN(d.ex,{note:$('#xn-note').value.trim(),vid:v});closeSheet();saveMain();render();toast('Saved');break}
     case 'ex-new':{const keep=ui.pick;sheet(`<h2>New exercise</h2><label class="lbl" for="nx-name">Name</label><input class="txt" id="nx-name" maxlength="40" autocomplete="off" placeholder="e.g. Kettlebell Swing">
         <label class="lbl" for="nx-type">How you log it</label><select id="nx-type"><option value="w">Weight and reps</option><option value="r">Reps only</option><option value="t">Timed hold</option></select>
         <label class="lbl" for="nx-group">Body area</label><select id="nx-group">${GROUPS.map(g=>`<option>${g}</option>`).join('')}</select>
