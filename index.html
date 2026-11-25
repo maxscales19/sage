@@ -682,7 +682,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795588492;
+const BUILD=1795588830;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -896,7 +896,7 @@ const API=((document.querySelector('meta[name="sage-api"]')||{}).content||'').tr
 const KEYLS='sage-key-v1';
 const USERLS='sage-user-v1';
 /* what a brand-new account starts with, by the name typed on the way in */
-const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:7,coach:true,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c','bryan1d']}};
+const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:7,coach:true,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c','bryan1d','bryan1e']}};
 let apiKey=null,apiUser='',webSteps=null,webStepsAt=0,retries=0;
 if(API){try{apiKey=localStorage.getItem(KEYLS);apiUser=localStorage.getItem(USERLS)||''}catch(e){}}
 function applyProfile(p){
@@ -945,6 +945,9 @@ bryan1b:()=>({patch:m=>{const w=m.workouts.u2;if(w)w.vars.forEach(v=>v.items.for
 /* retired workouts stay under Workouts but leave the Week screen */
 bryan1d:()=>({patch:m=>{const a=m.workouts.u1,b=m.workouts.u2;if(!a||!b)return;const ia=a.vars[0].items.findIndex(x=>x.ex==='mx-puh'),ib=b.vars[0].items.findIndex(x=>x.ex==='bx-fgp');if(ia<0||ib<0)return;
   const t=a.vars[0].items[ia];a.vars[0].items[ia]=b.vars[0].items[ib];b.vars[0].items[ib]=t;if(a.sub==='Heavy pull ups, dumbbell press')a.sub='False grip pull ups, dumbbell press';if(b.sub==='False grip pull ups, dips')b.sub='Heavy pull ups, dips'}}),
+bryan1e:()=>({patch:m=>{const a=m.workouts.u1;if(!a||!m.exercises['mx-puv'])return;const L=a.vars[0].items,i=L.findIndex(x=>x.ex==='bx-fgp');if(i<0||L.some(x=>x.ex==='mx-puv'))return;
+  const fg=L[i];L[i]={ex:'mx-puv',sets:3,reps:10,rest:120,link:false};const h=L.findIndex(x=>x.ex==='bx-hang');fg.link=true;fg.rest=60;if(h>=0)L[h]=fg;else{const k=L.findIndex(x=>x.ex==='bx-ksr');if(k>=0)L.splice(k,0,fg);else{fg.link=false;L.push(fg)}}
+  if(a.sub==='False grip pull ups, dumbbell press')a.sub='Volume pull ups, dumbbell press'}}),
 bryan1c:()=>({patch:m=>{['a','b'].forEach(id=>{const w=m.workouts[id];if(w&&/\(old\)$/.test(w.name))w.old=true})}}),
 bryan1:()=>{
   const E=(n,t,g,p)=>({n,t,g,q:'Custom',p,s:[]}),it=(ex,sets,reps,rest,link)=>({ex,sets,reps,rest,link:!!link});
