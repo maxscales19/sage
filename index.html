@@ -682,7 +682,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795588282;
+const BUILD=1795588492;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -2864,6 +2864,8 @@ async function checkUpdate(){
     const go=()=>location.replace(location.pathname+'?v='+m[1]);chain.then(go,go);
   }catch(e){}
 }
+/* a cold start can be handed a stale saved copy by the phone, so look for a newer one straight after opening too */
+setTimeout(()=>checkUpdate(),3000);
 /* pick up changes made elsewhere (for example a shortcut sync) when the app comes back to the front */
 let lastPull=Date.now();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){if(mainTimer!==null&&col){clearTimeout(mainTimer);mainTimer=null;pushMain()}return}
