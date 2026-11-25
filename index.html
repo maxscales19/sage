@@ -693,7 +693,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795641857;
+const BUILD=1795642997;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1315,7 +1315,7 @@ function setLog(ds,o){S.main.log=S.main.log||{};const c=Object.assign({},S.main.
   const keep=iso(addDays(new Date(),-120));Object.keys(S.main.log).forEach(k=>{if(k<keep)delete S.main.log[k]})}
 const hrs=v=>(Math.round(v*2)/2)+' h';
 function sleepCard(){
-  if(!DAYLOG()||ui.weekOff!==0)return '';const today=iso(new Date()),L=logOf(today);
+  if(!DAYLOG()||!S.main.settings.sleepcard||ui.weekOff!==0)return '';const today=iso(new Date()),L=logOf(today);
   if(L.sl!=null&&!ui.slEdit)return `<div class="card slp"><div><div class="small muted">Sleep last night</div><div class="ex-n num">${hrs(L.sl)}</div></div><button class="btn ghost sm" data-act="sl-edit">Change</button></div>`;
   const last=Object.keys(S.main.log||{}).sort().reverse().map(k=>S.main.log[k].sl).find(v=>v!=null),v=ui.slv!=null?ui.slv:L.sl!=null?L.sl:last!=null?last:7.5;
   return `<div class="card slp"><div><div class="small muted">Sleep last night</div><div class="stepper"><button data-act="sl-step" data-n="-0.5" aria-label="Half an hour less">–</button><b class="num" id="slv">${hrs(v)}</b><button data-act="sl-step" data-n="0.5" aria-label="Half an hour more">+</button></div></div><button class="btn sm" data-act="sl-save" data-v="${v}">Log</button></div>`;
@@ -2769,6 +2769,7 @@ document.addEventListener('click',e=>{
     case 'settings':sheet(`<h2>Settings</h2>
       <div class="row between"><div><b>Rest timer sound</b><div class="small muted">A short chime when rest is over.</div></div><button class="btn ${S.main.settings.sound?'':'ghost'} sm" data-act="sound">${S.main.settings.sound?'On':'Off'}</button></div>
       <div><b>Look</b><div class="small muted">Pick a colour, then match your phone or go always light or dark.</div><div class="seg scroll" role="group" aria-label="Colour" style="margin-top:8px">${PALETTES.map(([k,n])=>`<button class="${palette===k?'on':''}" data-act="palette" data-t="${k}" aria-pressed="${palette===k}"><i class="sw" data-p="${k}"></i>${n}</button>`).join('')}</div><div class="seg" role="group" aria-label="Look" style="margin-top:8px">${[['auto','Match phone'],['light','Light'],['dark','Dark']].map(([k,n])=>`<button class="${theme===k?'on':''}" data-act="theme" data-t="${k}" aria-pressed="${theme===k}">${n}</button>`).join('')}</div></div>
+      ${DAYLOG()?`<div class="row between"><div><b>Sleep card</b><div class="small muted">A card on the Week tab to log last night’s sleep, so your coach can set it against your training.</div></div><button class="btn ${S.main.settings.sleepcard?'':'ghost'} sm" data-act="flag" data-k="sleepcard">${S.main.settings.sleepcard?'On':'Off'}</button></div>`:''}
       <div class="row between"><div><b>Today screen</b><div class="small muted">A home screen with today’s numbers, plan and physio at a glance.</div></div><button class="btn ${HOME()?'':'ghost'} sm" data-act="flag" data-k="home">${HOME()?'On':'Off'}</button></div>
       <div class="row between"><div><b>Levels and XP</b><div class="small muted">The level name and XP. Achievements stay either way.</div></div><button class="btn ${LV()?'':'ghost'} sm" data-act="flag" data-k="levels">${LV()?'On':'Off'}</button></div>
       ${API?`<div class="row between"><div><b>Coach</b><div class="small muted" id="cst">${coachLine()}</div></div><button class="btn ${COACHON()?'':'ghost'} sm" data-act="flag" data-k="coach">${COACHON()?'On':'Off'}</button></div>`:''}
