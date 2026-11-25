@@ -622,6 +622,11 @@ textarea.inp{resize:vertical;line-height:1.4}
 .xdet{margin:10px 0 4px}.xdet summary{cursor:pointer;padding:6px 0}
 a.btn{text-decoration:none}
 .ukey{margin:2px 0 8px}.ukey b{color:var(--ink)}
+/* stop iPhone double-tap zoom on quick taps, and focus zoom on small text boxes */
+button,a,input,select,textarea,label,summary,[data-act]{touch-action:manipulation}
+input,select,textarea{font-size:16px}
+.fld button{width:clamp(28px,9vw,36px)}
+.set.one .fld button{width:56px}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -642,7 +647,7 @@ a.btn{text-decoration:none}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795569411;
+const BUILD=1795569757;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -856,7 +861,7 @@ const API=((document.querySelector('meta[name="sage-api"]')||{}).content||'').tr
 const KEYLS='sage-key-v1';
 const USERLS='sage-user-v1';
 /* what a brand-new account starts with, by the name typed on the way in */
-const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:6,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b']}};
+const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:6,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c']}};
 let apiKey=null,apiUser='',webSteps=null,webStepsAt=0,retries=0;
 if(API){try{apiKey=localStorage.getItem(KEYLS);apiUser=localStorage.getItem(USERLS)||''}catch(e){}}
 function applyProfile(p){
@@ -902,6 +907,8 @@ const SEEDS={paddle1:()=>{
 const UPGRADES={
 /* tidy-up for accounts that took bryan1 before it was adjusted: only touches values still at their original number */
 bryan1b:()=>({patch:m=>{const w=m.workouts.u2;if(w)w.vars.forEach(v=>v.items.forEach(it=>{if((it.ex==='bx-fgp'||it.ex==='mx-dip')&&it.rest===150)it.rest=120}))}}),
+/* retired workouts stay under Workouts but leave the Week screen */
+bryan1c:()=>({patch:m=>{['a','b'].forEach(id=>{const w=m.workouts[id];if(w&&/\(old\)$/.test(w.name))w.old=true})}}),
 bryan1:()=>{
   const E=(n,t,g,p)=>({n,t,g,q:'Custom',p,s:[]}),it=(ex,sets,reps,rest,link)=>({ex,sets,reps,rest,link:!!link});
   const ex={'bx-yta':E('Warm-up: Prone Y-T-A Reaches','r','Shoulders','plank'),'bx-hang-s':E('Warm-up: Relaxed Hang','t','Back','hang'),
@@ -1261,7 +1268,7 @@ function vWeek(){
       return `<button class="pill ${dn2?'done':''}" style="--c:var(--w${w.c})" data-drag="entry" data-act="entry" data-day="${i}" data-id="${e.id}" data-label="${esc(nm)}" data-c="${w.c}">${ICON.drag}<span class="nm">${esc(nm)}</span>${dn2?'<span class="tick">✓</span>':''}</button>`}).join('');
     return `<div class="day ${ds===today?'today':''}" data-drop="${i}"><div><div class="dn">${dn}</div><div class="dd num">${d.getDate()} ${MON[d.getMonth()]}</div></div>
       <div class="slot">${pills}${actsOn(ds).map(a=>a.type==='Steps'&&GW()?`<button class="actl st cool" data-act="act-edit" data-id="${a.id}"><span>${ICON.watch}${esc(actLine(a))}</span><i style="width:${Math.min(100,Math.round(a.steps/stepGoal()*100))}%"></i></button>`:`<button class="actl ${a.type==='Steps'?'st':''}" data-act="act-edit" data-id="${a.id}">${esc(actLine(a))}</button>`).join('')}${pills||actsOn(ds).length?'':'<span class="empty">Rest day</span>'}</div><button class="add" data-act="day-add" data-day="${i}" aria-label="Add a workout to ${dn}">+</button></div>`}).join('');
-  const tray=S.main.order.filter(W).map(id=>{const w=W(id);return `<button class="chip" style="--c:var(--w${w.c})" data-drag="w" data-w="${id}" data-label="${esc(w.name)}" data-c="${w.c}" data-act="tray">${ICON.drag}<span>${esc(w.name)}</span></button>`}).join('');
+  const tray=S.main.order.filter(id=>W(id)&&!W(id).old).map(id=>{const w=W(id);return `<button class="chip" style="--c:var(--w${w.c})" data-drag="w" data-w="${id}" data-label="${esc(w.name)}" data-c="${w.c}" data-act="tray">${ICON.drag}<span>${esc(w.name)}</span></button>`}).join('');
   const label=ui.weekOff===0?'This week':ui.weekOff===1?'Next week':ui.weekOff===-1?'Last week':'Week of '+nice(key);
   const isStarter=S.main.starter===key&&!S.sessions.length;
   return `<div class="row between"><button class="mini" data-act="week" data-d="-1" aria-label="Previous week">‹</button>
