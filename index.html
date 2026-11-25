@@ -663,6 +663,7 @@ input,select,textarea{font-size:16px}
 .ndel{width:32px;height:32px;border:0;background:none;color:var(--muted);font-size:20px;border-radius:50%}
 .chead{position:sticky;top:0;z-index:5;background:var(--bg);margin:0 -16px;padding:6px 16px 8px}.chead+p{margin-top:-8px}
 #pprev{display:flex;gap:10px;flex-wrap:wrap}.pmsgs{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:6px}.pmsgs .pmsg{max-width:96px;max-height:96px;margin:0}.pmsgs .pmsg:only-child{max-width:180px;max-height:180px}
+.svsum .cmd{margin-top:6px}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -683,7 +684,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795591577;
+const BUILD=1795640762;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -897,7 +898,7 @@ const API=((document.querySelector('meta[name="sage-api"]')||{}).content||'').tr
 const KEYLS='sage-key-v1';
 const USERLS='sage-user-v1';
 /* what a brand-new account starts with, by the name typed on the way in */
-const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:7,coach:true,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c','bryan1d','bryan1e']}};
+const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:7,coach:true,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c','bryan1d','bryan1e','bryan1f']}};
 let apiKey=null,apiUser='',webSteps=null,webStepsAt=0,retries=0;
 if(API){try{apiKey=localStorage.getItem(KEYLS);apiUser=localStorage.getItem(USERLS)||''}catch(e){}}
 function applyProfile(p){
@@ -949,6 +950,9 @@ bryan1d:()=>({patch:m=>{const a=m.workouts.u1,b=m.workouts.u2;if(!a||!b)return;c
 bryan1e:()=>({patch:m=>{const a=m.workouts.u1;if(!a||!m.exercises['mx-puv'])return;const L=a.vars[0].items,i=L.findIndex(x=>x.ex==='bx-fgp');if(i<0||L.some(x=>x.ex==='mx-puv'))return;
   const fg=L[i];L[i]={ex:'mx-puv',sets:3,reps:10,rest:120,link:false};const h=L.findIndex(x=>x.ex==='bx-hang');fg.link=true;fg.rest=60;if(h>=0)L[h]=fg;else{const k=L.findIndex(x=>x.ex==='bx-ksr');if(k>=0)L.splice(k,0,fg);else{fg.link=false;L.push(fg)}}
   if(a.sub==='False grip pull ups, dumbbell press')a.sub='Volume pull ups, dumbbell press'}}),
+bryan1f:()=>({patch:m=>{const x=m.xn=m.xn||{},at=(id,t)=>{const o=x[id];if(o&&o.vid&&!/[?&]t=/.test(o.vid))o.vid+='?t='+t};at('bx-hang',158);at('bx-hang-s',158);at('bx-yta',25);
+  if(x['bx-ksr']&&x['bx-ksr'].vid)x['bx-ksr'].vid=x['bx-ksr'].vid.replace(/([?&]t=)740$/,'$1757');if(x['mx-puh']&&x['mx-puh'].vid&&!(x['mx-puv']&&x['mx-puv'].vid))x['mx-puv']=Object.assign({},x['mx-puv'],{vid:x['mx-puh'].vid});
+  ['u1','u2'].forEach(id=>{const w=m.workouts[id];if(w)w.vars.forEach(v=>v.items.forEach(it=>{if(it.ex==='bx-yta'&&it.reps===10)it.reps=5}))})}}),
 bryan1c:()=>({patch:m=>{['a','b'].forEach(id=>{const w=m.workouts[id];if(w&&/\(old\)$/.test(w.name))w.old=true})}}),
 bryan1:()=>{
   const E=(n,t,g,p)=>({n,t,g,q:'Custom',p,s:[]}),it=(ex,sets,reps,rest,link)=>({ex,sets,reps,rest,link:!!link});
@@ -961,7 +965,7 @@ bryan1:()=>{
     'bx-tsu':E('Turkish Sit-Up','w','Core','crunch'),'bx-phr':E('Prone Hold and Reach','r','Core','plank'),'bx-xss':E('Explosive Split Squat','r','Legs','lunge'),
     'bx-ssd':E('Split Stance Deadlift, One Dumbbell','w','Glutes','rdl'),'bx-hh':E('Hamstring Hold, Feet on Bench','t','Glutes','bridge'),'bx-wl':E('Walking Lunge, Heels Up','w','Legs','lunge'),
     'bx-pcr':E('Paleo Squat Calf Raises','r','Legs','calf'),'bx-kw':E('Kneeling Windmill','w','Core','sideplank'),'bx-sup':E('Superman Hold','t','Core','plank')};
-  const wu=()=>[it('bx-yta',2,10,30,1),it('bx-hang-s',2,20,30)],wl=()=>[it('bx-rock',2,60,30,1),it('bx-ssh',2,30,30)];
+  const wu=()=>[it('bx-yta',2,5,30,1),it('bx-hang-s',2,20,30)],wl=()=>[it('bx-rock',2,60,30,1),it('bx-ssh',2,30,30)];
   const workouts={
     u1:{name:'Upper 1',sub:'Heavy pull ups, dumbbell press',c:1,vars:[{items:[...wu(),it('mx-puh',5,5,180),it('bx-dbp',3,10,120),it('bx-ssr',3,10,90),it('mx-hksp',2,12,90),it('bx-hang',3,30,60,1),it('bx-ksr',3,30,60)]}]},
     l1:{name:'Lower 1',sub:'Split squat day, core',c:3,vars:[{items:[...wl(),it('bx-sss',3,10,120,1),it('bx-bh',3,10,120),it('bx-sqp',2,30,90),it('bx-hws',3,60,60),it('bx-tsu',3,10,60,1),it('bx-phr',3,10,60)]}]},
@@ -988,14 +992,15 @@ function addProgramme(d){
 }
 /* How each exercise is done. b = Bryan's own cues for this exact exercise, m = not one of Bryan's. */
 const HOW={
+'mx-puv':['b','Same pull-up as the heavy one, lighter band, more reps. Overhand grip outside the shoulders. At the bottom let the shoulders rise to your ears, fully reached; do not pin them back and down. As you lower, let the elbows come forward. His demo has both knees on a band strung across the rack. Reps are Claude’s suggestion.'],
 'mx-puh':['b','Wide overhand grip. At the bottom let your shoulders rise up to your ears, fully reached; do not pin them back and down. Pressure through the outside edge of the palm, fingers curled tight over the bar.'],
 'mx-hksp':['b','Elbow tucked. Your torso opens as the weight goes up and closes as it comes down. Go lighter than you think.'],
 'mx-dip':['b','His only dip cues are for holds on rings: hips behind you, chest proud, look up, feet narrow and under you. He gives no spoken cues for bar dips.'],
-'bx-yta':['b','Lie face down and reach your arms into a Y, then a T, then an A shape. From one of his warm-ups; he names the shapes but gives no detailed cues. Reps are Claude’s suggestion.'],
-'bx-hang-s':['b','Hang relaxed and fully reached. Let the arm turn inwards and the elbow rotate back. Do not pull the shoulder blades down. Feet can stay on the floor.'],
+'bx-yta':['b','Chest down on the ground, hands just below the shoulders, toes in and heels out. Relax and get loose. Reach forward into a Y, out to the sides for a T, then down and back for an A. Y, T, A is one rep. He does 5 reps, for two rounds.'],
+'bx-hang-s':['b','Hang relaxed and fully reached. Let the arm turn inwards and the elbow rotate back. Do not pull the shoulder blades down. Feet off the ground is the real hang; he tucks his legs up when the bar is low. Feet on the floor, leaning away with one leg stepped back, is his easier stretch version.'],
 'bx-dbp':['b','Lie on the bench with your feet up on it: toes together, heels out, knees out. Dumbbells deep to the shoulders with elbows tucked, then rotate the elbows up and out as you press. Lower slowly. Sets and reps are Claude’s suggestion.'],
 'bx-ssr':['b','Head over the front foot, light on the back foot. Row with the arm opposite the front leg. Reach the shoulder fully at the bottom, let the dumbbell turn as it comes up, elbow tight at the top. He says you can go nice and heavy.'],
-'bx-hang':['b','Relaxed, fully reached, arm turning inwards. His target is 30 seconds on one arm. Use two arms, or keep your feet on the floor, until you can.'],
+'bx-hang':['b','Relaxed, fully reached, arm turning inwards. His target is 30 seconds on one arm, feet off the ground (tuck your legs if the bar is low). Until you can, use two arms, or keep your feet on the floor and lean away.'],
 'bx-ksr':['b','Kneeling, or standing if your knees complain. Lean to the left and reach the right arm over, then the other way, and flow. Let the spine move. He does 30, which is 15 each side.'],
 'bx-fgp':['b','Palm over the top of the bar or ring. Pull until your fists reach your chest and hold briefly at the top. Build up by simply hanging in the false grip first. Reps are Claude’s suggestion.'],
 'bx-kpd':['b','Kneel sitting back on your heels, toes together, heels out. Cable or band anchored high in front. Let it pull your arm and shoulder right up, then pull the elbow in to your ribs. Belly long, chest open. Reps are Claude’s suggestion.'],
@@ -1518,6 +1523,18 @@ function vHistory(){
     ${names.length>1?`<div class="fchips"><button class="${f==='all'?'on':''}" data-act="hist-f" data-f="all">All</button>${names.map(n=>`<button class="${f===n?'on':''}" data-act="hist-f" data-f="${esc(n)}">${esc(n)}</button>`).join('')}</div>`:''}
     ${h||'<div class="card"><p class="muted">Your finished workouts will be listed here.</p></div>'}`;
 }
+/* the coach's write-up for a workout, kept with it so it can be read again later */
+const sumOf=id=>{const m=S.coach&&S.coach.sums&&S.coach.sums[id];return m&&m.t?m.t:''};
+function svSum(id){
+  if(!COACH())return '';const t=sumOf(id);
+  if(t)return `<div class="card svsum"><small style="color:var(--accent-text)">From your coach</small><div class="cmd">${md(t)}</div></div>`;
+  return coachCfg?`<div class="card svsum" id="svsum"><small style="color:var(--accent-text)">From your coach</small><div class="cmd"><button class="btn ghost sm" data-act="sv-sum" data-id="${id}">Get the coach's review of this workout</button></div></div>`:'';
+}
+async function svSumGet(id){
+  const el=()=>$('#svsum .cmd');if(!el())return;el().innerHTML='<span class="dots"><i></i><i></i><i></i></span>';let acc='';
+  try{const t=await coachAsk({type:'summary',sid:id},x=>{acc+=x;if(el())el().innerHTML=md(acc)});if(!S.coach)S.coach={msgs:[]};(S.coach.sums=S.coach.sums||{})[id]={t,ts:Date.now()};persistLocal();if(el())el().innerHTML=md(t)}
+  catch(e){if(el())el().innerHTML='<p class="muted">'+esc(e.message)+'</p>'}
+}
 /* one workout, full screen: every set, how it compares with the time before, and arrows to the next one */
 function vSessView(){
   const sc=ui.screen.sv,all=histAll(),i=all.findIndex(x=>x.id===sc.id),s=all[i];if(!s){ui.screen={hist:{f:'all'}};return vHistory()}
@@ -1530,6 +1547,7 @@ function vSessView(){
   return `<div class="sess-h"><button class="back" data-act="back">‹ All workouts</button><span class="small muted num">${i+1} of ${all.length}</span></div>
     <div><span class="tag" style="background:var(--w${s.c||1});color:#fff">${DAYS[(d.getDay()+6)%7]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}</span><h2 style="font-size:28px;margin-top:8px">${esc(s.name)}</h2></div>
     <div class="tiles">${tiles}</div>
+    ${svSum(s.id)}
     ${cards}${s.cls?`<div class="card"><div class="ex-n">${esc(s.cls.name)}</div><div class="small muted">Class done ✓</div></div>`:''}${!cards&&!s.cls?'<div class="card"><p class="muted">No sets were ticked off in this one.</p></div>':''}
     <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="sess" data-id="${i<all.length-1?all[i+1].id:''}" ${i<all.length-1?'':'disabled'}>‹ Older</button><button class="btn ghost" style="flex:1" data-act="sess" data-id="${i>0?all[i-1].id:''}" ${i>0?'':'disabled'}>Newer ›</button></div>
     <button class="btn quiet wide" data-act="sess-ask" data-id="${s.id}">Delete this workout</button>`;
@@ -2099,7 +2117,7 @@ async function briefAsk(force){
 /* after a workout: a short write-up on the finish sheet */
 async function coachSummary(sid){
   const el=()=>$('#csum .cmd');let acc='';
-  try{const t=await coachAsk({type:'summary',sid},x=>{acc+=x;if(el())el().innerHTML=md(acc)});if(el())el().innerHTML=md(t)}
+  try{const t=await coachAsk({type:'summary',sid},x=>{acc+=x;if(el())el().innerHTML=md(acc)});if(t){if(!S.coach)S.coach={msgs:[]};(S.coach.sums=S.coach.sums||{})[sid]={t,ts:Date.now()};persistLocal()}if(el())el().innerHTML=md(t)}
   catch(e){if(e.code==='down'||e.code==='off'){const c=$('#csum');if(c)c.remove()}else if(el())el().innerHTML='<p class="muted">'+esc(e.message)+'</p>'}
 }
 
@@ -2762,6 +2780,7 @@ document.addEventListener('click',e=>{
     case 'reset':sheet(`<h2>Reset everything?</h2><p class="muted">This deletes every logged workout and activity, your plans, your custom exercises and any changes to the workouts. It cannot be undone.</p><button class="btn danger wide" data-act="reset-yes">Yes, delete it all</button><button class="btn wide" data-act="close">Cancel</button>`);break;
     case 'reset-yes':{const ids=S.sessions.map(s=>s.id),dels=[...(S.main.deleted||[]),...ids];S=defaults();S.main.deleted=dels;migrate();if(col)ids.forEach(id=>{chain=chain.then(()=>col&&col.doc(id).delete()).catch(cloudErr)});stopRest();closeSheet();ui.screen=null;ui.tab='week';saveMain();render();break}
     case 'sess':{if(!d.id||!S.sessions.some(x=>x.id===d.id))break;closeSheet();ui.screen={sv:{id:d.id,f:sc&&sc.hist?sc.hist.f:sc&&sc.sv?sc.sv.f:'all'}};render();$('#main').scrollTop=0;break}
+    case 'sv-sum':svSumGet(d.id);break;
     case 'sess-del':S.sessions=S.sessions.filter(x=>x.id!==d.id);S.main.deleted.push(d.id);if(col){const id=d.id;chain=chain.then(()=>col&&col.doc(id).delete()).catch(cloudErr)}closeSheet();if(ui.screen&&ui.screen.sv)ui.screen={hist:{f:ui.screen.sv.f||'all'}};saveMain();render();break;
   }
 });
