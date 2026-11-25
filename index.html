@@ -640,6 +640,27 @@ input,select,textarea{font-size:16px}
 .pthumb button{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-size:16px;line-height:1}
 .pmsg{display:block;max-width:180px;max-height:180px;border-radius:12px;margin:0 0 6px}.pflag{display:block;opacity:.7;font-size:12px}
 .micb2{flex:none;padding:0;width:44px}
+.recbar{display:none;flex:1;align-items:center;gap:8px}
+#chatf.rec>*:not(.recbar),#chatf.wait>*:not(.recbar){display:none}
+#chatf.rec .recbar,#chatf.wait .recbar{display:flex}
+.recmid{flex:1;height:48px;border-radius:24px;border:1.5px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:12px;padding:0 16px;min-width:0}
+.recwave{flex:1;height:26px;display:flex;align-items:center;gap:3px;overflow:hidden}
+.recwave i{flex:1;max-width:4px;height:12%;min-height:3px;border-radius:2px;background:var(--accent);animation:recp 1s ease-in-out infinite}
+.recwave i:nth-child(3n){animation-delay:.2s}.recwave i:nth-child(3n+1){animation-delay:.45s}.recwave i:nth-child(4n){animation-delay:.7s}
+.recwave.live i{animation:none;transition:height .07s linear}
+@keyframes recp{0%,100%{height:14%}50%{height:70%}}
+.rectime{font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;color:var(--muted)}
+.rectxt{display:none;flex:1;color:var(--muted);font-size:16px}
+#chatf.wait .recwave,#chatf.wait .rectime{display:none}#chatf.wait .rectxt{display:block}
+#chatf.wait .rectxt:after{content:'';display:inline-block;width:1.2em;text-align:left;animation:recd 1.2s steps(4) infinite;overflow:hidden;vertical-align:bottom}
+#chatf.wait .recbar .btn{opacity:.4;pointer-events:none}
+@keyframes recd{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+.sayv{height:36px;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:14px;padding:0 10px;max-width:150px}
+.saytog{width:40px;min-width:40px;height:40px;min-height:40px;padding:0;border-radius:50%}
+.noted{display:block;margin:8px 0 0;padding:0;border:0;background:none;color:var(--muted);font:inherit;font-size:13px;text-align:left}
+.nlist{margin-top:10px;max-height:44vh;overflow:auto}.nrow{display:flex;align-items:flex-start;gap:6px;border-top:1px solid var(--line);padding:8px 0}
+.ntext{flex:1;border:0;background:none;color:var(--ink);font:inherit;font-size:15px;text-align:left;padding:2px 0}.ntext small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.ndel{width:32px;height:32px;border:0;background:none;color:var(--muted);font-size:20px;border-radius:50%}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -660,7 +681,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795575057;
+const BUILD=1795582251;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1803,11 +1824,11 @@ function coachOnce(p,onDelta){
     if(!coachCfg)return rej(Object.assign(new Error('The coach has not been set up yet.'),{code:'off'}));
     const body=JSON.stringify(Object.assign({u:apiUser||'alex',t:coachCfg.token},p)),url=coachCfg.url;let settled=false,open=false,ws=null;
     const fail=(m,c)=>{if(!settled){settled=true;rej(Object.assign(new Error(m),{code:c||'down'}))}},ok=t=>{if(!settled){settled=true;coachUp=true;res(t)}};
-    const post=()=>fetch(url+'/api',{method:'POST',body}).then(r=>r.json()).then(j=>{if(j&&j.ok){ui.coachActs=j.acts||[];if(onDelta)onDelta(j.text);ok(j.text)}else fail((j&&j.msg)||'The coach could not answer that.',(j&&j.err)||'error')}).catch(()=>fail('Your coach is offline. The computer it runs on may be asleep or disconnected.'));
+    const post=()=>fetch(url+'/api',{method:'POST',body}).then(r=>r.json()).then(j=>{if(j&&j.ok){ui.coachActs=j.acts||[];ui.coachNotes=j.notes||null;ui.coachNoted=j.noted||null;if(onDelta)onDelta(j.text);ok(j.text)}else fail((j&&j.msg)||'The coach could not answer that.',(j&&j.err)||'error')}).catch(()=>fail('Your coach is offline. The computer it runs on may be asleep or disconnected.'));
     try{ws=new WebSocket(url.replace(/^http/,'ws')+'/ws')}catch(e){post();return}
     const t=setTimeout(()=>{if(!open){const w=ws;ws=null;try{w.close()}catch(e){}post()}},7000);
     ws.onopen=()=>{open=true;clearTimeout(t);ws.send(body)};
-    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}if(m.k==='d'){if(onDelta)onDelta(m.t)}else if(m.k==='s'){const el=$('#cnow');if(el&&!el.querySelector('.cstat'))el.insertAdjacentHTML('beforeend','<p class="cstat small muted">'+esc(m.t)+'…</p>')}else if(m.k==='end'){ui.coachActs=m.acts||[];ok(m.text)}else if(m.k==='err')fail(m.msg,m.code||'error')};
+    ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}if(m.k==='d'){if(onDelta)onDelta(m.t)}else if(m.k==='s'){const el=$('#cnow');if(el&&!el.querySelector('.cstat'))el.insertAdjacentHTML('beforeend','<p class="cstat small muted">'+esc(m.t)+'…</p>')}else if(m.k==='end'){ui.coachActs=m.acts||[];ui.coachNotes=m.notes||null;ui.coachNoted=m.noted||null;ok(m.text)}else if(m.k==='err')fail(m.msg,m.code||'error')};
     ws.onerror=()=>{if(!open&&ws){clearTimeout(t);ws=null;post()}};
     ws.onclose=()=>{if(open)fail('The coach was cut off part way through. Try again.')};
   });
@@ -1836,14 +1857,15 @@ function vCoach(){
   const watch=!!(S.garmin&&S.garmin.days),A=S.main.active;
   const qs=watch?['How did I sleep this week?','Should I train today?','How is my training going?','What should I focus on this week?']:[...(A?['How do I do this one?','Should I go up in weight?']:['What is on today?']),'How is my training going?','Weekly wrap-up'];
   const say=!!S.main.settings.say;
-  return `<div><div class="row between"><h2 style="font-size:26px">Coach</h2>${CANSAY?`<button class="btn ${say?'':'ghost'} sm" data-act="say-tog" aria-pressed="${say}">${say?'Voice on':'Voice off'}</button>`:''}</div><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p></div>
-    <div class="chat" id="chat">${ms.length?ms.map((m,i)=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?(m.img?'<small class="pflag">Photo</small>':'')+esc(m.t):md(m.t)+actCards(m)+sayBtn(i)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
+  return `<div><div class="row between"><h2 style="font-size:26px">Coach</h2><span class="row" style="gap:6px"><button class="btn ghost saytog" data-act="notes-open" aria-label="What your coach knows about you"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M6 4h12v16l-6-4-6 4z"/></svg></button>${coachCfg&&!watch?`<select id="sayv" class="sayv" aria-label="Choose your coach">${SAYV.map(v=>`<option value="${v[0]}" ${sayV()===v[0]?'selected':''}>${v[1]}</option>`).join('')}</select>`:''}<button class="btn ${say?'':'ghost'} saytog" data-act="say-tog" aria-pressed="${say}" aria-label="${say?'Spoken replies are on':'Spoken replies are off'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M4 9v6h4l5 4V5L8 9z"/>${say?'<path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>':'<path d="M17 9.5l5 5M22 9.5l-5 5"/>'}</svg></button></span></div><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p></div>
+    <div class="chat" id="chat">${ms.length?ms.map((m,i)=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?(m.img?'<small class="pflag">Photo</small>':'')+esc(m.t):md(m.t)+actCards(m)+notedLine(m)+sayBtn(i)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
     <div id="pprev">${ui.photo?`<span class="pthumb"><img alt="Photo to send" src="${ui.photo.url}"><button type="button" data-act="photo-x" aria-label="Remove photo">×</button></span>`:''}</div><input id="pfile" type="file" accept="image/*" hidden>
-    <form class="chatbar" id="chatf"><button class="btn ghost micb2" type="button" data-act="photo" aria-label="Add a photo" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><textarea id="cin" rows="1" maxlength="1500" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea>${SR||canRec?`<button class="btn ghost micb" type="button" data-act="mic" aria-label="Speak your message" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button></form>`;
+    <form class="chatbar" id="chatf"><button class="btn ghost micb2" type="button" data-act="photo" aria-label="Add a photo" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><textarea id="cin" rows="1" maxlength="1500" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea>${SR||canRec?`<button class="btn ghost micb" type="button" data-act="mic" aria-label="Speak your message" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button>
+      <div class="recbar" aria-live="polite"><button class="btn ghost" type="button" data-act="mic-x" aria-label="Cancel recording"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="20" height="20"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="recmid"><span class="recwave" aria-hidden="true">${'<i></i>'.repeat(28)}</span><span class="rectxt">Writing it out</span><b class="rectime">0:00</b></div><button class="btn" type="button" data-act="mic" aria-label="Finish recording"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div></form>`;
 }
 /* the coach reads the saved copy of the account, so send any change still waiting before asking */
 async function flushMain(){if(mainTimer!==null&&col){clearTimeout(mainTimer);mainTimer=null;pushMain()}try{await Promise.race([chain,new Promise(r=>setTimeout(r,4000))])}catch(e){}}
-const noAct=t=>String(t||'').replace(/\[\[action[\s\S]*?\]\]/g,'').replace(/\[\[action[\s\S]*$/,'').replace(/\[+$/,'').trim();
+const noAct=t=>String(t||'').replace(/\[\[(action|remember|forget)[\s\S]*?\]\]/g,'').replace(/\[\[[a-z]*$/,'').replace(/\[\[(action|remember|forget)[\s\S]*$/,'').replace(/\[+$/,'').trim();
 /* ---- changes the coach proposes: shown as cards, applied only on a tap ---- */
 const actState=id=>(S.main.coachDone||{})[id]||0;
 function actText(a){
@@ -1865,6 +1887,20 @@ function actText(a){
     case 'mealprefs':{const b=[];if(a.kcal!=null)b.push(a.kcal+' kcal a day');if(a.protein!=null)b.push(a.protein+' g protein');if(a.budget!=null)b.push(a.budget?'$'+a.budget+' a week':'no budget');return ['Change your meal targets',b.join(', ')]}
   }return ['Change',''];
 }
+const notedLine=m=>m.noted&&m.noted.length?`<button class="noted" type="button" data-act="notes-open">Noted: ${esc(m.noted.join(' · '))}</button>`:'';
+const coachNotes=()=>(S.coach&&Array.isArray(S.coach.notes)?S.coach.notes:[]);
+async function notesDo(p){
+  try{ui.coachNotes=null;await coachAsk(Object.assign({type:'notes'},p));if(!S.coach)S.coach={msgs:[]};if(ui.coachNotes)S.coach.notes=ui.coachNotes;if(p.op==='newchat')S.coach.msgs=[];persistLocal();return true}
+  catch(e){toast(e.message||'That did not work. Try again.');return false}
+}
+function notesSheet(){
+  const ns=coachNotes();
+  sheet(`<h3>What your coach knows about you</h3><p class="small muted">It writes these itself as you talk, and rewrites them when things change. It gets this list every time, so it never needs your whole chat history. Tap one to fix it.</p>
+    <div class="nlist">${ns.length?ns.map((n,i)=>`<div class="nrow"><button class="ntext" data-act="note-edit" data-i="${i}">${esc(n.t)}<small>${n.d?esc(n.d):''}</small></button><button class="ndel" data-act="note-del" data-i="${i}" aria-label="Delete this note">×</button></div>`).join(''):'<p class="muted">Nothing yet. Tell it about an injury, food you like, or how you want to be coached and it will keep it.</p>'}</div>
+    <form id="notef" class="row" style="gap:8px;margin-top:12px"><input id="note-in" class="inp" maxlength="180" placeholder="Add something yourself" aria-label="Add a note" style="flex:1"><button class="btn sm" type="submit">Add</button></form>
+    <button class="btn quiet wide" data-act="chat-new" style="margin-top:10px">Start a fresh chat (keeps these notes)</button>`);
+}
+document.addEventListener('submit',async e=>{if(e.target.id!=='notef')return;e.preventDefault();const i=$('#note-in'),t=i.value.trim();if(!t)return;const ed=i.dataset.i;if(await notesDo(ed!=null&&ed!==''?{op:'edit',i:+ed,text:t}:{op:'add',text:t}))notesSheet()});
 function actCards(m){
   if(!m||!m.acts||!m.acts.length)return '';
   return m.acts.map(a=>{const st=actState(a.id),[h,b]=actText(a);
@@ -1900,20 +1936,53 @@ function actApply(a){
    Where the browser can listen by itself and recording is not possible, that is used instead. */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null,canRec=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder);
 let mic=null,rec=null,recT=null;
-const micUI=st=>{const b=$('.micb'),i=$('#cin');if(b){b.classList.toggle('on',st==='rec');b.classList.toggle('wait',st==='wait');b.disabled=st==='wait'}if(i)i.placeholder=st==='rec'?'Listening. Tap the mic to finish':st==='wait'?'Working out what you said':'Ask your coach'};
+let recTick=null,recLv=null;
+const micUI=st=>{const f=$('#chatf');if(!f)return;f.classList.toggle('rec',st==='rec');f.classList.toggle('wait',st==='wait');
+  clearInterval(recTick);recTick=null;if(recLv){try{recLv.stop()}catch(e){}recLv=null}
+  if(st==='rec'){const t0=Date.now(),el=f.querySelector('.rectime');if(el)el.textContent='0:00';recTick=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000),e=$('#chatf .rectime');if(e)e.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},500)}};
+/* the bars follow the real loudness of the voice when the phone allows it; otherwise they just pulse */
+function micLevels(stream,ac){
+  try{if(!ac)return null;const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=256;src.connect(an);const buf=new Uint8Array(an.fftSize),hist=[];let on=true,seen=false;
+    const step=()=>{if(!on)return;an.getByteTimeDomainData(buf);let m=0;for(let i=0;i<buf.length;i++)m=Math.max(m,Math.abs(buf[i]-128));if(m>2)seen=true;hist.push(Math.min(1,m/60));if(hist.length>28)hist.shift();
+      const w=$('#chatf .recwave');if(w&&seen){w.classList.add('live');const bars=w.children;for(let i=0;i<bars.length;i++){const v=hist[hist.length-bars.length+i];bars[i].style.height=(v==null?12:Math.max(12,Math.round(v*100)))+'%'}}
+      setTimeout(step,70)};step();
+    return {stop(){on=false;try{src.disconnect()}catch(e){}try{ac.close()}catch(e){}}}}catch(e){return null}
+}
 const micPut=t=>{const el=$('#cin');if(!el||!t)return;el.value=((el.value?el.value.replace(/\s*$/,' '):'')+t).slice(0,1500);el.dispatchEvent(new Event('input',{bubbles:true}))};
 /* speaking replies: the phone's own voice. iPhones only speak after a tap, so the tap that sends a message opens the door for the reply. */
 const CANSAY=!!(window.speechSynthesis&&window.SpeechSynthesisUtterance);
-const sayBtn=i=>CANSAY?`<button class="saybtn" type="button" data-act="say" data-i="${i}" aria-label="Read this aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg></button>`:'';
+const sayBtn=i=>true?`<button class="saybtn" type="button" data-act="say" data-i="${i}" aria-label="Read this aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg></button>`:'';
 const sayText=t=>noAct(String(t||'')).replace(/```[\s\S]*?```/g,' ').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1').replace(/https?:\/\/\S+/g,'').replace(/[*_#`>|]/g,'').replace(/\s+/g,' ').trim();
 function sayVoice(){try{const v=speechSynthesis.getVoices()||[];return v.find(x=>/en[-_]AU/i.test(x.lang)&&x.localService)||v.find(x=>/en[-_]AU/i.test(x.lang))||v.find(x=>/en[-_]GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){return null}}
-function sayStop(){if(CANSAY)try{speechSynthesis.cancel()}catch(e){}}
-function sayPrime(){if(!CANSAY)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}}
 function say(t){
   if(!CANSAY)return;t=sayText(t);if(!t)return;
   try{speechSynthesis.cancel();const v=sayVoice();(t.match(/[^.!?]+[.!?]*\s*/g)||[t]).reduce((a,x)=>{if(a.length&&(a[a.length-1]+x).length<180)a[a.length-1]+=x;else a.push(x);return a},[]).forEach(x=>{const u=new SpeechSynthesisUtterance(x.trim());if(v){u.voice=v;u.lang=v.lang}else u.lang='en-AU';u.rate=1.05;speechSynthesis.speak(u)})}catch(e){}
 }
-const sayOn=()=>CANSAY&&!!S.main.settings.say;
+const SAYV=[['af_heart','Heart · warm'],['af_bella','Bella · upbeat'],['bf_emma','Emma · calm'],['am_michael','Michael · direct'],['bm_george','George · gruff']];
+const sayV=()=>S.main.settings.sayV||'af_heart';
+let sayEl=null,sayRun=0,sayUrls=[];
+const SILENT='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
+const sayPhone=say;
+function sayStop(){sayRun++;if(sayEl){try{sayEl.pause()}catch(e){}}sayUrls.forEach(u=>URL.revokeObjectURL(u));sayUrls=[];if(CANSAY)try{speechSynthesis.cancel()}catch(e){}}
+/* called inside a tap: iPhones only let sound start later if this player was first started by a tap */
+function sayPrime(){
+  try{if(!sayEl){sayEl=new Audio();sayEl.playsInline=true}sayEl.src=SILENT;const p=sayEl.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
+  if(CANSAY)try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}
+}
+async function sayClip(t,cfg){
+  const r=await fetch(cfg.url+'/tts',{method:'POST',headers:{'Content-Type':'application/json','X-Coach-User':apiUser,'X-Coach-Token':cfg.token},body:JSON.stringify({text:t,voice:sayV()})});
+  if(!/audio/.test(r.headers.get('Content-Type')||''))throw new Error('no speech');const u=URL.createObjectURL(await r.blob());sayUrls.push(u);return u;
+}
+async function sayNice(t){
+  t=sayText(t);if(!t)return;sayStop();const run=sayRun,cfg=coachCfg;
+  if(!cfg||ui.noTts||!sayEl){sayPhone(t);return}
+  const parts=(t.match(/[^.!?]+[.!?]*\s*/g)||[t]).reduce((a,x)=>{if(a.length&&(a[a.length-1]+x).length<260)a[a.length-1]+=x;else a.push(x);return a},[]).map(x=>x.trim()).filter(Boolean);
+  try{let next=sayClip(parts[0],cfg);
+    for(let i=0;i<parts.length;i++){const url=await next;if(run!==sayRun)return;next=i+1<parts.length?sayClip(parts[i+1],cfg):null;if(next)next.catch(()=>{});
+      sayEl.src=url;await sayEl.play();await new Promise((res,rej)=>{sayEl.onended=res;sayEl.onerror=rej;sayEl.onpause=()=>{if(run!==sayRun)res()}});if(run!==sayRun)return}}
+  catch(e){if(run!==sayRun)return;ui.noTts=1;sayPhone(t)}
+}
+const sayOn=()=>!!S.main.settings.say;
 /* photos: shrunk on the phone, sent to the coach computer, looked at once and not kept */
 function photoPick(f){
   if(!f)return;const url=URL.createObjectURL(f),im=new Image();
@@ -1926,23 +1995,24 @@ async function photoSend(){
   let j;try{j=await (await fetch(cfg.url+'/img',{method:'POST',headers:{'Content-Type':'image/jpeg','X-Coach-User':apiUser,'X-Coach-Token':cfg.token},body:ui.photo.blob})).json()}catch(e){throw new Error('Could not send the photo to the coach computer.')}
   if(!j||!j.ok)throw new Error((j&&j.msg)||'The photo did not go through. Try again.');return j.id;
 }
-document.addEventListener('change',e=>{if(e.target.id==='pfile'){photoPick(e.target.files&&e.target.files[0]);e.target.value=''}});
+document.addEventListener('change',e=>{if(e.target.id==='sayv'){S.main.settings.sayV=e.target.value;saveMain();ui.noTts=0;if(sayOn()){sayPrime();sayNice('This is how I sound.')}else toast('Coach changed');return}if(e.target.id==='pfile'){photoPick(e.target.files&&e.target.files[0]);e.target.value=''}});
 async function micToggle(){
   if(rec){try{rec.stop()}catch(e){}return}
   if(mic){try{mic.stop()}catch(e){}return}
   if(!canRec||!coachCfg){micListen();return}
+  let ac=null;try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){ac=new AC();if(ac.resume)ac.resume().catch(()=>{})}}catch(e){ac=null}
   let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('The microphone is blocked for Sage. Allow it in your phone settings, or use the mic on the keyboard.');return}
   const type=['audio/mp4','audio/webm;codecs=opus','audio/webm'].find(t=>{try{return MediaRecorder.isTypeSupported(t)}catch(e){return false}})||'';
   let r;try{r=new MediaRecorder(stream,type?{mimeType:type}:undefined)}catch(e){stream.getTracks().forEach(t=>t.stop());toast('This phone could not start recording. Use the mic on the keyboard.');return}
   const chunks=[],cfg=coachCfg;
   r.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-  r.onstop=async()=>{clearTimeout(recT);rec=null;stream.getTracks().forEach(t=>t.stop());micUI('wait');
+  r.onstop=async()=>{clearTimeout(recT);rec=null;stream.getTracks().forEach(t=>t.stop());if(r.dropped){micUI('');return}micUI('wait');
     const blob=new Blob(chunks,{type:(r.mimeType||type||'audio/mp4')});
     try{const j=await (await fetch(cfg.url+'/stt',{method:'POST',headers:{'Content-Type':(blob.type||'audio/mp4').split(';')[0],'X-Coach-User':apiUser,'X-Coach-Token':cfg.token},body:blob})).json();
       if(j&&j.ok){if(j.text)micPut(j.text);else toast('Did not catch any words. Try again.')}else toast((j&&j.msg)||'Voice hit a problem. Try again.')}
     catch(e){toast('Could not reach the coach computer for voice.')}
     micUI('')};
-  try{r.start();rec=r;micUI('rec');recT=setTimeout(()=>{if(rec)try{rec.stop()}catch(e){}},60000)}catch(e){stream.getTracks().forEach(t=>t.stop());toast('This phone could not start recording.')}
+  try{r.start();rec=r;micUI('rec');recLv=micLevels(stream,ac);recT=setTimeout(()=>{if(rec)try{rec.stop()}catch(e){}},60000)}catch(e){stream.getTracks().forEach(t=>t.stop());toast('This phone could not start recording.')}
 }
 function micListen(){
   if(!SR){toast('Use the mic on the keyboard for now.');return}
@@ -1970,11 +2040,11 @@ async function coachSend(text){
   box.insertAdjacentHTML('beforeend',`<div class="msg me">${ph?'<img class="pmsg" alt="Your photo" src="'+ph.url+'">':''}${esc(text)}</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>`);
   const inp=$('#cin');if(inp){inp.value='';inp.style.height='';inp.disabled=true}document.querySelectorAll('#chatf button').forEach(b=>b.disabled=true);if(mic){try{mic.stop()}catch(e){}}if(rec){try{rec.stop()}catch(e){}}chatBottom();
   let acc='';
-  try{await flushMain();ui.coachActs=[];
-    const req={type:'chat',text};if(ph){req.img=await photoSend();ui.photo=null;const pv=$('#pprev');if(pv)pv.innerHTML=''}
+  try{await flushMain();ui.coachActs=[];ui.coachNotes=null;ui.coachNoted=null;
+    const req={type:'chat',text};if(S.main.settings.sayV)req.coach=sayV();if(ph){req.img=await photoSend();ui.photo=null;const pv=$('#pprev');if(pv)pv.innerHTML=''}
     const full=await coachAsk(req,t=>{acc+=t;const el=$('#cnow');if(el){el.innerHTML=md(noAct(acc))||'<span class="dots"><i></i><i></i><i></i></span>';chatBottom()}});
-    const m={r:'a',t:full,ts:Date.now()};if(ui.coachActs&&ui.coachActs.length)m.acts=ui.coachActs;
-    S.coach.msgs.push(m);const el=$('#cnow');if(el){el.innerHTML=md(full)+actCards(m)+sayBtn(S.coach.msgs.length-1);el.removeAttribute('id')}if(sayOn())say(full)}
+    const m={r:'a',t:full,ts:Date.now()};if(ui.coachActs&&ui.coachActs.length)m.acts=ui.coachActs;if(ui.coachNotes){S.coach.notes=ui.coachNotes;if(ui.coachNoted&&ui.coachNoted.length)m.noted=ui.coachNoted}
+    S.coach.msgs.push(m);const el=$('#cnow');if(el){el.innerHTML=md(full)+actCards(m)+notedLine(m)+sayBtn(S.coach.msgs.length-1);el.removeAttribute('id')}if(sayOn())sayNice(full)}
   catch(e){S.coach.msgs.pop();const el=$('#cnow');if(el){el.className='msg err';el.removeAttribute('id');el.textContent=e.message}if(inp)inp.value=text}
   ui.coachBusy=false;persistLocal();
   const i2=$('#cin');if(i2)i2.disabled=false;document.querySelectorAll('#chatf button').forEach(b=>b.disabled=false);chatBottom();
@@ -2640,8 +2710,13 @@ document.addEventListener('click',e=>{
     case 'mic':sayStop();micToggle();break;
     case 'photo':{const f=$('#pfile');if(f)f.click();break}
     case 'photo-x':ui.photo=null;{const pv=$('#pprev');if(pv)pv.innerHTML=''}break;
-    case 'say':{const m=coachMsgs()[+d.i];if(m){if(speechSynthesis.speaking&&ui.saying===+d.i){sayStop();ui.saying=null}else{ui.saying=+d.i;say(m.t)}}break}
-    case 'say-tog':S.main.settings.say=S.main.settings.say?0:1;saveMain();if(S.main.settings.say){say('Voice is on.')}else sayStop();render();break;
+    case 'say':{const m=coachMsgs()[+d.i];if(m){const going=ui.saying===+d.i&&((sayEl&&!sayEl.paused&&!sayEl.ended)||(CANSAY&&speechSynthesis.speaking));sayStop();if(going)ui.saying=null;else{ui.saying=+d.i;sayPrime();sayNice(m.t)}}break}
+    case 'say-tog':S.main.settings.say=S.main.settings.say?0:1;saveMain();if(S.main.settings.say){sayPrime();ui.noTts=0;sayNice('Voice is on.')}else sayStop();{const keep=($('#cin')||{}).value||'';render();const i=$('#cin');if(i&&keep){i.value=keep;i.dispatchEvent(new Event('input',{bubbles:true}))}}toast(S.main.settings.say?'Replies will be read aloud':'Voice off');break;
+    case 'notes-open':notesSheet();notesDo({op:'get'}).then(ok=>{if(ok&&$('#notef'))notesSheet()});break;
+    case 'note-del':notesDo({op:'del',i:+d.i}).then(ok=>{if(ok)notesSheet()});break;
+    case 'note-edit':{const n=coachNotes()[+d.i],i=$('#note-in');if(n&&i){i.value=n.t;i.dataset.i=d.i;i.focus();const bt=$('#notef button');if(bt)bt.textContent='Save'}break}
+    case 'chat-new':notesDo({op:'newchat'}).then(ok=>{if(ok){closeSheet();render();toast('Fresh chat. Your coach still knows you.')}});break;
+    case 'mic-x':if(rec){rec.dropped=1;try{rec.stop()}catch(e){}}else if(mic){try{mic.abort()}catch(e){}}break;
     case 'coach-q':if(d.q==='Weekly wrap-up')coachWeek();else coachSend(d.q);break;
     case 'act-yes':{const a=actFind(d.id);if(!a||actState(a.id))break;const err=actApply(a);if(err){toast(err);break}(S.main.coachDone=S.main.coachDone||{})[a.id]=1;const ks=Object.keys(S.main.coachDone);if(ks.length>200)ks.slice(0,ks.length-200).forEach(k=>delete S.main.coachDone[k]);saveMain();render();toast('Done');break}
     case 'act-no':{const a=actFind(d.id);if(!a||actState(a.id))break;(S.main.coachDone=S.main.coachDone||{})[a.id]=2;saveMain();render();break}
