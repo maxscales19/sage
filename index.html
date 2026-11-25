@@ -682,7 +682,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795584314;
+const BUILD=1795586006;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1983,6 +1983,26 @@ async function sayNice(t){
       sayEl.src=url;await sayEl.play();await new Promise((res,rej)=>{sayEl.onended=res;sayEl.onerror=rej;sayEl.onpause=()=>{if(run!==sayRun)res()}});if(run!==sayRun)return}}
   catch(e){if(run!==sayRun)return;ui.noTts=1;sayPhone(t)}
 }
+/* speaking while the answer is still being written: each finished sentence is sent off to be voiced straight away and played in order */
+function sayLive(){sayStop();return {run:sayRun,done:0,clips:[],next:0,playing:false,failed:false,live:!!(coachCfg&&!ui.noTts&&sayEl),cfg:coachCfg}}
+async function sayPump(q){
+  if(q.playing)return;q.playing=true;
+  try{while(q.next<q.clips.length){const url=await q.clips[q.next++];if(q.run!==sayRun)return;sayEl.src=url;await sayEl.play();await new Promise((res,rej)=>{sayEl.onended=res;sayEl.onerror=rej;sayEl.onpause=()=>{if(q.run!==sayRun)res()}});if(q.run!==sayRun)return}}
+  catch(e){if(q.run===sayRun){q.failed=true;ui.noTts=1;if(q.full)sayPhone(q.full)}}
+  q.playing=false;
+}
+function sayFeed(q,acc,final){
+  if(!q||q.run!==sayRun)return;const t=sayText(acc);
+  if(!q.live||q.failed){if(final){q.full=t;sayPhone(t)}return}
+  if(final)q.full=t;
+  let rest=t.slice(q.done);
+  for(;;){let cut=-1;if(final)cut=rest.length;else{const re=/[.!?]["')]?\s/g;let m;while((m=re.exec(rest))){if(m.index+1>=(q.clips.length?90:40)){cut=m.index+m[0].length;break}}}
+    if(cut<=0)break;let piece=rest.slice(0,cut);if(piece.length>280&&!/[.!?]/.test(piece.slice(0,280))){}
+    if(piece.length>280){const k=piece.lastIndexOf(' ',280);if(k>60){piece=piece.slice(0,k+1);cut=piece.length}}
+    q.done+=cut;rest=rest.slice(cut);if(piece.trim()){const c=sayClip(piece.trim(),q.cfg);c.catch(()=>{});q.clips.push(c)}
+    if(!rest)break}
+  sayPump(q);
+}
 const sayOn=()=>!!S.main.settings.say;
 /* photos: shrunk on the phone, sent to the coach computer, looked at once and not kept */
 function photoPick(f){
@@ -2040,12 +2060,12 @@ async function coachSend(text){
   S.coach.msgs.push(ph?{r:'u',t:text,ts:Date.now(),img:1}:{r:'u',t:text,ts:Date.now()});ui.coachBusy=true;
   box.insertAdjacentHTML('beforeend',`<div class="msg me">${ph?'<img class="pmsg" alt="Your photo" src="'+ph.url+'">':''}${esc(text)}</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>`);
   const inp=$('#cin');if(inp){inp.value='';inp.style.height='';inp.disabled=true}document.querySelectorAll('#chatf button').forEach(b=>b.disabled=true);if(mic){try{mic.stop()}catch(e){}}if(rec){try{rec.stop()}catch(e){}}chatBottom();
-  let acc='';
-  try{await flushMain();ui.coachActs=[];ui.coachNotes=null;ui.coachNoted=null;
+  let acc='',sq=null;
+  try{await flushMain();ui.coachActs=[];ui.coachNotes=null;ui.coachNoted=null;if(sayOn())sq=sayLive();
     const req={type:'chat',text};if(S.main.settings.sayV)req.coach=sayV();if(ph){req.img=await photoSend();ui.photo=null;const pv=$('#pprev');if(pv)pv.innerHTML=''}
-    const full=await coachAsk(req,t=>{acc+=t;const el=$('#cnow');if(el){el.innerHTML=md(noAct(acc))||'<span class="dots"><i></i><i></i><i></i></span>';chatBottom()}});
+    const full=await coachAsk(req,t=>{acc+=t;if(sq)sayFeed(sq,acc);const el=$('#cnow');if(el){el.innerHTML=md(noAct(acc))||'<span class="dots"><i></i><i></i><i></i></span>';chatBottom()}});
     const m={r:'a',t:full,ts:Date.now()};if(ui.coachActs&&ui.coachActs.length)m.acts=ui.coachActs;if(ui.coachNotes){S.coach.notes=ui.coachNotes;if(ui.coachNoted&&ui.coachNoted.length)m.noted=ui.coachNoted}
-    S.coach.msgs.push(m);const el=$('#cnow');if(el){el.innerHTML=md(full)+actCards(m)+notedLine(m)+sayBtn(S.coach.msgs.length-1);el.removeAttribute('id')}if(sayOn())sayNice(full)}
+    S.coach.msgs.push(m);const el=$('#cnow');if(el){el.innerHTML=md(full)+actCards(m)+notedLine(m)+sayBtn(S.coach.msgs.length-1);el.removeAttribute('id')}if(sq)sayFeed(sq,full,true)}
   catch(e){S.coach.msgs.pop();const el=$('#cnow');if(el){el.className='msg err';el.removeAttribute('id');el.textContent=e.message}if(inp)inp.value=text}
   ui.coachBusy=false;persistLocal();
   const i2=$('#cin');if(i2)i2.disabled=false;document.querySelectorAll('#chatf button').forEach(b=>b.disabled=false);chatBottom();
