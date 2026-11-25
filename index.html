@@ -684,7 +684,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795640762;
+const BUILD=1795641111;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -995,7 +995,7 @@ const HOW={
 'mx-puv':['b','Same pull-up as the heavy one, lighter band, more reps. Overhand grip outside the shoulders. At the bottom let the shoulders rise to your ears, fully reached; do not pin them back and down. As you lower, let the elbows come forward. His demo has both knees on a band strung across the rack. Reps are Claude’s suggestion.'],
 'mx-puh':['b','Wide overhand grip. At the bottom let your shoulders rise up to your ears, fully reached; do not pin them back and down. Pressure through the outside edge of the palm, fingers curled tight over the bar.'],
 'mx-hksp':['b','Elbow tucked. Your torso opens as the weight goes up and closes as it comes down. Go lighter than you think.'],
-'mx-dip':['b','His only dip cues are for holds on rings: hips behind you, chest proud, look up, feet narrow and under you. He gives no spoken cues for bar dips.'],
+'mx-dip':['g','He only cues dips as holds on rings: at the top, hips behind you, chest proud, look up, feet narrow and under you, hands turning in; at the bottom, let the shoulders go forward. Our read for bar dips: keep that shape. Legs under you rather than tucked up in front, chest proud, let the shoulders travel forward as you lower, go only as deep as you can control, and press up without shrugging stiff.'],
 'bx-yta':['b','Chest down on the ground, hands just below the shoulders, toes in and heels out. Relax and get loose. Reach forward into a Y, out to the sides for a T, then down and back for an A. Y, T, A is one rep. He does 5 reps, for two rounds.'],
 'bx-hang-s':['b','Hang relaxed and fully reached. Let the arm turn inwards and the elbow rotate back. Do not pull the shoulder blades down. Feet off the ground is the real hang; he tucks his legs up when the bar is low. Feet on the floor, leaning away with one leg stepped back, is his easier stretch version.'],
 'bx-dbp':['b','Lie on the bench with your feet up on it: toes together, heels out, knees out. Dumbbells deep to the shoulders with elbows tucked, then rotate the elbows up and out as you press. Lower slowly. Sets and reps are Claude’s suggestion.'],
@@ -1004,7 +1004,7 @@ const HOW={
 'bx-ksr':['b','Kneeling, or standing if your knees complain. Lean to the left and reach the right arm over, then the other way, and flow. Let the spine move. He does 30, which is 15 each side.'],
 'bx-fgp':['b','Palm over the top of the bar or ring. Pull until your fists reach your chest and hold briefly at the top. Build up by simply hanging in the false grip first. Reps are Claude’s suggestion.'],
 'bx-kpd':['b','Kneel sitting back on your heels, toes together, heels out. Cable or band anchored high in front. Let it pull your arm and shoulder right up, then pull the elbow in to your ribs. Belly long, chest open. Reps are Claude’s suggestion.'],
-'bx-rot':['m','Your pick for golf. No demo of his ball throws was found, so there are no Bryan cues for this one. Set up his way: split stance, feet straight, hips back, and let your torso and shoulders turn freely. Do not brace stiff.'],
+'bx-rot':['g','Your pick for golf; he has no demo of this one. Our read, built from how he coaches the split stance row and his throwing work: split stance, feet straight, head over the front foot, light on the back foot. Pull across with the arm opposite the front leg and let the hips, ribs and shoulders all turn, like a throw. Stay loose through the middle, no stiff bracing. Keep the load moderate and chase speed and rhythm, not weight.'],
 'bx-ppu':['b','From a crawl position, step one hand forward so your hands are staggered. Body low, hips in a crawl shape, not a rigid plank. Knees down is fine. He does 10, then 8, then 6 per side.'],
 'bx-ccl':['b','All fours with toes tucked. Step one arm and the opposite leg forward, lift the other arm and leg off the floor, and hold. Chest up, eyes forward. Then swap sides.'],
 'bx-rock':['b','All fours with toes tucked. Rock your hips back to your heels and forward again. He does 60 pulses.'],
@@ -1966,9 +1966,9 @@ const micUI=st=>{const f=$('#chatf');if(!f)return;f.classList.toggle('rec',st===
   clearInterval(recTick);recTick=null;if(recLv){try{recLv.stop()}catch(e){}recLv=null}
   if(st==='rec'){const t0=Date.now(),el=f.querySelector('.rectime');if(el)el.textContent='0:00';recTick=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000),e=$('#chatf .rectime');if(e)e.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},500)}};
 /* the bars follow the real loudness of the voice when the phone allows it; otherwise they just pulse */
-function micLevels(stream,ac){
-  try{if(!ac)return null;const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=256;src.connect(an);const buf=new Uint8Array(an.fftSize),hist=[];let on=true,seen=false;
-    const step=()=>{if(!on)return;an.getByteTimeDomainData(buf);let m=0;for(let i=0;i<buf.length;i++)m=Math.max(m,Math.abs(buf[i]-128));if(m>2)seen=true;hist.push(Math.min(1,m/60));if(hist.length>28)hist.shift();
+function micLevels(stream,ac,onQuiet){
+  try{if(!ac)return null;const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=256;src.connect(an);const buf=new Uint8Array(an.fftSize),hist=[];let on=true,seen=false,loud=0,last=Date.now();
+    const step=()=>{if(!on)return;an.getByteTimeDomainData(buf);let m=0;for(let i=0;i<buf.length;i++)m=Math.max(m,Math.abs(buf[i]-128));if(m>2)seen=true;if(m>16){loud++;last=Date.now()}else if(onQuiet&&loud>=4&&Date.now()-last>1800){onQuiet();onQuiet=null}hist.push(Math.min(1,m/60));if(hist.length>28)hist.shift();
       const w=$('#chatf .recwave');if(w&&seen){w.classList.add('live');const bars=w.children;for(let i=0;i<bars.length;i++){const v=hist[hist.length-bars.length+i];bars[i].style.height=(v==null?12:Math.max(12,Math.round(v*100)))+'%'}}
       setTimeout(step,70)};step();
     return {stop(){on=false;try{src.disconnect()}catch(e){}try{ac.close()}catch(e){}}}}catch(e){return null}
@@ -2058,10 +2058,10 @@ async function micToggle(){
   r.onstop=async()=>{clearTimeout(recT);rec=null;stream.getTracks().forEach(t=>t.stop());if(r.dropped){micUI('');return}micUI('wait');
     const blob=new Blob(chunks,{type:(r.mimeType||type||'audio/mp4')});
     try{const j=await (await fetch(cfg.url+'/stt',{method:'POST',headers:{'Content-Type':(blob.type||'audio/mp4').split(';')[0],'X-Coach-User':apiUser,'X-Coach-Token':cfg.token},body:blob})).json();
-      if(j&&j.ok){if(j.text)micPut(j.text);else toast('Did not catch any words. Try again.')}else toast((j&&j.msg)||'Voice hit a problem. Try again.')}
+      if(j&&j.ok){if(j.text){micPut(j.text);if(r.talk){micUI('');const el=$('#cin'),t=el?el.value:'';if(el)el.value='';coachSend(t);return}}else toast('Did not catch any words. Try again.')}else toast((j&&j.msg)||'Voice hit a problem. Try again.')}
     catch(e){toast('Could not reach the coach computer for voice.')}
     micUI('')};
-  try{r.start();rec=r;micUI('rec');recLv=micLevels(stream,ac);recT=setTimeout(()=>{if(rec)try{rec.stop()}catch(e){}},60000)}catch(e){stream.getTracks().forEach(t=>t.stop());toast('This phone could not start recording.')}
+  try{r.talk=sayOn()&&!(($('#cin')||{}).value||'').trim();r.start();rec=r;micUI('rec');recLv=micLevels(stream,ac,r.talk?()=>{if(rec===r)try{r.stop()}catch(e){}}:null);recT=setTimeout(()=>{if(rec)try{rec.stop()}catch(e){}},60000)}catch(e){stream.getTracks().forEach(t=>t.stop());toast('This phone could not start recording.')}
 }
 function micListen(){
   if(!SR){toast('Use the mic on the keyboard for now.');return}
@@ -2305,7 +2305,7 @@ function exInfo(id){
   const subs=(x.s||[]).filter(X),how=HOW[id],xn=XN(id);
   sheet(`<div class="row">${fig(x.p,'lg')}<div><h2>${esc(x.n)}</h2><p class="muted">${esc(x.g||'Other')} · ${esc(x.q||'Custom')}</p><p class="small muted">${x.t==='w'?'Logged as weight and reps':x.t==='t'?'Logged as a timed hold':'Logged as reps'}</p></div></div>
     ${best?`<div class="card" style="background:var(--surface2);box-shadow:none"><span class="small muted">Your best</span><div class="ex-n num">${best}</div></div>`:''}
-    ${how?`<h3>${how[0]==='b'?'How Bryan does it':'How to do it'}</h3><p class="small">${esc(how[1])}</p>`:''}
+    ${how?`<h3>${how[0]==='b'?'How Bryan does it':how[0]==='g'?'How we think Bryan would do it':'How to do it'}</h3><p class="small">${esc(how[1])}</p>`:''}
     ${okUrl(xn.vid)?`<a class="btn ghost wide" href="${esc(xn.vid)}" target="_blank" rel="noopener">${ICON.play}Watch demo</a>`:''}
     <label class="lbl" for="xn-note">Your setup note</label><input class="txt" id="xn-note" value="${esc(xn.note||'')}" maxlength="80" autocomplete="off" placeholder="e.g. cable height 12, bench notch 3, green band">
     <details class="xdet"><summary class="small muted">Demo video link</summary><input class="txt" id="xn-vid" value="${esc(xn.vid||'')}" maxlength="200" autocomplete="off" inputmode="url" placeholder="https://..."></details>
@@ -2756,7 +2756,7 @@ document.addEventListener('click',e=>{
     case 'pack':sheet(`<h2>Add demo videos</h2><p class="muted">Paste the code you were sent. It adds a demo link to your exercises. Nothing else changes.</p><label class="lbl" for="pk-code">Code</label><input class="txt" id="pk-code" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste here"><button class="btn wide" data-act="pack-go">Add them</button><button class="btn quiet" data-act="close">Cancel</button>`);break;
     case 'pack-go':{const n=packCode($('#pk-code').value);if(!n){toast('That code did not match any of your exercises');break}closeSheet();saveMain();render();toast(n+' demo videos added');break}
     case 'coach':closeSheet();ui.screen=null;ui.tab='coach';ui.moved=true;render();break;
-    case 'mic':sayStop();micToggle();break;
+    case 'mic':sayStop();if(sayOn()&&!rec)sayPrime();micToggle();break;
     case 'photo':{const f=$('#pfile');if(f)f.click();break}
     case 'photo-x':(ui.photos||[]).splice(+d.i,1);photoShow();break;
     case 'say':{const m=coachMsgs()[+d.i];if(m){const going=ui.saying===+d.i&&((sayEl&&!sayEl.paused&&!sayEl.ended)||(CANSAY&&speechSynthesis.speaking));sayStop();if(going)ui.saying=null;else{ui.saying=+d.i;sayPrime();sayNice(m.t)}}break}
