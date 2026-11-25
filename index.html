@@ -662,6 +662,7 @@ input,select,textarea{font-size:16px}
 .ntext{flex:1;border:0;background:none;color:var(--ink);font:inherit;font-size:15px;text-align:left;padding:2px 0}.ntext small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 .ndel{width:32px;height:32px;border:0;background:none;color:var(--muted);font-size:20px;border-radius:50%}
 .chead{position:sticky;top:0;z-index:5;background:var(--bg);margin:0 -16px;padding:6px 16px 8px}.chead+p{margin-top:-8px}
+#pprev{display:flex;gap:10px;flex-wrap:wrap}.pmsgs{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:6px}.pmsgs .pmsg{max-width:96px;max-height:96px;margin:0}.pmsgs .pmsg:only-child{max-width:180px;max-height:180px}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -682,7 +683,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795588830;
+const BUILD=1795591577;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1864,8 +1865,8 @@ function vCoach(){
   const qs=watch?['How did I sleep this week?','Should I train today?','How is my training going?','What should I focus on this week?']:[...(A?['How do I do this one?','Should I go up in weight?']:['What is on today?']),'How is my training going?','Weekly wrap-up'];
   const say=!!S.main.settings.say;
   return `<div class="chead row between"><h2 style="font-size:26px">Coach</h2><span class="row" style="gap:6px"><button class="btn ghost saytog" data-act="notes-open" aria-label="What your coach knows about you"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M6 4h12v16l-6-4-6 4z"/></svg></button>${coachCfg&&!watch?`<select id="sayv" class="sayv" aria-label="Choose your coach">${SAYV.map(v=>`<option value="${v[0]}" ${sayV()===v[0]?'selected':''}>${v[1]}</option>`).join('')}</select>`:''}<button class="btn ${say?'':'ghost'} saytog" data-act="say-tog" aria-pressed="${say}" aria-label="${say?'Spoken replies are on':'Spoken replies are off'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M4 9v6h4l5 4V5L8 9z"/>${say?'<path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>':'<path d="M17 9.5l5 5M22 9.5l-5 5"/>'}</svg></button></span></div><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p>
-    <div class="chat" id="chat">${ms.length?ms.map((m,i)=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?(m.img?'<small class="pflag">Photo</small>':'')+esc(m.t):md(m.t)+actCards(m)+notedLine(m)+sayBtn(i)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
-    <div id="pprev">${ui.photo?`<span class="pthumb"><img alt="Photo to send" src="${ui.photo.url}"><button type="button" data-act="photo-x" aria-label="Remove photo">×</button></span>`:''}</div><input id="pfile" type="file" accept="image/*" hidden>
+    <div class="chat" id="chat">${ms.length?ms.map((m,i)=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?(m.img?'<small class="pflag">'+(m.img>1?m.img+' photos':'Photo')+'</small>':'')+esc(m.t):md(m.t)+actCards(m)+notedLine(m)+sayBtn(i)}</div>`).join(''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
+    <div id="pprev">${photoThumbs()}</div><input id="pfile" type="file" accept="image/*" multiple hidden>
     <form class="chatbar" id="chatf"><button class="btn ghost micb2" type="button" data-act="photo" aria-label="Add a photo" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><textarea id="cin" rows="1" maxlength="1500" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea>${SR||canRec?`<button class="btn ghost micb" type="button" data-act="mic" aria-label="Speak your message" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button>
       <div class="recbar" aria-live="polite"><button class="btn ghost" type="button" data-act="mic-x" aria-label="Cancel recording"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="20" height="20"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="recmid"><span class="recwave" aria-hidden="true">${'<i></i>'.repeat(28)}</span><span class="rectxt">Writing it out</span><b class="rectime">0:00</b></div><button class="btn" type="button" data-act="mic" aria-label="Finish recording"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div></form>`;
 }
@@ -2010,18 +2011,22 @@ function sayFeed(q,acc,final){
 }
 const sayOn=()=>!!S.main.settings.say;
 /* photos: shrunk on the phone, sent to the coach computer, looked at once and not kept */
-function photoPick(f){
-  if(!f)return;const url=URL.createObjectURL(f),im=new Image();
-  im.onload=()=>{const k=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);
-    c.toBlob(b=>{if(!b){toast('Could not read that photo.');return}ui.photo={blob:b,url:c.toDataURL('image/jpeg',.5)};const el=$('#pprev');if(el)el.innerHTML=`<span class="pthumb"><img alt="Photo to send" src="${ui.photo.url}"><button type="button" data-act="photo-x" aria-label="Remove photo">×</button></span>`},'image/jpeg',.82)};
-  im.onerror=()=>{URL.revokeObjectURL(url);toast('Could not open that photo.')};im.src=url;
+const photoThumbs=()=>(ui.photos||[]).map((p,i)=>`<span class="pthumb"><img alt="Photo to send" src="${p.url}"><button type="button" data-act="photo-x" data-i="${i}" aria-label="Remove photo">×</button></span>`).join('');
+const photoShow=()=>{const el=$('#pprev');if(el)el.innerHTML=photoThumbs()};
+function photoPick(files){
+  const list=[...(files||[])];ui.photos=ui.photos||[];if(ui.photos.length+list.length>6)toast('Six photos at a time. The first six are in.');
+  list.slice(0,Math.max(0,6-ui.photos.length)).forEach(f=>{const url=URL.createObjectURL(f),im=new Image(),slot={url:'',blob:null};ui.photos.push(slot);
+    im.onload=()=>{const k=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);
+      c.toBlob(b=>{if(!b){ui.photos=ui.photos.filter(x=>x!==slot);toast('Could not read one of those photos.')}else{slot.blob=b;slot.url=c.toDataURL('image/jpeg',.5)}photoShow()},'image/jpeg',.82)};
+    im.onerror=()=>{URL.revokeObjectURL(url);ui.photos=ui.photos.filter(x=>x!==slot);toast('Could not open one of those photos.');photoShow()};im.src=url});
 }
-async function photoSend(){
-  const cfg=coachCfg;if(!cfg)throw new Error('The coach has not been set up yet.');
-  let j;try{j=await (await fetch(cfg.url+'/img',{method:'POST',headers:{'Content-Type':'image/jpeg','X-Coach-User':apiUser,'X-Coach-Token':cfg.token},body:ui.photo.blob})).json()}catch(e){throw new Error('Could not send the photo to the coach computer.')}
-  if(!j||!j.ok)throw new Error((j&&j.msg)||'The photo did not go through. Try again.');return j.id;
+async function photoSend(list){
+  const cfg=coachCfg;if(!cfg)throw new Error('The coach has not been set up yet.');const ids=[];
+  for(const p of list){let j;try{j=await (await fetch(cfg.url+'/img',{method:'POST',headers:{'Content-Type':'image/jpeg','X-Coach-User':apiUser,'X-Coach-Token':cfg.token},body:p.blob})).json()}catch(e){throw new Error('Could not send the photo to the coach computer.')}
+    if(!j||!j.ok)throw new Error((j&&j.msg)||'A photo did not go through. Try again.');ids.push(j.id)}
+  return ids;
 }
-document.addEventListener('change',e=>{if(e.target.id==='sayv'){S.main.settings.sayV=e.target.value;saveMain();ui.noTts=0;if(sayOn()){sayPrime();sayNice('This is how I sound.')}else toast('Coach changed');return}if(e.target.id==='pfile'){photoPick(e.target.files&&e.target.files[0]);e.target.value=''}});
+document.addEventListener('change',e=>{if(e.target.id==='sayv'){S.main.settings.sayV=e.target.value;saveMain();ui.noTts=0;if(sayOn()){sayPrime();sayNice('This is how I sound.')}else toast('Coach changed');return}if(e.target.id==='pfile'){photoPick(e.target.files);e.target.value=''}});
 async function micToggle(){
   if(rec){try{rec.stop()}catch(e){}return}
   if(mic){try{mic.stop()}catch(e){}return}
@@ -2058,16 +2063,16 @@ async function coachWeek(){
   ui.coachBusy=false;persistLocal();chatBottom();
 }
 async function coachSend(text){
-  text=String(text||'').trim();const ph=ui.photo;if(!text&&ph)text='What do you see in this photo?';if(!text||ui.coachBusy)return;
+  text=String(text||'').trim();const ph=(ui.photos||[]).filter(p=>p.blob);if((!text&&!ph.length)||ui.coachBusy)return;
   if(!S.coach)S.coach={msgs:[]};const box=$('#chat');if(!box)return;
   if(!coachMsgs().length)box.innerHTML='';
   if(sayOn())sayPrime();else sayStop();
-  S.coach.msgs.push(ph?{r:'u',t:text,ts:Date.now(),img:1}:{r:'u',t:text,ts:Date.now()});ui.coachBusy=true;
-  box.insertAdjacentHTML('beforeend',`<div class="msg me">${ph?'<img class="pmsg" alt="Your photo" src="'+ph.url+'">':''}${esc(text)}</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>`);
+  S.coach.msgs.push(ph.length?{r:'u',t:text,ts:Date.now(),img:ph.length}:{r:'u',t:text,ts:Date.now()});ui.coachBusy=true;
+  box.insertAdjacentHTML('beforeend',`<div class="msg me">${ph.length?'<span class="pmsgs">'+ph.map(p=>'<img class="pmsg" alt="Your photo" src="'+p.url+'">').join('')+'</span>':''}${esc(text)}</div><div class="msg co" id="cnow"><span class="dots"><i></i><i></i><i></i></span></div>`);
   const inp=$('#cin');if(inp){inp.value='';inp.style.height='';inp.disabled=true}document.querySelectorAll('#chatf button').forEach(b=>b.disabled=true);if(mic){try{mic.stop()}catch(e){}}if(rec){try{rec.stop()}catch(e){}}chatBottom();
   let acc='',sq=null;
   try{await flushMain();ui.coachActs=[];ui.coachNotes=null;ui.coachNoted=null;if(sayOn())sq=sayLive();
-    const req={type:'chat',text};if(S.main.settings.sayV)req.coach=sayV();if(ph){req.img=await photoSend();ui.photo=null;const pv=$('#pprev');if(pv)pv.innerHTML=''}
+    const req={type:'chat',text};if(S.main.settings.sayV)req.coach=sayV();if(ph.length){req.imgs=await photoSend(ph);ui.photos=[];photoShow()}
     const full=await coachAsk(req,t=>{acc+=t;if(sq)sayFeed(sq,acc);const el=$('#cnow');if(el){el.innerHTML=md(noAct(acc))||'<span class="dots"><i></i><i></i><i></i></span>';chatBottom()}});
     const m={r:'a',t:full,ts:Date.now()};if(ui.coachActs&&ui.coachActs.length)m.acts=ui.coachActs;if(ui.coachNotes){S.coach.notes=ui.coachNotes;if(ui.coachNoted&&ui.coachNoted.length)m.noted=ui.coachNoted}
     S.coach.msgs.push(m);const el=$('#cnow');if(el){el.innerHTML=md(full)+actCards(m)+notedLine(m)+sayBtn(S.coach.msgs.length-1);el.removeAttribute('id')}if(sq)sayFeed(sq,full,true)}
@@ -2735,7 +2740,7 @@ document.addEventListener('click',e=>{
     case 'coach':closeSheet();ui.screen=null;ui.tab='coach';ui.moved=true;render();break;
     case 'mic':sayStop();micToggle();break;
     case 'photo':{const f=$('#pfile');if(f)f.click();break}
-    case 'photo-x':ui.photo=null;{const pv=$('#pprev');if(pv)pv.innerHTML=''}break;
+    case 'photo-x':(ui.photos||[]).splice(+d.i,1);photoShow();break;
     case 'say':{const m=coachMsgs()[+d.i];if(m){const going=ui.saying===+d.i&&((sayEl&&!sayEl.paused&&!sayEl.ended)||(CANSAY&&speechSynthesis.speaking));sayStop();if(going)ui.saying=null;else{ui.saying=+d.i;sayPrime();sayNice(m.t)}}break}
     case 'say-tog':S.main.settings.say=S.main.settings.say?0:1;saveMain();if(S.main.settings.say){sayPrime();ui.noTts=0;sayNice('Voice is on.')}else sayStop();{const keep=($('#cin')||{}).value||'';render();const i=$('#cin');if(i&&keep){i.value=keep;i.dispatchEvent(new Event('input',{bubbles:true}))}}toast(S.main.settings.say?'Replies will be read aloud':'Voice off');break;
     case 'notes-open':notesSheet();notesDo({op:'get'}).then(ok=>{if(ok&&$('#notef'))notesSheet()});break;
