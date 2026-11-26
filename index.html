@@ -678,6 +678,8 @@ input,select,textarea{font-size:16px}
 .cpk button,.cpp button{height:46px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-weight:700;font-size:16px}
 .cpp button{padding:0 16px;font-size:15px;font-weight:600}
 .cpk button.on,.cpp button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ytbox{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;margin:10px 0}.ytbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#saynow.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -698,7 +700,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795723853;
+const BUILD=1795727448;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -919,7 +921,7 @@ const API=((document.querySelector('meta[name="sage-api"]')||{}).content||'').tr
 const KEYLS='sage-key-v1';
 const USERLS='sage-user-v1';
 /* what a brand-new account starts with, by the name typed on the way in */
-const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:8,daylog:true,coach:true,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c','bryan1d','bryan1e','bryan1f']}};
+const PROFILES={dad:{v:4,coach:true,name:'John',palette:'harbour',physio:true,gymOnly:true,home:true,levels:false},max:{v:8,daylog:true,coach:true,palette:'lime',name:'Max',seed:'paddle1',meals:true,up:['bryan1','bryan1b','bryan1c','bryan1d','bryan1e','bryan1f','bryan1g']}};
 let apiKey=null,apiUser='',webSteps=null,webStepsAt=0,retries=0;
 if(API){try{apiKey=localStorage.getItem(KEYLS);apiUser=localStorage.getItem(USERLS)||''}catch(e){}}
 function applyProfile(p){
@@ -974,6 +976,8 @@ bryan1e:()=>({patch:m=>{const a=m.workouts.u1;if(!a||!m.exercises['mx-puv'])retu
 bryan1f:()=>({patch:m=>{const x=m.xn=m.xn||{},at=(id,t)=>{const o=x[id];if(o&&o.vid&&!/[?&]t=/.test(o.vid))o.vid+='?t='+t};at('bx-hang',158);at('bx-hang-s',158);at('bx-yta',25);
   if(x['bx-ksr']&&x['bx-ksr'].vid)x['bx-ksr'].vid=x['bx-ksr'].vid.replace(/([?&]t=)740$/,'$1757');if(x['mx-puh']&&x['mx-puh'].vid&&!(x['mx-puv']&&x['mx-puv'].vid))x['mx-puv']=Object.assign({},x['mx-puv'],{vid:x['mx-puh'].vid});
   ['u1','u2'].forEach(id=>{const w=m.workouts[id];if(w)w.vars.forEach(v=>v.items.forEach(it=>{if(it.ex==='bx-yta'&&it.reps===10)it.reps=5}))})}}),
+bryan1g:()=>({patch:m=>{const x=m.xn||{},clip=(id,t,e)=>{const o=x[id];if(!o||!o.vid||/[?&]e=\d+/.test(o.vid))return;o.vid=o.vid.replace(/[?&]t=\d+/,'');o.vid+=(o.vid.includes('?')?'&':'?')+'t='+t+'&e='+e};
+  clip('bx-hang',158,208);clip('bx-hang-s',158,208);clip('bx-yta',108,146);clip('bx-ksr',757,788)}}),
 bryan1c:()=>({patch:m=>{['a','b'].forEach(id=>{const w=m.workouts[id];if(w&&/\(old\)$/.test(w.name))w.old=true})}}),
 bryan1:()=>{
   const E=(n,t,g,p)=>({n,t,g,q:'Custom',p,s:[]}),it=(ex,sets,reps,rest,link)=>({ex,sets,reps,rest,link:!!link});
@@ -1046,6 +1050,18 @@ const HOW={
 /* per-exercise notes the person keeps themselves: a setup note (cable height, bench angle, band) and a demo link. Lives in their account data, never in this file. */
 const XN=id=>(S.main.xn&&S.main.xn[id])||{};
 const okUrl=u=>/^https:\/\/[^\s"'<>]+$/.test(u||'');
+/* a YouTube demo plays inside the app, and only the part that shows this exercise when a start and end are known */
+function ytClip(u){
+  const m=/^https:\/\/(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/))([\w-]{11})/.exec(u||'');if(!m)return null;
+  const q=n=>{const x=new RegExp('[?&]'+n+'=(\\d+)').exec(u);return x?+x[1]:0};return {id:m[1],t:q('t')||q('start'),e:q('e')||q('end')};
+}
+function demoSheet(exId){
+  const xn=XN(exId),c=ytClip(xn.vid),ex=X(exId);if(!c)return;
+  const src='https://www.youtube-nocookie.com/embed/'+c.id+'?playsinline=1&rel=0&modestbranding=1&autoplay=1'+(c.t?'&start='+c.t:'')+(c.e?'&end='+c.e:'');
+  sheet(`<h3>${esc(ex?ex.n:'Demo')}</h3><div class="ytbox"><iframe src="${src}" title="Demo video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <p class="small muted">${c.e?'Just the part for this exercise. ':c.t?'Starts where this exercise begins. ':''}If it will not play here, open it in YouTube.</p>
+    <a class="btn ghost wide" href="${esc(xn.vid.replace(/[?&]e=\d+/,''))}" target="_blank" rel="noopener">Open in YouTube</a><button class="btn quiet wide" data-act="close">Done</button>`);
+}
 function setXN(id,o){S.main.xn=S.main.xn||{};const c=Object.assign({},S.main.xn[id],o);Object.keys(c).forEach(k=>{if(!c[k])delete c[k]});if(Object.keys(c).length)S.main.xn[id]=c;else delete S.main.xn[id]}
 /* a pack is a private link the owner opens once: it fills in demo links for their exercises */
 function stashPack(){const m=/^#pack=([A-Za-z0-9_-]+)$/.exec(location.hash||'');if(!m)return;try{localStorage.setItem('sage-pack',m[1]);history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
@@ -1937,7 +1953,7 @@ function vCoach(){
   const watch=!!(S.garmin&&S.garmin.days),A=S.main.active;
   const qs=watch?['How did I sleep this week?','Should I train today?','How is my training going?','What should I focus on this week?']:[...(A?['How do I do this one?','Should I go up in weight?']:['What is on today?']),'How is my training going?','Weekly wrap-up'];
   const say=!!S.main.settings.say;
-  return `<div class="chead"><h2 style="font-size:26px">Coach</h2><div class="cctl"><button data-act="notes-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M6 4h12v16l-6-4-6 4z"/></svg>Memory</button>${coachCfg&&!watch?`<label class="cpick"><span>Coach</span><select id="sayv" class="sayv" aria-label="Choose your coach">${SAYV.map(v=>`<option value="${v[0]}" ${sayV()===v[0]?'selected':''}>${v[1]}</option>`).join('')}</select></label>`:''}<button class="${say?'on':''}" data-act="say-tog" aria-pressed="${say}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 9v6h4l5 4V5L8 9z"/>${say?'<path d="M16.5 8.5a5 5 0 0 1 0 7"/>':'<path d="M17 9.5l5 5M22 9.5l-5 5"/>'}</svg>${say?'Voice on':'Voice off'}</button></div></div><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p>
+  return `<div class="chead"><h2 style="font-size:26px">Coach</h2><div class="cctl"><button data-act="notes-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M6 4h12v16l-6-4-6 4z"/></svg>Memory</button>${coachCfg&&!watch?`<label class="cpick"><span>Coach</span><select id="sayv" class="sayv" aria-label="Choose your coach">${SAYV.map(v=>`<option value="${v[0]}" ${sayV()===v[0]?'selected':''}>${v[1]}</option>`).join('')}</select></label>`:''}<button class="${say?'on':''}" data-act="say-tog" aria-pressed="${say}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 9v6h4l5 4V5L8 9z"/>${say?'<path d="M16.5 8.5a5 5 0 0 1 0 7"/>':'<path d="M17 9.5l5 5M22 9.5l-5 5"/>'}</svg>${say?'Voice on':'Voice off'}</button>${say?`<button id="saynow" class="${ui.talking?'on':''}" data-act="say-now">${ui.talking?SAYI.stop+'Stop':SAYI.again+'Again'}</button>`:''}</div></div><p class="small muted">${watch?'Reads your watch, workouts and physio, then answers in plain words. It is a coach, not a doctor.':'Claude, with your workouts in front of it. Ask anything. It is not a doctor.'}</p>
     <div class="chat" id="chat">${ms.length?ms.map((m,i)=>`<div class="msg ${m.r==='u'?'me':'co'}">${m.r==='u'?(m.img?'<small class="pflag">'+(m.img>1?m.img+' photos':'Photo')+'</small>':'')+esc(m.t):md(m.t)+actCards(m)+notedLine(m)+sayBtn(i)}</div>`).join('')+(ui.coachBusy?`<div class="msg co" id="cnow">${ui.coachAcc&&noAct(ui.coachAcc).trim()?md(noAct(ui.coachAcc)):'<span class="dots"><i></i><i></i><i></i></span>'}</div>`:''):`<div class="msg co"><p>${nm?'Hi '+esc(nm)+'. ':''}${watch?'Ask me anything about your sleep, steps, training or physio. Here are a few to start.':'Ask me anything. I can see your programme and what you have logged, and I can change the app for you if you ask.'}</p></div><div class="qs">${qs.map(x=>`<button data-act="coach-q" data-q="${esc(x)}">${x}</button>`).join('')}</div>`}</div>
     <div id="pprev">${photoThumbs()}</div><input id="pfile" type="file" accept="image/*" multiple hidden>
     <form class="chatbar" id="chatf"><button class="btn ghost micb2" type="button" data-act="photo" aria-label="Add a photo" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><textarea id="cin" rows="1" maxlength="8000" placeholder="Ask your coach" aria-label="Message for your coach" ${ui.coachBusy?'disabled':''}></textarea>${SR||canRec?`<button class="btn ghost micb" type="button" data-act="mic" aria-label="Speak your message" ${ui.coachBusy?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}<button class="btn" type="submit" ${ui.coachBusy?'disabled':''} aria-label="Send">${ICON.send}</button>
@@ -2040,14 +2056,16 @@ const sayText=t=>noAct(String(t||'')).replace(/```[\s\S]*?```/g,' ').replace(/\[
 function sayVoice(){try{const v=speechSynthesis.getVoices()||[];return v.find(x=>/en[-_]AU/i.test(x.lang)&&x.localService)||v.find(x=>/en[-_]AU/i.test(x.lang))||v.find(x=>/en[-_]GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){return null}}
 function say(t){
   if(!CANSAY)return;t=sayText(t);if(!t)return;
-  try{speechSynthesis.cancel();const v=sayVoice();(t.match(/[^.!?]+[.!?]*\s*/g)||[t]).reduce((a,x)=>{if(a.length&&(a[a.length-1]+x).length<180)a[a.length-1]+=x;else a.push(x);return a},[]).forEach(x=>{const u=new SpeechSynthesisUtterance(x.trim());if(v){u.voice=v;u.lang=v.lang}else u.lang='en-AU';u.rate=1.05;speechSynthesis.speak(u)})}catch(e){}
+  try{speechSynthesis.cancel();const v=sayVoice();(t.match(/[^.!?]+[.!?]*\s*/g)||[t]).reduce((a,x)=>{if(a.length&&(a[a.length-1]+x).length<180)a[a.length-1]+=x;else a.push(x);return a},[]).forEach((x,i,arr)=>{const u=new SpeechSynthesisUtterance(x.trim());if(v){u.voice=v;u.lang=v.lang}else u.lang='en-AU';u.rate=1.05;if(i===arr.length-1){const r=sayRun;u.onend=u.onerror=()=>{if(r===sayRun)sayUI(false)}}speechSynthesis.speak(u)});sayUI(true)}catch(e){}
 }
 const SAYV=[['af_heart','Heart · warm'],['af_bella','Bella · upbeat'],['bf_emma','Emma · calm'],['am_michael','Michael · direct'],['bm_george','George · gruff']];
 const sayV=()=>S.main.settings.sayV||'af_heart';
 let sayEl=null,sayRun=0,sayUrls=[];
 const SILENT='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
 const sayPhone=say;
-function sayStop(){sayRun++;if(sayEl){try{sayEl.pause()}catch(e){}}sayUrls.forEach(u=>URL.revokeObjectURL(u));sayUrls=[];if(CANSAY)try{speechSynthesis.cancel()}catch(e){}}
+const sayUI=on=>{ui.talking=!!on;const b=$('#saynow');if(b){b.classList.toggle('on',!!on);b.innerHTML=on?SAYI.stop+'Stop':SAYI.again+'Again'}};
+const SAYI={stop:'<svg viewBox="0 0 24 24" width="14" height="14"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>',again:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg>'};
+function sayStop(){sayRun++;sayUI(false);if(sayEl){try{sayEl.pause()}catch(e){}}sayUrls.forEach(u=>URL.revokeObjectURL(u));sayUrls=[];if(CANSAY)try{speechSynthesis.cancel()}catch(e){}}
 /* called inside a tap: iPhones only let sound start later if this player was first started by a tap */
 function sayPrime(){
   try{if(!sayEl){sayEl=new Audio();sayEl.playsInline=true}sayEl.src=SILENT;const p=sayEl.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}
@@ -2057,31 +2075,31 @@ async function sayClip(t,cfg){
   const r=await fetch(cfg.url+'/tts',{method:'POST',headers:{'Content-Type':'application/json','X-Coach-User':apiUser,'X-Coach-Token':cfg.token},body:JSON.stringify({text:t,voice:sayV()})});
   if(!/audio/.test(r.headers.get('Content-Type')||''))throw new Error('no speech');const u=URL.createObjectURL(await r.blob());sayUrls.push(u);return u;
 }
-async function sayNice(t){
-  t=sayText(t);if(!t)return;sayStop();const run=sayRun,cfg=coachCfg;
-  if(!cfg||ui.noTts||!sayEl){sayPhone(t);return}
-  const parts=(t.match(/[^.!?]+[.!?]*\s*/g)||[t]).reduce((a,x)=>{if(a.length&&(a[a.length-1]+x).length<260)a[a.length-1]+=x;else a.push(x);return a},[]).map(x=>x.trim()).filter(Boolean);
-  try{let next=sayClip(parts[0],cfg);
-    for(let i=0;i<parts.length;i++){const url=await next;if(run!==sayRun)return;next=i+1<parts.length?sayClip(parts[i+1],cfg):null;if(next)next.catch(()=>{});
-      sayEl.src=url;await sayEl.play();await new Promise((res,rej)=>{sayEl.onended=res;sayEl.onerror=rej;sayEl.onpause=()=>{if(run!==sayRun)res()}});if(run!==sayRun)return}}
-  catch(e){if(run!==sayRun)return;ui.noTts=1;sayPhone(t)}
+function sayNice(t){
+  t=sayText(t);if(!t)return;sayStop();
+  if(!coachCfg||ui.noTts||!sayEl){sayPhone(t);return}
+  const q={run:sayRun,done:0,clips:[],next:0,playing:false,failed:false,live:true,cfg:coachCfg};sayUI(true);sayFeed(q,t,true);
 }
 /* speaking while the answer is still being written: each finished sentence is sent off to be voiced straight away and played in order */
-function sayLive(){sayStop();return {run:sayRun,done:0,clips:[],next:0,playing:false,failed:false,live:!!(coachCfg&&!ui.noTts&&sayEl),cfg:coachCfg}}
+function sayLive(){sayStop();sayUI(true);return {run:sayRun,done:0,clips:[],next:0,playing:false,failed:false,live:!!(coachCfg&&!ui.noTts&&sayEl),cfg:coachCfg}}
 async function sayPump(q){
-  if(q.playing)return;q.playing=true;
+  if(q.playing)return;q.playing=true;sayUI(true);
   try{while(q.next<q.clips.length){const url=await q.clips[q.next++];if(q.run!==sayRun)return;sayEl.src=url;await sayEl.play();await new Promise((res,rej)=>{sayEl.onended=res;sayEl.onerror=rej;sayEl.onpause=()=>{if(q.run!==sayRun)res()}});if(q.run!==sayRun)return}}
   catch(e){if(q.run===sayRun){q.failed=true;ui.noTts=1;if(q.full)sayPhone(q.full)}}
-  q.playing=false;
+  q.playing=false;if(q.run===sayRun&&(q.full!=null||q.failed))sayUI(false);
 }
 function sayFeed(q,acc,final){
   if(!q||q.run!==sayRun)return;const t=sayText(acc);
   if(!q.live||q.failed){if(final){q.full=t;sayPhone(t)}return}
   if(final)q.full=t;
   let rest=t.slice(q.done);
-  for(;;){let cut=-1;if(final)cut=rest.length;else{const re=/[.!?]["')]?\s/g;let m;while((m=re.exec(rest))){if(m.index+1>=(q.clips.length?90:40)){cut=m.index+m[0].length;break}}}
-    if(cut<=0)break;let piece=rest.slice(0,cut);if(piece.length>280&&!/[.!?]/.test(piece.slice(0,280))){}
-    if(piece.length>280){const k=piece.lastIndexOf(' ',280);if(k>60){piece=piece.slice(0,k+1);cut=piece.length}}
+  for(;;){let cut=-1;const first=!q.clips.length;
+    if(final)cut=rest.length;
+    else{const re=/[.!?]["')]?\s/g;let m;while((m=re.exec(rest))){if(m.index+1>=(first?12:70)){cut=m.index+m[0].length;break}}
+      /* a long opening sentence: start speaking at the first comma rather than waiting for the full stop */
+      if(cut<0&&first&&rest.length>70){const k=rest.slice(0,110).search(/[,;:]\s(?=\S)/);if(k>=25)cut=k+2}}
+    if(cut<=0)break;let piece=rest.slice(0,cut);
+    if(piece.length>200){const k=Math.max(piece.lastIndexOf('. ',200),piece.lastIndexOf(', ',200));const j=k>60?k+2:piece.lastIndexOf(' ',200)+1;if(j>60){piece=piece.slice(0,j);cut=piece.length}}
     q.done+=cut;rest=rest.slice(cut);if(piece.trim()){const c=sayClip(piece.trim(),q.cfg);c.catch(()=>{});q.clips.push(c)}
     if(!rest)break}
   sayPump(q);
@@ -2368,7 +2386,7 @@ function exInfo(id){
   sheet(`<div class="row">${fig(x.p,'lg')}<div><h2>${esc(x.n)}</h2><p class="muted">${esc(x.g||'Other')} · ${esc(x.q||'Custom')}</p><p class="small muted">${x.t==='w'?'Logged as weight and reps':x.t==='t'?'Logged as a timed hold':'Logged as reps'}</p></div></div>
     ${best?`<div class="card" style="background:var(--surface2);box-shadow:none"><span class="small muted">Your best</span><div class="ex-n num">${best}</div></div>`:''}
     ${how?`<h3>${how[0]==='b'?'How Bryan does it':how[0]==='g'?'How we think Bryan would do it':'How to do it'}</h3><p class="small">${esc(how[1])}</p>`:''}
-    ${okUrl(xn.vid)?`<a class="btn ghost wide" href="${esc(xn.vid)}" target="_blank" rel="noopener">${ICON.play}Watch demo</a>`:''}
+    ${okUrl(xn.vid)?(ytClip(xn.vid)?`<button class="btn ghost wide" data-act="demo" data-ex="${esc(id)}">${ICON.play}Watch demo</button>`:`<a class="btn ghost wide" href="${esc(xn.vid)}" target="_blank" rel="noopener">${ICON.play}Watch demo</a>`):''}
     <label class="lbl" for="xn-note">Your setup note</label><input class="txt" id="xn-note" value="${esc(xn.note||'')}" maxlength="80" autocomplete="off" placeholder="e.g. cable height 12, bench notch 3, green band">
     <details class="xdet"><summary class="small muted">Demo video link</summary><input class="txt" id="xn-vid" value="${esc(xn.vid||'')}" maxlength="200" autocomplete="off" inputmode="url" placeholder="https://..."></details>
     <button class="btn wide" data-act="xn-save" data-ex="${id}">Save note</button>
@@ -2856,6 +2874,8 @@ document.addEventListener('click',e=>{
       <p class="small muted">Not sure of the numbers? Leave them empty, or ask your coach to estimate from a photo.</p><button class="btn wide" data-act="ate-save" data-ds="${d.ds}">Add</button><button class="btn quiet wide" data-act="close">Cancel</button>`);break;
     case 'ate-save':{const n=$('#ate-n').value.trim();if(!n){toast('Give it a name');break}const cur=(logOf(d.ds).ate||[]).slice();cur.push({n:n.slice(0,60),kcal:Math.max(0,Math.min(5000,Math.round(+$('#ate-k').value||0))),p:Math.max(0,Math.min(400,Math.round(+$('#ate-p').value||0)))});setLog(d.ds,{ate:cur});saveMain();closeSheet();render();break}
     case 'ate-del':{const cur=(logOf(d.ds).ate||[]).slice();cur.splice(+d.i,1);setLog(d.ds,{ate:cur});saveMain();{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
+    case 'say-now':{if(ui.talking){sayStop()}else{const ms=coachMsgs(),m=ms.slice().reverse().find(x=>x.r==='a');if(m){sayPrime();sayNice(m.t)}}break}
+    case 'demo':demoSheet(d.ex);break;
     case 'save-as':saveAsSheet(d.id);break;
     case 'save-as-yes':{const id=saveAsWorkout(d.id,($('#sa-n')||{}).value);closeSheet();if(id){render();toast('Saved. Find it in Workouts, or add it to a day in Week.')}break}
     case 'sv-sum':svSumGet(d.id);break;
