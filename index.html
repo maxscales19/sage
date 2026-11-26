@@ -673,6 +673,11 @@ input,select,textarea{font-size:16px}
 .cctl .cpick{padding-right:4px}.cctl .cpick span{color:var(--muted);font-weight:500}.cctl .sayv{border:0;background:none;height:32px;padding:0 4px;font-weight:600;max-width:124px}
 .slp{display:flex;align-items:center;justify-content:space-between;gap:12px}.slp .stepper{margin-top:4px}.slp .stepper b{min-width:54px;text-align:center;font-size:20px}
 .xate .xh{letter-spacing:.14em;text-transform:uppercase;font:700 11px/1 var(--body);color:var(--muted)}.xrow{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:8px 0 0;margin-top:8px}.xrow b{display:block;font-size:15px}.xrow small{color:var(--muted)}
+.cprops{margin:12px 0 4px}.cprops small{display:block;letter-spacing:.14em;text-transform:uppercase;font:700 11px/1 var(--body);color:var(--muted);margin:14px 0 8px}
+.cpk{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.cpp{display:flex;flex-wrap:wrap;gap:8px}
+.cpk button,.cpp button{height:46px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-weight:700;font-size:16px}
+.cpp button{padding:0 16px;font-size:15px;font-weight:600}
+.cpk button.on,.cpp button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -693,7 +698,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795643466;
+const BUILD=1795723853;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -838,7 +843,11 @@ generic:[24,9,"M24 12.5V27M24 27L20 42M24 27L28 42M24 16L18 26M24 16L30 26","M14
 function fig(pose,cls){const p=POSES[pose]||POSES.generic;return `<span class="figb ${cls||''}"><svg class="fig" viewBox="0 0 48 48" aria-hidden="true"><path class="fe" d="${p[3]}"/><path class="fb" d="${p[2]}"/><circle class="fb" cx="${p[0]}" cy="${p[1]}" r="3.4"/></svg></span>`}
 
 /* ---------- state ---------- */
-const CW=['upper','lower','core'],CWL={upper:'Upper',lower:'Lower',core:'Core'};
+const CW=['upper','lower','core'],CWL={upper:'Upper',lower:'Lower',core:'Core',wt:'Heaviest weight'};
+/* what a class used: hand weights by kg, and the other props. Logged in place of the old upper, lower and core weights. */
+const PROPS=[['ball','Weighted ball'],['squish','Squishy ball'],['band','Resistance band']],PKG=[1,2,3,4,5,6,7];
+const propsText=p=>{if(!p)return '';const kg=(p.kg||[]).slice().sort((a,b)=>a-b),b=[];if(kg.length)b.push(kg.join(', ').replace(/, ([^,]*)$/,' and $1')+' kg weights');PROPS.forEach(x=>{if(p[x[0]])b.push(x[1].toLowerCase())});return b.join(', ')};
+const lastProps=wid=>{for(let i=S.sessions.length-1;i>=0;i--){const x=S.sessions[i];if(x.workoutId===wid&&x.cls&&x.cls.props)return x.cls.props}return null};
 const cwId=(wid,k)=>'cw-'+wid+'-'+k;
 const mkItem=(e,link,rest)=>{const x=LIB[e]||S.main.exercises[e]||{t:'w'};return {ex:e,sets:3,reps:x.t==='t'?30:x.t==='r'?12:10,rest:rest||(x.t==='w'?90:30),link:!!link}};
 function gymDefaults(){
@@ -855,8 +864,8 @@ function defaults(){
     upper:{name:'Upper Body',sub:'Gym',c:1,vars:V(g.upper)},
     lower:{name:'Lower Body',sub:'Gym',c:2,vars:V(g.lower)},
     full:{name:'Full Body',sub:'Gym',c:3,vars:V(g.full)},
-    mat:{name:'Core + Mat Pilates',sub:'Pilates',c:4,vars:[{items:[]}],cls:{name:'Mat Pilates class',mins:45,wts:true}},
-    hot:{name:'Core + Hot Strength',sub:'Pilates',c:5,vars:[{items:[]}],cls:{name:'Hot Strength class',mins:45,wts:true}}
+    mat:{name:'Core + Mat Pilates',sub:'Pilates',c:4,vars:[{items:[]}],cls:{name:'Mat Pilates class',mins:45,props:true}},
+    hot:{name:'Core + Hot Strength',sub:'Pilates',c:5,vars:[{items:[]}],cls:{name:'Hot Strength class',mins:45,props:true}}
   };
   const plans={};const k=iso(mondayOf(new Date()));
   plans[k]={0:[{id:uid('p'),w:'upper',v:0}],1:[{id:uid('p'),w:'mat'}],2:[{id:uid('p'),w:'lower',v:0}],4:[{id:uid('p'),w:'full',v:0}],5:[{id:uid('p'),w:'hot'}]};
@@ -876,9 +885,12 @@ function migrate(){
       if(g[id]&&its.map(x=>x.ex).join(',')===old[id])w.vars=g[id].map(items=>({items}));
       else{w.vars=[{items:its}];if(g[id])w.vars.push({items:g[id][1]})}});
     m.v=3;ch=true}
+  if(!m.clsProps){['mat','hot'].forEach(id=>{const w=m.workouts[id];if(w&&w.cls&&w.cls.wts){w.cls.wts=false;w.cls.props=true}});
+    if(m.active&&m.active.cls&&m.active.cls.wts&&['mat','hot'].includes(m.active.workoutId)){m.active.cls.wts=null;m.active.cls.props={kg:[]}}m.clsProps=1;ch=true}
   if(!m.acts){m.acts=[];ch=true}
   if(!m.physio||!m.physio.items){m.physio={items:[],log:{}};ch=true}
   Object.keys(m.workouts).forEach(id=>{const w=m.workouts[id];if(!w.vars||!w.vars.length){w.vars=[{items:[]}];ch=true}
+    if(w.cls&&w.cls.props){const n=w.cls.name.replace(' class','')+' weights',e=m.exercises[cwId(id,'wt')];if(!e||e.n!==n){m.exercises[cwId(id,'wt')]={n,t:'k'};ch=true}}
     if(w.cls&&w.cls.wts)CW.forEach(k=>{const n=w.cls.name.replace(' class','')+' '+k+' weight',e=m.exercises[cwId(id,k)];if(!e||e.n!==n){m.exercises[cwId(id,k)]={n,t:'k'};ch=true}})});
   return ch;
 }
@@ -1363,7 +1375,7 @@ function vWorkouts(){
   return seg+S.main.order.filter(W).map(id=>{const w=W(id);
     const cnt=n=>n+' exercise'+(n===1?'':'s');
     const body=w.cls&&!w.vars.some(v=>v.items.length)?'':w.vars.length>1?`<div class="ochips">${w.vars.map((v,i)=>`<button class="ochip" data-act="open" data-w="${id}" data-v="${i}"><b>Option ${i+1}</b><span>${cnt(v.items.length)}</span></button>`).join('')}</div>`:`<div class="small muted" style="margin-top:8px">${cnt(w.vars[0].items.length)}</div>`;
-    return `<div class="card wk" style="--c:var(--w${w.c})"><button class="wk-h" data-act="open" data-w="${id}"><div><div class="ex-n">${esc(w.name)}</div><div class="small muted">${esc(w.sub||'')}${w.cls?' · '+esc(w.cls.name)+(w.cls.wts?' with upper, lower and core weights':''):''}</div></div><span class="chev">›</span></button>
+    return `<div class="card wk" style="--c:var(--w${w.c})"><button class="wk-h" data-act="open" data-w="${id}"><div><div class="ex-n">${esc(w.name)}</div><div class="small muted">${esc(w.sub||'')}${w.cls?' · '+esc(w.cls.name)+(w.cls.wts?' with upper, lower and core weights':w.cls.props?' with the props you used':''):''}</div></div><span class="chev">›</span></button>
       ${body}<div class="row" style="margin-top:12px"><button class="btn sm" data-act="start-pick" data-w="${id}">${ICON.play}Start</button><button class="btn ghost sm" data-act="open" data-w="${id}">View</button><button class="btn ghost sm" data-act="open" data-w="${id}" data-edit="1">Edit</button></div></div>`}).join('')+
     `<button class="btn ghost wide" data-act="w-new">+ Create a new workout</button>`;
 }
@@ -1387,7 +1399,7 @@ function vWorkout(){
         <div class="ed-r"><label>Sets ${stp('ed-step',`data-i="${i}" data-f="sets"`,it.sets)}</label><label>${ex.t==='t'?'Seconds':'Reps'} ${stp('ed-step',`data-i="${i}" data-f="reps"`,it.reps)}</label>
         <label>Rest <button class="restb" style="min-height:40px" data-act="rest-pick" data-src="ed" data-i="${i}">${restLabel(it.rest)}</button></label></div></div>
         ${i<items.length-1?`<button class="linkbtn ${it.link?'on':''}" data-act="ed-link" data-i="${i}">${it.link?'Superset with next ✓':'Pair with next as a superset'}</button>`:''}`}).join('');
-    const cls=w.cls?`<div class="card"><div class="ex-n">${esc(w.cls.name)}</div><p class="small muted" style="margin-top:4px">A 45-minute class with your trainer.${w.cls.wts?' You tick it off and note the upper, lower and core weights you used.':''}</p></div>`:'';
+    const cls=w.cls?`<div class="card"><div class="ex-n">${esc(w.cls.name)}</div><p class="small muted" style="margin-top:4px">A 45-minute class with your trainer.${w.cls.wts?' You tick it off and note the upper, lower and core weights you used.':w.cls.props?' You tick it off and note the props you used.':''}</p></div>`:'';
     if(day)return `<div class="sess-h"><span class="tag" style="margin:0">Editing ${DAYS[sc.from.day]} only</span><button class="btn sm" data-act="ed-done">Done</button></div>
       <div class="card" style="background:var(--accent-soft);box-shadow:none"><b>Just for this ${DAYS[sc.from.day]}</b><p class="small" style="margin-top:4px">Changes here only apply to this one planned workout. Your saved ${esc(w.name)} stays exactly as it is. To change it for good, edit it from the Workouts tab.</p></div>
       ${list||'<p class="muted" style="text-align:center;padding:10px 0">No exercises. Add one below.</p>'}
@@ -1408,7 +1420,7 @@ function vWorkout(){
     <div><span class="tag" style="background:var(--w${w.c});color:var(--w-ink)">${esc(w.sub||'Workout')}${from?' · '+DAYS[from.day]:''}</span><h2 style="font-size:26px">${esc(vName(id,multi?sc.v:null))}</h2></div>
     ${tabs}${custom?`<p class="small muted" style="margin-top:-6px">Changed for this ${DAYS[from.day]} only. <button class="tlink" data-act="entry-reset">Put it back to the usual</button></p>`:multi?'<p class="small muted" style="margin-top:-6px">Different versions of the same session. Pick the one you feel like today.</p>':''}
     ${items.length?`<div class="card"><h3>${items.length} exercise${items.length>1?'s':''}</h3><div class="xlist">${list}</div></div>`:(w.cls?'':'<div class="card"><p class="muted">No exercises in here yet. Tap Edit to add some.</p></div>')}
-    ${w.cls?`<div class="card"><div class="ex-n">${esc(w.cls.name)}</div><p class="small muted" style="margin-top:4px">A 45-minute class with your trainer.${w.cls.wts?' Tick it off and note your upper, lower and core weights.':''}</p></div>`:''}
+    ${w.cls?`<div class="card"><div class="ex-n">${esc(w.cls.name)}</div><p class="small muted" style="margin-top:4px">A 45-minute class with your trainer.${w.cls.wts?' Tick it off and note your upper, lower and core weights.':w.cls.props?' Tick it off and note the props you used.':''}</p></div>`:''}
     ${from?`<button class="btn danger wide" data-act="entry-del" data-day="${from.day}" data-id="${from.id}">Remove from ${DAYS[from.day]}</button>`:''}
     <div class="startbar"><button class="btn wide big" data-act="start" data-w="${id}" data-v="${sc.v}">${ICON.play}${!items.length&&w.cls?'Log this class':'Start '+esc(vName(id,multi?sc.v:null))}</button></div>`;
 }
@@ -1441,8 +1453,9 @@ function vSession(){
       `}).join('');
   const cwRow=k=>{const ls=lastSets(cwId(A.workoutId,k));return `<div class="set cw"><span class="lab">${CWL[k]}<div class="small muted" style="font-weight:500">${ls?'last '+fmt(num(ls[0].w))+' kg':'kg'}</div></span><div class="fld"><button data-act="cw-step" data-k="${k}" data-d="-0.5" aria-label="Less">−</button><input id="f-cw-${k}" inputmode="decimal" autocomplete="off" data-f="cw" data-k="${k}" value="${esc(A.cls.wts[k]??'')}" placeholder="kg" aria-label="${CWL[k]} weight in kg"><button data-act="cw-step" data-k="${k}" data-d="0.5" aria-label="More">+</button></div></div>`};
   const classOnly=!A.entries.length&&!!A.cls;
-  const cls=A.cls?`<div class="card"><div class="ex-h"><div><div class="ex-n">${esc(A.cls.name)}</div><div class="small muted">${A.cls.wts?'45 minutes with your trainer. Add the weights you used, leave any blank, then mark it done.':'Tick it off when the class is done.'}</div></div></div>
+  const cls=A.cls?`<div class="card"><div class="ex-h"><div><div class="ex-n">${esc(A.cls.name)}</div><div class="small muted">${A.cls.wts?'45 minutes with your trainer. Add the weights you used, leave any blank, then mark it done.':A.cls.props?'45 minutes with your trainer. Tap what you used today, then mark it done.':'Tick it off when the class is done.'}</div></div></div>
     ${A.cls.wts?CW.map(cwRow).join(''):''}
+    ${A.cls.props?`<div class="cprops"><small>Hand weights (kg)</small><div class="cpk">${PKG.map(n=>`<button class="${(A.cls.props.kg||[]).includes(n)?'on':''}" data-act="cp-kg" data-n="${n}" aria-pressed="${(A.cls.props.kg||[]).includes(n)}" aria-label="${n} kilogram weights">${n}</button>`).join('')}</div><small>Other props</small><div class="cpp">${PROPS.map(x=>`<button class="${A.cls.props[x[0]]?'on':''}" data-act="cp-prop" data-k="${x[0]}" aria-pressed="${!!A.cls.props[x[0]]}">${x[1]}</button>`).join('')}</div></div>`:''}
     ${classOnly?'':`<button class="donebtn ${A.cls.done?'on':''}" data-act="cls-check" aria-pressed="${!!A.cls.done}">${A.cls.done?'✓ Class done':'Tick when the class is done'}</button>`}</div>`:'';
   return `<div class="sess-h"><button class="back" data-act="back">‹ Back</button>${classOnly?'':'<span class="small muted num" id="elapsed"></span>'}${COACH()&&!classOnly?'<button class="btn ghost sm" data-act="coach">Ask coach</button>':''}<button class="btn sm" data-act="finish">${classOnly?'✓ Done':'Finish'}</button></div>
     <div><span class="tag" style="background:var(--w${w.c});color:var(--w-ink)">${esc(w.sub||'Workout')}</span><h2>${esc(A.name)}</h2>${A.entries.length?'<p class="small muted" style="margin-top:4px">Machine taken? Tap Swap for a substitute. Anything you change in here is for today only.</p>':''}</div>
@@ -1544,6 +1557,24 @@ function vHistory(){
     ${names.length>1?`<div class="fchips"><button class="${f==='all'?'on':''}" data-act="hist-f" data-f="all">All</button>${names.map(n=>`<button class="${f===n?'on':''}" data-act="hist-f" data-f="${esc(n)}">${esc(n)}</button>`).join('')}</div>`:''}
     ${h||'<div class="card"><p class="muted">Your finished workouts will be listed here.</p></div>'}`;
 }
+/* keep a workout you changed on the day: make a new workout from what was actually done, and leave the one it started from alone */
+const sessExs=s=>(s.entries||[]).filter(e=>e.type!=='k'&&X(e.ex));
+function saveAsSheet(sid){
+  const s=S.sessions.find(x=>x.id===sid);if(!s||!sessExs(s).length)return;const d=new Date(s.date+'T00:00:00'),base=(W(s.workoutId)||{name:s.name}).name;
+  sheet(`<h2>Save as a new workout</h2><p class="muted">Keeps the ${sessExs(s).length} exercises you did ${DAYS[(d.getDay()+6)%7]} as their own workout, ready to plan again. ${esc(base)} stays as it was.</p>
+    <label class="lbl" for="sa-n">Name</label><input class="txt" id="sa-n" maxlength="40" autocomplete="off" value="${esc((base+' '+DAYS[(d.getDay()+6)%7].slice(0,3)+' '+d.getDate()+' '+MON[d.getMonth()]).slice(0,40))}">
+    <div class="small muted" style="margin-top:8px">${sessExs(s).map(e=>esc(e.name)).join(' · ')}</div>
+    <button class="btn wide" data-act="save-as-yes" data-id="${s.id}">Save workout</button><button class="btn quiet wide" data-act="close">Not now</button>`);
+  const i=$('#sa-n');if(i){i.focus();i.select()}
+}
+function saveAsWorkout(sid,name){
+  const s=S.sessions.find(x=>x.id===sid);if(!s)return null;const src=W(s.workoutId),tpl=it=>{let f=null;Object.values(S.main.workouts).forEach(w=>(w.vars||[]).forEach(v=>v.items.forEach(x=>{if(x.ex===it&&(!f||w===src))f=x})));return f};
+  const items=sessExs(s).map(e=>{const t=tpl(e.ex),rs=e.sets.map(x=>num(x.r)).filter(Boolean);return {ex:e.ex,sets:Math.max(1,e.sets.length),reps:rs.length?rs.slice().sort((a,b)=>rs.filter(v=>v===b).length-rs.filter(v=>v===a).length)[0]:(t?t.reps:10),rest:t?t.rest:90,link:false}});
+  if(!items.length)return null;const id=uid('w');
+  S.main.workouts[id]={name:(name||'').trim().slice(0,40)||s.name,sub:(src&&src.sub)||'Gym',c:(src&&src.c)||s.c||1,vars:[{items}]};
+  if(src&&src.cls&&s.cls)S.main.workouts[id].cls=JSON.parse(JSON.stringify(src.cls));
+  S.main.order.push(id);migrate();saveMain();return id;
+}
 /* the coach's write-up for a workout, kept with it so it can be read again later */
 const sumOf=id=>{const m=S.coach&&S.coach.sums&&S.coach.sums[id];return m&&m.t?m.t:''};
 function svSum(id){
@@ -1569,8 +1600,9 @@ function vSessView(){
     <div><span class="tag" style="background:var(--w${s.c||1});color:#fff">${DAYS[(d.getDay()+6)%7]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}</span><h2 style="font-size:28px;margin-top:8px">${esc(s.name)}</h2></div>
     <div class="tiles">${tiles}</div>
     ${svSum(s.id)}
-    ${cards}${s.cls?`<div class="card"><div class="ex-n">${esc(s.cls.name)}</div><div class="small muted">Class done ✓</div></div>`:''}${!cards&&!s.cls?'<div class="card"><p class="muted">No sets were ticked off in this one.</p></div>':''}
+    ${cards}${s.cls?`<div class="card"><div class="ex-n">${esc(s.cls.name)}</div><div class="small muted">Class done ✓${s.cls.props?' · used '+esc(propsText(s.cls.props)):''}</div></div>`:''}${!cards&&!s.cls?'<div class="card"><p class="muted">No sets were ticked off in this one.</p></div>':''}
     <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="sess" data-id="${i<all.length-1?all[i+1].id:''}" ${i<all.length-1?'':'disabled'}>‹ Older</button><button class="btn ghost" style="flex:1" data-act="sess" data-id="${i>0?all[i-1].id:''}" ${i>0?'':'disabled'}>Newer ›</button></div>
+    ${sessExs(s).length?`<button class="btn ghost wide" data-act="save-as" data-id="${s.id}">Save these exercises as a new workout</button>`:''}
     <button class="btn quiet wide" data-act="sess-ask" data-id="${s.id}">Delete this workout</button>`;
 }
 
@@ -2373,7 +2405,7 @@ function startWorkout(wid,v,force){
   let on=iso(new Date());const fr=ui.screen&&ui.screen.from;
   if(fr&&fr.key&&fr.day>=0){const d=iso(addDays(new Date(fr.key+'T00:00:00'),+fr.day));if(d<on){on=d;setTimeout(()=>toast('Logging this for '+DAYS[+fr.day]),300)}}
   S.main.active={id:uid('s'),workoutId:wid,v,name:vName(wid,v),c:w.c,date:on,startedAt:Date.now(),entries,
-    cls:w.cls?{name:w.cls.name,mins:w.cls.mins,done:false,wts:w.cls.wts?Object.fromEntries(CW.map(k=>{const ls=lastSets(cwId(wid,k));return [k,ls?fmt(num(ls[0].w)):'']})):null}:null};
+    cls:w.cls?{name:w.cls.name,mins:w.cls.mins,done:false,wts:w.cls.wts?Object.fromEntries(CW.map(k=>{const ls=lastSets(cwId(wid,k));return [k,ls?fmt(num(ls[0].w)):'']})):null,props:w.cls.props?JSON.parse(JSON.stringify(Object.assign({kg:[]},lastProps(wid)||{}))):null}:null};
   stopRest();closeSheet();ui.screen='session';saveMain();render();$('#main').scrollTop=0;
 }
 function checkPB(e,set){
@@ -2413,6 +2445,8 @@ function classDone(){
   const A=S.main.active,c=A.cls;c.done=true;c.pb={};let first=null;
   if(c.wts)CW.forEach(k=>{const w=num(c.wts[k]);if(!(w>0))return;const pr=stats(cwId(A.workoutId,k),S.sessions);
     if(pr.has&&w>pr.maxW){c.pb[k]=1;if(!first)first={pb:{k:'Heaviest yet',v:fmt(w)+' kg',sub:'Up from '+fmt(pr.maxW)+' kg.'},name:c.name.replace(' class','')+', '+k+' weight'}}});
+  if(c.props){const kg=(c.props.kg||[]),w=kg.length?Math.max(...kg):0,pr=stats(cwId(A.workoutId,'wt'),S.sessions);
+    if(w>0&&pr.has&&w>pr.maxW){c.pb.wt=1;first={pb:{k:'Heaviest yet',v:fmt(w)+' kg',sub:'Up from '+fmt(pr.maxW)+' kg.'},name:c.name.replace(' class','')+' weights'}}}
   saveMain();return first;
 }
 function finish(){
@@ -2422,7 +2456,7 @@ function finish(){
   const clsDone=A.cls&&A.cls.done;
   if(!entries.length&&!clsDone){sheet(`<h2>Nothing logged yet</h2><p class="muted">Tick off at least one set or the class to save this workout.</p><button class="btn wide" data-act="close">Keep going</button><button class="btn danger wide" data-act="discard-yes">Discard workout</button>`);return}
   const sess={id:A.id,workoutId:A.workoutId,v:A.v||0,name:A.name,c:A.c,date:A.date,startedAt:A.startedAt,finishedAt:Date.now(),entries};
-  if(clsDone){sess.cls={name:A.cls.name,mins:num(A.cls.mins)};if(A.cls.wts)CW.forEach(k=>{const w=num(A.cls.wts[k]);if(w>0){const st={w,r:1};if(A.cls.pb&&A.cls.pb[k])st.pb=1;entries.push({ex:cwId(A.workoutId,k),name:(X(cwId(A.workoutId,k))||{n:k+' weight'}).n,type:'k',sets:[st]})}})}
+  if(clsDone){sess.cls={name:A.cls.name,mins:num(A.cls.mins)};if(A.cls.props){const P=A.cls.props,o={};if((P.kg||[]).length)o.kg=P.kg.slice().sort((a,b)=>a-b);PROPS.forEach(x=>{if(P[x[0]])o[x[0]]=1});if(Object.keys(o).length)sess.cls.props=o;if(o.kg){const st={w:Math.max(...o.kg),r:1};if(A.cls.pb&&A.cls.pb.wt)st.pb=1;entries.push({ex:cwId(A.workoutId,'wt'),name:(X(cwId(A.workoutId,'wt'))||{n:'Class weights'}).n,type:'k',sets:[st]})}}if(A.cls.wts)CW.forEach(k=>{const w=num(A.cls.wts[k]);if(w>0){const st={w,r:1};if(A.cls.pb&&A.cls.pb[k])st.pb=1;entries.push({ex:cwId(A.workoutId,k),name:(X(cwId(A.workoutId,k))||{n:k+' weight'}).n,type:'k',sets:[st]})}})}
   const before=snap();
   S.sessions.push(sess);S.main.active=null;stopRest();saveSession(sess);saveMain();
   const gain=gained(before);
@@ -2433,14 +2467,15 @@ function finish(){
   ui.screen=null;ui.tab='week';ui.weekOff=0;render();
   sheet(`<div style="text-align:center"><span class="tag">${sets?'Done':'Class done'}</span><h2 style="font-size:26px">${esc(sess.name)}</h2></div>
     ${sets?`<div class="tiles"><div class="tile"><b>${mins}</b><span>${mins===1?'minute':'minutes'}</span></div><div class="tile"><b>${sets}</b><span>sets</span></div><div class="tile"><b style="color:var(--gold)">${pbs}</b><span>new PBs</span></div></div>`:''}
-    ${entries.some(e=>e.type==='k')?`<p class="num" style="text-align:center;font-weight:700">${entries.filter(e=>e.type==='k').map(e=>CWL[e.ex.split('-').pop()]+' '+fmt(e.sets[0].w)+' kg').join(' · ')}</p>`:''}
+    ${sess.cls&&sess.cls.props?`<p style="text-align:center;font-weight:700">Used ${esc(propsText(sess.cls.props))}</p>`:entries.some(e=>e.type==='k')?`<p class="num" style="text-align:center;font-weight:700">${entries.filter(e=>e.type==='k').map(e=>CWL[e.ex.split('-').pop()]+' '+fmt(e.sets[0].w)+' kg').join(' · ')}</p>`:''}
     ${vol?`<p class="muted" style="text-align:center">You moved <b class="num" style="color:var(--ink)">${Math.round(vol).toLocaleString()} kg</b> in total${sess.cls?', plus your class':''}.</p>`:`<p class="muted" style="text-align:center">Ticked off${pbs?' with '+pbs+' new PB'+(pbs>1?'s':''):''}. Nice work.</p>`}
     ${pbList?`<div class="pbl"><small>Personal bests</small>${pbList}</div>`:''}
     ${COACH()&&coachCfg?'<div class="pbl" id="csum"><small style="color:var(--accent-text)">From your coach</small><div class="cmd"><span class="dots"><i></i><i></i><i></i></span></div></div>':''}
     ${unlockHTML(gain)}
     <p class="num" style="text-align:center;font-weight:700">+${workoutPts(sess)} week points · ${weekPoints(mondayOf(new Date(sess.date+'T00:00:00'))).total} of ${wkGoal()}</p>
     ${LV()?`<p class="small muted num" style="text-align:center">+${(100+sets*5+pbs*50+gain.newB.length*100).toLocaleString()} XP</p>`:''}
-    <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="sess" data-id="${sess.id}">Review it</button><button class="btn" style="flex:1" data-act="close">Lovely</button></div>`);
+    <div class="row" style="gap:10px"><button class="btn ghost" style="flex:1" data-act="sess" data-id="${sess.id}">Review it</button><button class="btn" style="flex:1" data-act="close">Lovely</button></div>
+    ${sessExs(sess).length?`<button class="btn quiet wide" data-act="save-as" data-id="${sess.id}">Save these exercises as a new workout</button>`:''}`);
   if(COACH()&&coachCfg){const sid=sess.id;chain.then(()=>coachSummary(sid),()=>coachSummary(sid))}
   const bigWin=gain.newB.length||gain.lvl;
   if(cpb)celebrate(cpb.pb,cpb.name);else confetti(pbs||bigWin?1:.45);
@@ -2722,6 +2757,8 @@ document.addEventListener('click',e=>{
     case 'step':{const s=A.entries[+d.e].sets[+d.s],v=Math.max(0,num(s[d.f])+Number(d.d));s[d.f]=fmt(v);const i=document.getElementById(`f-${d.e}-${d.s}-${d.f}`);if(i)i.value=s[d.f];saveMain();break}
     case 'cls-step':A.cls.mins=Math.max(5,num(A.cls.mins)+Number(d.d));$('#f-cls').value=A.cls.mins;saveMain();break;
     case 'cls-check':if(A.cls.done){A.cls.done=false;A.cls.pb={};saveMain();render()}else{const r=classDone();render();if(r)celebrate(r.pb,r.name)}break;
+    case 'cp-kg':{const P=A.cls.props,n=+d.n;P.kg=P.kg||[];const i=P.kg.indexOf(n);if(i>=0)P.kg.splice(i,1);else P.kg.push(n);b.classList.toggle('on',i<0);b.setAttribute('aria-pressed',i<0);saveMain();break}
+    case 'cp-prop':{const P=A.cls.props;P[d.k]=!P[d.k];b.classList.toggle('on',!!P[d.k]);b.setAttribute('aria-pressed',!!P[d.k]);saveMain();break}
     case 'cw-step':{const v=Math.max(0,num(A.cls.wts[d.k])+Number(d.d));A.cls.wts[d.k]=v?fmt(v):'';const i=document.getElementById('f-cw-'+d.k);if(i)i.value=A.cls.wts[d.k];saveMain();break}
     case 'add-set':d.g.split(',').forEach(i=>{const en=A.entries[+i],l=en.sets[en.sets.length-1];en.sets.push({w:l?l.w:'',r:l?l.r:'10',done:false})});saveMain();render();break;
     case 'del-set':d.g.split(',').forEach(i=>{const en=A.entries[+i];if(en.sets.length>1)en.sets.pop()});saveMain();render();break;
@@ -2819,6 +2856,8 @@ document.addEventListener('click',e=>{
       <p class="small muted">Not sure of the numbers? Leave them empty, or ask your coach to estimate from a photo.</p><button class="btn wide" data-act="ate-save" data-ds="${d.ds}">Add</button><button class="btn quiet wide" data-act="close">Cancel</button>`);break;
     case 'ate-save':{const n=$('#ate-n').value.trim();if(!n){toast('Give it a name');break}const cur=(logOf(d.ds).ate||[]).slice();cur.push({n:n.slice(0,60),kcal:Math.max(0,Math.min(5000,Math.round(+$('#ate-k').value||0))),p:Math.max(0,Math.min(400,Math.round(+$('#ate-p').value||0)))});setLog(d.ds,{ate:cur});saveMain();closeSheet();render();break}
     case 'ate-del':{const cur=(logOf(d.ds).ate||[]).slice();cur.splice(+d.i,1);setLog(d.ds,{ate:cur});saveMain();{const st=$('#main').scrollTop;render();$('#main').scrollTop=st}break}
+    case 'save-as':saveAsSheet(d.id);break;
+    case 'save-as-yes':{const id=saveAsWorkout(d.id,($('#sa-n')||{}).value);closeSheet();if(id){render();toast('Saved. Find it in Workouts, or add it to a day in Week.')}break}
     case 'sv-sum':svSumGet(d.id);break;
     case 'sess-del':S.sessions=S.sessions.filter(x=>x.id!==d.id);S.main.deleted.push(d.id);if(col){const id=d.id;chain=chain.then(()=>col&&col.doc(id).delete()).catch(cloudErr)}closeSheet();if(ui.screen&&ui.screen.sv)ui.screen={hist:{f:ui.screen.sv.f||'all'}};saveMain();render();break;
   }
