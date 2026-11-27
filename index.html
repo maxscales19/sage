@@ -702,6 +702,10 @@ input,select,textarea{font-size:16px}
 #nav{align-items:flex-end}#nav .nvh{flex:1 1 0;min-width:0;display:flex}
 #nav .nvcup{flex:0 0 64px;padding:0;margin:-22px 4px 0;align-self:flex-start}#nav .nvcup span{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#F2C94C,#D99A1C);color:#3a2a00;box-shadow:0 4px 14px rgba(0,0,0,.25),0 0 0 5px var(--surface)}
 #nav .nvcup svg{width:28px;height:28px}#nav .nvcup[aria-current="page"] span{box-shadow:0 4px 14px rgba(0,0,0,.25),0 0 0 5px var(--surface),0 0 0 8px #E0AA2E}
+.chtb{display:grid;grid-template-columns:72px repeat(var(--n),1fr);gap:8px 6px;align-items:center;text-align:center}.chtb>span{text-align:left;font-size:13px;color:var(--muted);font-weight:600}.chtb>b{font-size:13px}
+.chtb em{font-style:normal;display:flex;flex-direction:column;background:var(--surface2);border-radius:10px;padding:5px 2px}.chtb em b{font-size:16px}.chtb em small{font-size:11px;color:var(--muted)}
+.seg.sm{width:auto}.seg.sm button{padding:6px 12px;font-size:13px}
+#nav{position:relative;z-index:6;overflow:visible}#nav .nvcup{position:relative;z-index:7}#nav .nvcup span{transform:translateZ(0)}#main{position:relative;z-index:1}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -722,7 +726,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795817102;
+const BUILD=1795817327;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1681,7 +1685,7 @@ function wkTrend(){
 /* ---------- December challenge: a points race between the three accounts, with its own tab ---------- */
 const CH={from:'2026-12-01',to:'2026-12-31',workout:10,steps:[[20000,12],[15000,8],[10000,5]],maxW:2};
 const CHN={alex:'Alex',max:'Max',dad:'Dad'},CHC={alex:'#E0669A',max:'#6FB03A',dad:'#3A82C8'},chMe=()=>apiUser||'alex';
-const CHE=['👏','🔥','😤'],chIn=()=>!!S.main.settings.chal;
+const CHS='2026-11-23',CHE=['👏','🔥','😤'],chIn=()=>!!S.main.settings.chal;
 function chalDay(ds){
   const g=GW(),o={pts:0,w:0,st:0,sb:0};
   let w=S.sessions.filter(s=>s.date===ds&&workoutPts(s)>0).length;
@@ -1694,8 +1698,9 @@ function chalDay(ds){
 }
 let chK=[];try{chK=JSON.parse(localStorage.getItem('sage-cheers')||'[]')||[]}catch(e){}
 function chalMine(){
-  const today=iso(new Date()),o={p:0,w:0,s10:0,s15:0,s20:0,t:0,d:[],k:chK.slice(-6)};
+  const today=iso(new Date()),o={p:0,w:0,s10:0,s15:0,s20:0,t:0,d:[],wd:[],sd:[],k:chK.slice(-6)};
   for(let d=new Date(CH.from+'T12:00:00');iso(d)<=CH.to&&iso(d)<=today;d=addDays(d,1)){const x=chalDay(iso(d));o.d.push(x.pts);o.p+=x.pts;o.w+=x.w;if(x.st>=20000)o.s20++;else if(x.st>=15000)o.s15++;else if(x.st>=10000)o.s10++;if(iso(d)===today)o.t=x.pts}
+  for(let d=new Date(CHS+'T12:00:00');iso(d)<=CH.to&&iso(d)<=today;d=addDays(d,1)){const x=chalDay(iso(d));o.wd.push(x.w);o.sd.push(Math.round(x.st/100))}
   return o;
 }
 let chBoard={},chSent='',chT=null,chAt=0,chBusy=false;
@@ -1758,14 +1763,29 @@ function vChal(){
       ${r.out?'':`<em class="num">${r.p}</em>`}</div>`}).join('');
   return `<div class="chhero"><div class="chcup">🏆</div><small>${pre?'Starting soon':done?'Final result':chDaysLeft()+' day'+(chDaysLeft()===1?'':'s')+' left'}</small><h2>December challenge</h2><p>${line}</p>
       ${chIn()?'':'<button class="btn wide chjoin" data-act="chal-join">Join the challenge</button>'}</div>
-    <div class="card"><h3 style="margin-bottom:6px">Leaderboard</h3>${list}</div>
-    <div class="card"><h3 style="margin-bottom:8px">How to score</h3>
-    <div class="pbl"><div class="h"><span>Any workout or class</span><span class="num muted">${CH.workout}</span></div>
+    <div class="card"><div class="row between" style="margin-bottom:6px"><h3>Leaderboard</h3><button class="small muted" data-act="chal-how">How to score ›</button></div>${list}</div>
+    ${chalStats(rows)}
+    ${chIn()?'<button class="btn ghost wide" data-act="chal-leave">Leave the challenge</button>':''}`;
+}
+const chK1=n=>n>=1000?(n/1000).toFixed(n>=10000?0:1).replace(/\.0$/,'')+'k':String(n);
+function chalStats(rows){
+  const inn=rows.filter(r=>!r.out);if(!inn.length)return '';
+  const wk=ui.chStat==='w',today=iso(new Date()),n=Math.max(0,...inn.map(r=>(r.wd||[]).length)),day=i=>addDays(new Date(CHS+'T12:00:00'),i);
+  let lines=[];
+  if(wk){for(let a=Math.floor((n-1)/7)*7;a>=0&&lines.length<6;a-=7)lines.push({l:a+7>n&&iso(day(a+6))>=today?'This week':day(a).getDate()+' '+MON[day(a).getMonth()],c:inn.map(r=>{let w=0,st=0;for(let i=a;i<a+7&&i<n;i++){w+=(r.wd||[])[i]||0;st+=((r.sd||[])[i]||0)*100}return [w,st]})})}
+  else for(let i=n-1;i>=0&&lines.length<7;i--)lines.push({l:iso(day(i))===today?'Today':DAYS[(day(i).getDay()+6)%7]+' '+day(i).getDate(),c:inn.map(r=>[(r.wd||[])[i]||0,((r.sd||[])[i]||0)*100])});
+  return `<div class="card"><div class="row between" style="margin-bottom:10px"><h3>Stats</h3><div class="seg sm" role="group"><button class="${wk?'':'on'}" data-act="chal-stat" data-v="d">Days</button><button class="${wk?'on':''}" data-act="chal-stat" data-v="w">Weeks</button></div></div>
+    <div class="chtb" style="--n:${inn.length}"><span></span>${inn.map(r=>`<b style="color:${CHC[r.u]}">${r.me?'You':CHN[r.u]}</b>`).join('')}
+    ${lines.map(x=>`<span>${x.l}</span>${x.c.map(c=>`<em><b class="num">${c[0]||'–'}</b><small class="num">${c[1]?chK1(c[1]):'–'}</small></em>`).join('')}`).join('')}</div>
+    <p class="small muted" style="margin-top:10px">Big number is workouts. Small number is steps.</p></div>`;
+}
+function chalHow(){
+  sheet(`<h2>How to score</h2><div class="pbl"><div class="h"><span>Any workout or class</span><span class="num muted">${CH.workout}</span></div>
       <div class="h"><span>10,000 step day</span><span class="num muted">+${CH.steps[2][1]}</span></div>
       <div class="h"><span>15,000 step day</span><span class="num muted">+${CH.steps[1][1]}</span></div>
       <div class="h"><span>20,000 step day</span><span class="num muted">+${CH.steps[0][1]}</span></div></div>
-    <p class="small muted" style="margin-top:8px">Most points on 31 December wins. Same points for everyone. Up to ${CH.maxW} workouts count each day.</p>
-    ${chIn()?'<button class="btn ghost wide" style="margin-top:10px" data-act="chal-leave">Leave the challenge</button>':''}</div>`;
+    <p class="small muted" style="margin-top:8px">Most points on 31 December wins. Same points for everyone. Steps score on their own, no workout needed. Up to ${CH.maxW} workouts count each day.</p>
+    <button class="btn wide" style="margin-top:14px" data-act="close">Done</button>`);
 }
 /* ---------- past workouts ---------- */
 const sessSets=s=>(s.entries||[]).reduce((n,e)=>n+(e.type==='k'?0:e.sets.length),0);
@@ -2911,6 +2931,8 @@ document.addEventListener('click',e=>{
     case 'pantry':{const pn=pantry();if(pn[d.id])delete pn[d.id];else pn[d.id]=1;saveMain();{const st=$('#main').scrollTop;render();$('#main').scrollTop=st};toast(pn[d.id]?'Moved to your kitchen':'Back on the list');break}
     case 'wkp-open':wkSheet(d.k);break;
     case 'chal-cheer':chalCheer(d.u,d.e);break;
+    case 'chal-how':chalHow();break;
+    case 'chal-stat':ui.chStat=d.v;render();break;
     case 'chal-join':S.main.settings.chal=iso(new Date());saveMain();render();confetti(1);toast('You are in 🏆');chalSync(true);break;
     case 'chal-leave':delete S.main.settings.chal;saveMain();render();chalSync(true);break;
     case 'wkg':S.main.settings.wkGoal=Math.max(30,Math.min(400,wkGoal()+ +d.n));saveMain();render();wkSheet(d.k);break;
