@@ -706,6 +706,7 @@ input,select,textarea{font-size:16px}
 .chtb em{font-style:normal;display:flex;flex-direction:column;background:var(--surface2);border-radius:10px;padding:5px 2px}.chtb em b{font-size:16px}.chtb em small{font-size:11px;color:var(--muted)}
 .seg.sm{width:auto}.seg.sm button{padding:6px 12px;font-size:13px}
 #nav{position:relative;z-index:6;overflow:visible}#nav .nvcup{position:relative;z-index:7}#nav .nvcup span{transform:translateZ(0)}#main{position:relative;z-index:1}
+.chdemo{width:100%;background:var(--gold);color:#2b1e00;font-weight:700;font-size:13.5px;border-radius:14px;padding:10px 12px;text-align:center}
 /* extra:end */
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -726,7 +727,7 @@ input,select,textarea{font-size:16px}
 "use strict";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const BUILD=1795817327;
+const BUILD=1795817517;
 const LS='sage-training-v1';
 /* look: follows the phone unless the person picks light or dark; remembered on this device */
 const THEMELS='sage-theme-v1';let theme='auto';try{theme=localStorage.getItem(THEMELS)||'auto'}catch(e){}
@@ -1685,7 +1686,7 @@ function wkTrend(){
 /* ---------- December challenge: a points race between the three accounts, with its own tab ---------- */
 const CH={from:'2026-12-01',to:'2026-12-31',workout:10,steps:[[20000,12],[15000,8],[10000,5]],maxW:2};
 const CHN={alex:'Alex',max:'Max',dad:'Dad'},CHC={alex:'#E0669A',max:'#6FB03A',dad:'#3A82C8'},chMe=()=>apiUser||'alex';
-const CHS='2026-11-23',CHE=['👏','🔥','😤'],chIn=()=>!!S.main.settings.chal;
+const CHS='2026-11-23',CHE=['👏','🔥','😤'],chIn=()=>!!ui.chDemo||!!S.main.settings.chal;
 function chalDay(ds){
   const g=GW(),o={pts:0,w:0,st:0,sb:0};
   let w=S.sessions.filter(s=>s.date===ds&&workoutPts(s)>0).length;
@@ -1706,6 +1707,7 @@ function chalMine(){
 let chBoard={},chSent='',chT=null,chAt=0,chBusy=false;
 try{chBoard=JSON.parse(localStorage.getItem('sage-board')||'{}')||{}}catch(e){}
 function chalRows(){
+  if(ui.chDemo)return chalDemo();
   const b=Object.assign({},chBoard);b[chMe()]=chalMine();Object.keys(b).forEach(u=>{if(b[u]&&b[u].off)delete b[u]});
   if(!chIn())delete b[chMe()];return Object.keys(CHN).filter(u=>API||u===chMe()).map(u=>b[u]&&typeof b[u].p==='number'?Object.assign({u,me:u===chMe(),d:[]},b[u]):{u,me:u===chMe(),out:true,p:0,w:0,s10:0,s15:0,s20:0,t:0,d:[]}).sort((a,c)=>(a.out?1:0)-(c.out?1:0)||c.p-a.p||(a.u<c.u?-1:1));
 }
@@ -1719,6 +1721,7 @@ function chalExtras(rows){
 async function chalSync(force){
   if(!API||!apiKey||chBusy)return;chBusy=true;
   try{
+    if(ui.chDemo){chBusy=false;return}
     const me=chIn()?chalMine():{off:1},js=JSON.stringify(me);
     if(js!==chSent){await api({op:'boardset',json:js});chSent=js}
     if(Date.now()-chAt>(force?8000:60000)){
@@ -1736,18 +1739,27 @@ async function chalSync(force){
   chBusy=false;
 }
 function chalSoon(){clearTimeout(chT);chT=setTimeout(()=>chalSync(),4000)}
-function chalCheer(to,e){chK.push({to,e,at:Date.now()});chK=chK.slice(-6);try{localStorage.setItem('sage-cheers',JSON.stringify(chK))}catch(x){}toast('Sent '+e+' to '+CHN[to]);chalSync()}
-const chDaysLeft=()=>Math.max(0,Math.round((new Date(CH.to+'T12:00:00')-new Date(iso(new Date())+'T12:00:00'))/864e5)+1);
-const chDaysTo=()=>Math.round((new Date(CH.from+'T12:00:00')-new Date(iso(new Date())+'T12:00:00'))/864e5);
+function chalCheer(to,e){if(ui.chDemo){toast('Sent '+e+' to '+CHN[to]);return}chK.push({to,e,at:Date.now()});chK=chK.slice(-6);try{localStorage.setItem('sage-cheers',JSON.stringify(chK))}catch(x){}toast('Sent '+e+' to '+CHN[to]);chalSync()}
+const chToday=()=>ui.chDemo?'2026-12-12':iso(new Date());
+/* a look ahead: made-up scores as they might stand on 12 December; nothing is saved or sent */
+function chalDemo(){
+  const W={max:[1,0,1,1,0,1,0, 1,1,0,1,1,0,0, 1,0,1,1,0,1],alex:[1,1,0,1,1,1,0, 0,1,1,1,0,2,0, 1,1,0,1,1,1],dad:[0,1,0,1,0,1,0, 1,0,1,0,1,0,1, 0,1,1,0,1,0]};
+  const St={max:[84,121,96,103,152,207,66, 91,108,74,125,99,161,88, 102,93,110,156,81,120],alex:[102,95,131,88,104,157,72, 110,86,101,123,94,205,68, 97,115,104,89,151,108],dad:[101,112,98,154,105,121,100, 93,108,151,102,97,115,204, 106,99,152,103,110,101]};
+  return Object.keys(CHN).map(u=>{const o={u,me:u===chMe(),p:0,w:0,s10:0,s15:0,s20:0,t:0,d:[],wd:W[u],sd:St[u]};
+    for(let i=8;i<20;i++){const st=St[u][i]*100,b=CH.steps.find(x=>st>=x[0]),pts=W[u][i]*CH.workout+(b?b[1]:0);o.d.push(pts);o.p+=pts;o.w+=W[u][i];if(st>=20000)o.s20++;else if(st>=15000)o.s15++;else if(st>=10000)o.s10++;if(i===19)o.t=pts}
+    return o}).sort((a,c)=>c.p-a.p);
+}
+const chDaysLeft=()=>Math.max(0,Math.round((new Date(CH.to+'T12:00:00')-new Date(chToday()+'T12:00:00'))/864e5)+1);
+const chDaysTo=()=>Math.round((new Date(CH.from+'T12:00:00')-new Date(chToday()+'T12:00:00'))/864e5);
 function chalCard(){
-  const today=iso(new Date());if(today>'2027-01-07')return '';
+  const today=chToday();if(today>'2027-01-07')return '';
   const rows=chalRows(),pre=today<CH.from,done=today>CH.to,medal=['👑','🥈','🥉'];
   const top=rows[0]&&!rows[0].out&&rows[0].p>0?rows[0]:null;
   return `<button class="wkp chal" data-act="tab" data-tab="chal"><span class="row between"><small>December challenge</small><small>${pre?'Starts in '+chDaysTo()+' day'+(chDaysTo()===1?'':'s'):done?(top?CHN[top.u]+' won 🏆':'Finished'):'Leaderboard ›'}</small></span>
     ${!chIn()?'<span class="chrow"><b>Tap to join</b></span>':''}${rows.filter(r=>!r.out).map((r,i)=>`<span class="chrow ${r.me?'me':''}"><i>${pre||!r.p?'·':medal[i]||''}</i><b>${r.me?'You':CHN[r.u]}</b><em class="num">${r.p}</em></span>`).join('')}</button>`;
 }
 function vChal(){
-  const rows=chalRows(),today=iso(new Date()),pre=today<CH.from,done=today>CH.to,medal=['👑','🥈','🥉'];
+  const rows=chalRows(),today=chToday(),pre=today<CH.from,done=today>CH.to,medal=['👑','🥈','🥉'];
   const inn=rows.filter(r=>!r.out),me=rows.find(r=>r.me),mi=inn.indexOf(me),lead=inn[0],any=lead&&lead.p>0;
   let line='';
   if(!chIn())line='Join in. Points count from 1 December, even if you join late.';
@@ -1761,16 +1773,16 @@ function vChal(){
       <div class="nm"><b>${r.me?'You':CHN[r.u]}</b><small>${r.out?'Not joined yet':pre?'In':r.w+' workout'+(r.w===1?'':'s')+' · '+big+' step day'+(big===1?'':'s')}</small></div>
       ${r.me||r.out?'':`<div class="chee">${CHE.slice(0,2).map(x=>`<button data-act="chal-cheer" data-u="${r.u}" data-e="${x}" aria-label="Send ${x} to ${CHN[r.u]}">${x}</button>`).join('')}</div>`}
       ${r.out?'':`<em class="num">${r.p}</em>`}</div>`}).join('');
-  return `<div class="chhero"><div class="chcup">🏆</div><small>${pre?'Starting soon':done?'Final result':chDaysLeft()+' day'+(chDaysLeft()===1?'':'s')+' left'}</small><h2>December challenge</h2><p>${line}</p>
+  return `${ui.chDemo?'<button class="chdemo" data-act="chal-demo">Preview: how 12 December might look. Tap to go back.</button>':''}<div class="chhero"><div class="chcup">🏆</div><small>${pre?'Starting soon':done?'Final result':chDaysLeft()+' day'+(chDaysLeft()===1?'':'s')+' left'}</small><h2>December challenge</h2><p>${line}</p>
       ${chIn()?'':'<button class="btn wide chjoin" data-act="chal-join">Join the challenge</button>'}</div>
     <div class="card"><div class="row between" style="margin-bottom:6px"><h3>Leaderboard</h3><button class="small muted" data-act="chal-how">How to score ›</button></div>${list}</div>
     ${chalStats(rows)}
-    ${chIn()?'<button class="btn ghost wide" data-act="chal-leave">Leave the challenge</button>':''}`;
+    ${ui.chDemo?'':'<button class="btn ghost wide" data-act="chal-demo">Preview 12 December</button>'}${chIn()&&!ui.chDemo?'<button class="btn ghost wide" data-act="chal-leave">Leave the challenge</button>':''}`;
 }
 const chK1=n=>n>=1000?(n/1000).toFixed(n>=10000?0:1).replace(/\.0$/,'')+'k':String(n);
 function chalStats(rows){
   const inn=rows.filter(r=>!r.out);if(!inn.length)return '';
-  const wk=ui.chStat==='w',today=iso(new Date()),n=Math.max(0,...inn.map(r=>(r.wd||[]).length)),day=i=>addDays(new Date(CHS+'T12:00:00'),i);
+  const wk=ui.chStat==='w',today=chToday(),n=Math.max(0,...inn.map(r=>(r.wd||[]).length)),day=i=>addDays(new Date(CHS+'T12:00:00'),i);
   let lines=[];
   if(wk){for(let a=Math.floor((n-1)/7)*7;a>=0&&lines.length<6;a-=7)lines.push({l:a+7>n&&iso(day(a+6))>=today?'This week':day(a).getDate()+' '+MON[day(a).getMonth()],c:inn.map(r=>{let w=0,st=0;for(let i=a;i<a+7&&i<n;i++){w+=(r.wd||[])[i]||0;st+=((r.sd||[])[i]||0)*100}return [w,st]})})}
   else for(let i=n-1;i>=0&&lines.length<7;i--)lines.push({l:iso(day(i))===today?'Today':DAYS[(day(i).getDay()+6)%7]+' '+day(i).getDate(),c:inn.map(r=>[(r.wd||[])[i]||0,((r.sd||[])[i]||0)*100])});
@@ -2932,6 +2944,7 @@ document.addEventListener('click',e=>{
     case 'wkp-open':wkSheet(d.k);break;
     case 'chal-cheer':chalCheer(d.u,d.e);break;
     case 'chal-how':chalHow();break;
+    case 'chal-demo':ui.chDemo=!ui.chDemo;render();$('#main').scrollTop=0;break;
     case 'chal-stat':ui.chStat=d.v;render();break;
     case 'chal-join':S.main.settings.chal=iso(new Date());saveMain();render();confetti(1);toast('You are in 🏆');chalSync(true);break;
     case 'chal-leave':delete S.main.settings.chal;saveMain();render();chalSync(true);break;
@@ -2940,7 +2953,7 @@ document.addEventListener('click',e=>{
     case 'hist-f':sc.hist.f=d.f;render();break;
     case 'sess-ask':sheet(`<h2>Delete this workout?</h2><p class="muted">It is removed from your history, charts and points. This cannot be undone.</p><button class="btn danger wide" data-act="sess-del" data-id="${d.id}">Delete it</button><button class="btn quiet wide" data-act="close">Keep it</button>`);break;
     case 'wtab':ui.wtab=d.t;render();$('#main').scrollTop=0;break;
-    case 'tab':if(d.tab==='physio'){d.tab='workouts';ui.wtab='physio'}ui.tab=d.tab;ui.moved=true;if(d.tab==='week'&&d.now)ui.weekOff=0;ui.screen=null;render();$('#main').scrollTop=0;if(d.tab==='chal')chalSync(true);break;
+    case 'tab':ui.chDemo=false;if(d.tab==='physio'){d.tab='workouts';ui.wtab='physio'}ui.tab=d.tab;ui.moved=true;if(d.tab==='week'&&d.now)ui.weekOff=0;ui.screen=null;render();$('#main').scrollTop=0;if(d.tab==='chal')chalSync(true);break;
     case 'week':ui.weekOff=d.d==='0'?0:ui.weekOff+Number(d.d);render();break;
     case 'tray':sheet(`<h2>Add ${esc(W(d.w).name)} to</h2><div class="opts">${DAYS.map((n,i)=>`<button class="opt" data-act="add-pick" data-day="${i}" data-w="${d.w}">${n}</button>`).join('')}</div><p class="small muted">Tip: you can also drag it straight onto a day.</p><button class="btn quiet" data-act="close">Cancel</button>`);break;
     case 'day-add':sheet(`<h2>${DAYS[d.day]}</h2><div class="opts" style="grid-template-columns:1fr">${S.main.order.filter(W).map(id=>`<button class="opt w" style="--c:var(--w${W(id).c})" data-act="add-pick" data-day="${d.day}" data-w="${id}">${esc(W(id).name)}</button>`).join('')}</div><button class="btn ghost wide" data-act="act-new" data-day="${d.day}">Log cardio or steps</button><button class="btn quiet" data-act="close">Cancel</button>`);break;
